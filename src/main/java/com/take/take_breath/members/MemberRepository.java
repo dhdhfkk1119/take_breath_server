@@ -1,6 +1,5 @@
-package com.take.take_breath.members.repository;
+package com.take.take_breath.members;
 
-import com.take.take_breath.members.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

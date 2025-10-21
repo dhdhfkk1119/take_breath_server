@@ -1,11 +1,8 @@
-package com.take.take_breath.members.service;
+package com.take.take_breath.members;
 
 import com.take.take_breath._core._jwt.JwtTokenProvider;
-import com.take.take_breath.members.Role;
-import com.take.take_breath.members.Status;
-import com.take.take_breath.members.dto.MemberDTO;
-import com.take.take_breath.members.entity.Member;
-import com.take.take_breath.members.repository.MemberRepository;
+import com.take.take_breath.members.email.EmailCodeStore;
+import com.take.take_breath.members.email.service.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,9 +11,12 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final EmailCodeStore emailCodeStore;
 
     // 회원가입
     @Transactional
@@ -60,4 +60,7 @@ public class MemberService {
 
         return jwtTokenProvider.createToken(member);
     }
+
+
 }
+
