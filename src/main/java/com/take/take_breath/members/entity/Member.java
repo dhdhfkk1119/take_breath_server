@@ -31,14 +31,11 @@ public class Member {
     private String address;
 
     @Enumerated(EnumType.STRING)
-    @Builder.Default
     private Role role;       // USER, COUNSELOR, ADMIN
 
     @Enumerated(EnumType.STRING)
-    @Builder.Default
     private Status status;     // PENDING, ACTIVE, SUSPENDED
 
-    @Builder.Default
     private boolean emailVerified = false;
 
     private String certificationUrl; // 상담사일 경우
