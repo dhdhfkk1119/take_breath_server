@@ -1,6 +1,8 @@
 package com.take.take_breath.members;
 
 import com.take.take_breath._core._jwt.JwtTokenProvider;
+import com.take.take_breath.members.dto.request.MemberLoginRequest;
+import com.take.take_breath.members.dto.request.MemberSignupRequest;
 import com.take.take_breath.members.email.EmailCodeStore;
 import com.take.take_breath.members.email.service.EmailService;
 import jakarta.transaction.Transactional;
@@ -20,7 +22,7 @@ public class MemberService {
 
     // 회원가입
     @Transactional
-    public void signup(MemberDTO.SignupRequest req) {
+    public void signup(MemberSignupRequest req) {
         if (memberRepository.existsByEmail(req.getEmail())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
@@ -38,7 +40,7 @@ public class MemberService {
     }
 
     // 로그인
-    public String login(MemberDTO.LoginRequest req) {
+    public String login(MemberLoginRequest req) {
         Member member = memberRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new IllegalStateException("존재하지 않는 이메일입니다."));
 
@@ -58,6 +60,7 @@ public class MemberService {
             throw new IllegalStateException("이용 정지된 계정입니다.");
         }
 
+        String token = jwtTokenProvider.createToken(member);
         return jwtTokenProvider.createToken(member);
     }
 

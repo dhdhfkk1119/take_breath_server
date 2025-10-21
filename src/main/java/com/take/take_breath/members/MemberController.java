@@ -1,5 +1,9 @@
 package com.take.take_breath.members;
 
+import com.take.take_breath.members.dto.request.MemberLoginRequest;
+import com.take.take_breath.members.dto.request.MemberSignupRequest;
+import com.take.take_breath.members.dto.response.MemberTokenResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,17 +19,17 @@ public class MemberController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody MemberDTO.SignupRequest req) {
+    public ResponseEntity<?> signup(@Valid @RequestBody MemberSignupRequest req) {
         memberService.signup(req);
-        return ResponseEntity.ok("회원가입 성공");
+        return ResponseEntity.ok().build();
     }
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody MemberDTO.LoginRequest req) {
+    public ResponseEntity<?> login(@Valid @RequestBody MemberLoginRequest req) {
         String token = memberService.login(req);
-        return ResponseEntity.ok(new MemberDTO.TokenResponse(token));
+        MemberTokenResponse response = new MemberTokenResponse(token);
+        return ResponseEntity.ok(response);
     }
-
 
 }

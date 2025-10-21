@@ -1,6 +1,8 @@
 package com.take.take_breath.members.email.controller;
 
-import com.take.take_breath.members.MemberDTO;
+import com.take.take_breath.members.dto.request.EmailSendCodeRequest;
+import com.take.take_breath.members.dto.request.EmailVerifyCodeRequest;
+import com.take.take_breath.members.dto.response.EmailVerificationResponse;
 import com.take.take_breath.members.email.service.EmailVerificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,17 +21,17 @@ public class EmailController {
 
     // 이메일 인증 코드 발송
     @PostMapping("/verify")
-    public ResponseEntity<Void> sendCode(@Valid @RequestBody MemberDTO.SendCodeRequest req) {
+    public ResponseEntity<?> sendCode(@Valid @RequestBody EmailSendCodeRequest req) {
         emailVerificationService.sendVerificationCode(req);
         return ResponseEntity.ok().build();
     }
 
     // 이메일 인증코드 검증
     @PostMapping("/verify/check")
-    public ResponseEntity<MemberDTO.EmailVerificationResponse> verifyCode(
-            @Valid @RequestBody MemberDTO.VerifyCodeRequest req) {
+    public ResponseEntity<?> verifyCode(
+            @Valid @RequestBody EmailVerifyCodeRequest req) {
 
-        MemberDTO.EmailVerificationResponse res = emailVerificationService.verifyCode(req);
+        EmailVerificationResponse res = emailVerificationService.verifyCode(req);
         return ResponseEntity.ok(res);
     }
 }
