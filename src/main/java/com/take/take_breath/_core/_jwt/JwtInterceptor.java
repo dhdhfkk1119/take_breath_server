@@ -23,12 +23,12 @@ public class JwtInterceptor implements HandlerInterceptor {
             // 결과값이 true 라면 controller 로 보낸다
 
             // request 이메일 정보
-            String userEmail = jwtTokenProvider.getSubject(token);
+            String memberEmail = jwtTokenProvider.getSubject(token);
             // request role
-            Role userRole = jwtTokenProvider.getRole(token);
+            Role memberRole = jwtTokenProvider.getRole(token);
 
-            request.setAttribute("userEmail", userEmail);
-            request.setAttribute("userRole", userRole);
+            request.setAttribute("memberEmail", memberEmail);
+            request.setAttribute("memberRole", memberRole);
             return true;
         }
 
