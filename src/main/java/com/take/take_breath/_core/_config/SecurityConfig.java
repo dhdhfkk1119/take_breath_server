@@ -1,4 +1,4 @@
-package com.market.market_place._core._config;
+package com.take.take_breath._core._config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -255,6 +255,8 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
+.gradle/
+
 # Windows shortcuts
 *.lnk
 

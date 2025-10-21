@@ -1,4 +1,4 @@
-package com.market.market_place._core._utils;
+package com.take.take_breath._core._utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
