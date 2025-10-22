@@ -1,9 +1,11 @@
 package com.take.take_breath.members.email.service;
 
-import com.take.take_breath.members.MemberRepository;
+import com.take.take_breath.members.repository.MemberRepository;
 import com.take.take_breath.members.dto.request.EmailRequest;
 import com.take.take_breath.members.dto.response.EmailResponse;
 import com.take.take_breath.members.email.EmailCodeStore;
+import org.springframework.context.ApplicationEventPublisher;
+import com.take.take_breath.members.email.event.EmailVerifiedEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +23,8 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final EmailCodeStore emailCodeStore;
-    private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher publisher;
+
 
     private static final String SUBJECT = "[TakeBreath] 이메일 인증 코드";
     private static final String BODY_PREFIX = "아래 인증 코드를 입력해 주세요.\n\n인증코드: ";
@@ -63,8 +66,9 @@ public class EmailService {
 
         if (verified) {
             emailCodeStore.delete(req.getEmail()); // 인증 성공 시 코드 삭제
-            memberRepository.findByEmail(req.getEmail())
-                    .ifPresent(member -> member.setEmailVerified(true));
+
+            // 이벤트 발행
+            publisher.publishEvent(new EmailVerifiedEvent(this, req.getEmail()));
         }
         return new EmailResponse(verified);
     }

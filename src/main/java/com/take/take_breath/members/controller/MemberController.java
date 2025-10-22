@@ -1,6 +1,7 @@
-package com.take.take_breath.members;
+package com.take.take_breath.members.controller;
 
 
+import com.take.take_breath.members.service.MemberService;
 import com.take.take_breath.members.dto.request.MemberRequest;
 import com.take.take_breath.members.dto.response.MemberResponse;
 import jakarta.validation.Valid;
