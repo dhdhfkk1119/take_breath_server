@@ -36,7 +36,11 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Status status;     // PENDING, ACTIVE, SUSPENDED
 
+    // 상담사용
+    private String license;
+    private String specialty;
+    private String introduction;
+
     private boolean emailVerified = false;
 
-    private String certificationUrl; // 상담사일 경우
 }

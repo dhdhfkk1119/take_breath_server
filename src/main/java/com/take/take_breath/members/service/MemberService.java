@@ -31,8 +31,15 @@ public class MemberService {
     // 회원가입
     @Transactional
     public void signup(MemberRequest req) {
-        // 비밀번호 암호화
+
         String encodedPassword = passwordEncoder.encode(req.getPassword());
+
+        Role role = (req.getRole() != null) ? req.getRole() : Role.USER;
+
+        Status status = (role == Role.COUNSELOR)
+                ? Status.PENDING // 상담사는 관리자 승인대기
+                : Status.ACTIVE; // 일반 유저는 바로 활성화
+
 
         Member member = Member.builder()
                 .email(req.getEmail())
@@ -40,7 +47,11 @@ public class MemberService {
                 .name(req.getName())
                 .phone(req.getPhone())
                 .address(req.getAddress())
-                .role(Role.USER)
+                .license(req.getLicense())
+                .specialty(req.getSpecialty())
+                .introduction(req.getIntroduction())
+                .role(role)
+                .status(status)
                 .build();
         memberRepository.save(member);
 

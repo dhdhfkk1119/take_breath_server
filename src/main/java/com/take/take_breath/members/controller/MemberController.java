@@ -22,7 +22,7 @@ public class MemberController {
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody @Valid MemberRequest req) {
         memberService.signup(req);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("회원가입 요청이 완료되었습니다.");
     }
 
     // 로그인
@@ -32,5 +32,6 @@ public class MemberController {
         MemberResponse response = new MemberResponse(token);
         return ResponseEntity.ok(response);
     }
+
 
 }

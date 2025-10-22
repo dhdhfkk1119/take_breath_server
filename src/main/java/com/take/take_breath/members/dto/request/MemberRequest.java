@@ -1,5 +1,6 @@
 package com.take.take_breath.members.dto.request;
 
+import com.take.take_breath.members.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
@@ -22,5 +23,13 @@ public class MemberRequest {
     private String name;
     private String phone;
     private String address;
+
+    // 상담사
+    private String license;
+    private String specialty;
+    private String introduction;
+
+    private Role role;
+
 
 }
