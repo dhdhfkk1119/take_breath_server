@@ -8,28 +8,24 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "chat_message_tb")
-@Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ChatMessage {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;            // 기본 키
-
-    private String sender;      // 보낸 사람
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String content;     // 메시지 본문
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id")
-    private ChatRoom chatRoom;
+    @JoinColumn(name = "member_id")
+    private Member sender;      // 보낸 사람
 
-    public ChatMessage(String sender, String content, ChatRoom chatRoom) {
-        this.sender = sender;
-        this.content = content;
-        this.chatRoom = chatRoom;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_room_id", nullable = false)
+    private ChatRoom chatRoom;  // 채팅방
 }
 
 

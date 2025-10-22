@@ -10,9 +10,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chat_room_tb")
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ChatRoom {
 
     @Id
@@ -20,8 +21,4 @@ public class ChatRoom {
     private Long id;
 
     private String name;
-
-    public ChatRoom(String name) {
-        this.name = name;
-    }
 }
