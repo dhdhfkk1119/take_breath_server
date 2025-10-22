@@ -5,6 +5,8 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class MemberTokenResponse {
-    private String token;
+public class EmailResponse {
+
+    // 이메일 인증 확인
+    private boolean emailVerified;
 }
