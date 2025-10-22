@@ -1,7 +1,7 @@
 package com.take.take_breath.email.service;
 
-import com.take.take_breath.members.dto.request.EmailRequest;
-import com.take.take_breath.members.dto.response.EmailResponse;
+import com.take.take_breath.email.dto.EmailRequest;
+import com.take.take_breath.email.dto.EmailResponse;
 import com.take.take_breath.email.EmailCodeStore;
 import org.springframework.context.ApplicationEventPublisher;
 import com.take.take_breath.email.event.EmailVerifiedEvent;

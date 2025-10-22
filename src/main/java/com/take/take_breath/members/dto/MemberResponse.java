@@ -1,4 +1,4 @@
-package com.take.take_breath.members.dto.response;
+package com.take.take_breath.members.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

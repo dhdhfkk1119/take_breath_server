@@ -7,13 +7,12 @@ import com.take.take_breath._core._jwt.JwtTokenProvider;
 import com.take.take_breath.email.EmailCodeStore;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
-import com.take.take_breath.members.dto.request.MemberRequest;
+import com.take.take_breath.members.dto.MemberRequest;
 import com.take.take_breath.members.entity.Member;
 import com.take.take_breath.members.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,20 +41,7 @@ public class MemberService {
                 ? Status.PENDING // 상담사는 관리자 승인대기
                 : Status.ACTIVE; // 일반 유저는 바로 활성화
 
-
-        Member member = Member.builder()
-                .email(req.getEmail())
-                .password(encodedPassword)
-                .name(req.getName())
-                .phone(req.getPhone())
-                .address(req.getAddress())
-                .license(req.getLicense())
-                .specialty(req.getSpecialty())
-                .introduction(req.getIntroduction())
-                .role(role)
-                .status(status)
-                .emailVerified(true)
-                .build();
+        Member member = req.toEntity(req, encodedPassword, status);
         memberRepository.save(member);
     }
 

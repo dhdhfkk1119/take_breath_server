@@ -37,9 +37,11 @@ public class Member {
     private Status status;     // PENDING, ACTIVE, SUSPENDED
 
     // 상담사용
-    private String license;
-    private String specialty;
-    private String introduction;
+    private String license; // 자격
+    private String specialty; // 상담분야(전문분야)
+    private String introduction; // 소개
+    private String gender; // 성별
+    private String profileImage; // 프필 이미지
 
     private boolean emailVerified = false;
 

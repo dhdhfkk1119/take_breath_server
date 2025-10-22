@@ -2,8 +2,8 @@ package com.take.take_breath.members.controller;
 
 
 import com.take.take_breath.members.service.MemberService;
-import com.take.take_breath.members.dto.request.MemberRequest;
-import com.take.take_breath.members.dto.response.MemberResponse;
+import com.take.take_breath.members.dto.MemberRequest;
+import com.take.take_breath.members.dto.MemberResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +32,5 @@ public class MemberController {
         MemberResponse response = new MemberResponse(token);
         return ResponseEntity.ok(response);
     }
-
 
 }

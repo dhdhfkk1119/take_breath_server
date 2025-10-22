@@ -1,7 +1,7 @@
 package com.take.take_breath.email.controller;
 
-import com.take.take_breath.members.dto.request.EmailRequest;
-import com.take.take_breath.members.dto.response.EmailResponse;
+import com.take.take_breath.email.dto.EmailRequest;
+import com.take.take_breath.email.dto.EmailResponse;
 import com.take.take_breath.email.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

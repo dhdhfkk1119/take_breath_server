@@ -1,4 +1,4 @@
-package com.take.take_breath.members.dto.request;
+package com.take.take_breath.email.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
