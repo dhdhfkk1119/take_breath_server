@@ -1,8 +1,8 @@
-package com.take.take_breath.members.email;
+package com.take.take_breath.email;
 
 
-import com.take.take_breath.members.email.entity.EmailAuth;
-import com.take.take_breath.members.email.repository.EmailAuthRepository;
+import com.take.take_breath.email.entity.EmailAuth;
+import com.take.take_breath.email.repository.EmailAuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;

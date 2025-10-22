@@ -1,6 +1,6 @@
-package com.take.take_breath.members.email.repository;
+package com.take.take_breath.email.repository;
 
-import com.take.take_breath.members.email.entity.EmailAuth;
+import com.take.take_breath.email.entity.EmailAuth;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,11 +1,10 @@
-package com.take.take_breath.members.email.service;
+package com.take.take_breath.email.service;
 
-import com.take.take_breath.members.repository.MemberRepository;
 import com.take.take_breath.members.dto.request.EmailRequest;
 import com.take.take_breath.members.dto.response.EmailResponse;
-import com.take.take_breath.members.email.EmailCodeStore;
+import com.take.take_breath.email.EmailCodeStore;
 import org.springframework.context.ApplicationEventPublisher;
-import com.take.take_breath.members.email.event.EmailVerifiedEvent;
+import com.take.take_breath.email.event.EmailVerifiedEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

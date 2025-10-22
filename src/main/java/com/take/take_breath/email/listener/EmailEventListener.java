@@ -1,7 +1,7 @@
-package com.take.take_breath.members.email.listener;
+package com.take.take_breath.email.listener;
 
 import com.take.take_breath.members.dto.request.EmailRequest;
-import com.take.take_breath.members.email.service.EmailService;
+import com.take.take_breath.email.service.EmailService;
 import com.take.take_breath.members.event.MemberRegisteredEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

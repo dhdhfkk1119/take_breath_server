@@ -1,7 +1,7 @@
 package com.take.take_breath.members.listener;
 
 import com.take.take_breath.members.repository.MemberRepository;
-import com.take.take_breath.members.email.event.EmailVerifiedEvent;
+import com.take.take_breath.email.event.EmailVerifiedEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

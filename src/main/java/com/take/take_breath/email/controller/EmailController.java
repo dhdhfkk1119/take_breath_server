@@ -1,8 +1,8 @@
-package com.take.take_breath.members.email.controller;
+package com.take.take_breath.email.controller;
 
 import com.take.take_breath.members.dto.request.EmailRequest;
 import com.take.take_breath.members.dto.response.EmailResponse;
-import com.take.take_breath.members.email.service.EmailService;
+import com.take.take_breath.email.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

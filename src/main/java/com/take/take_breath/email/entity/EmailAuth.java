@@ -1,4 +1,4 @@
-package com.take.take_breath.members.email.entity;
+package com.take.take_breath.email.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
