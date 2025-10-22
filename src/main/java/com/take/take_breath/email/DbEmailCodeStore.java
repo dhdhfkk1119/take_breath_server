@@ -4,11 +4,13 @@ package com.take.take_breath.email;
 import com.take.take_breath.email.entity.EmailAuth;
 import com.take.take_breath.email.repository.EmailAuthRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Component
 @Primary // 이걸 붙여야 DB 버전이 EmailVerificationService에 자동 주입됨
 @RequiredArgsConstructor
@@ -35,8 +37,12 @@ public class DbEmailCodeStore implements EmailCodeStore {
                 .email(email)
                 .code(code)
                 .expireAt(expireAt)
+                .verified(false)
                 .build());
+        log.info("인증 코드 저장됨: email={}, code={}, expireSeconds={}", email, code, expireSeconds);
+
     }
+
 
     @Override
     public String get(String email) {
@@ -49,5 +55,20 @@ public class DbEmailCodeStore implements EmailCodeStore {
     @Override
     public void delete(String email) {
         emailAuthRepository.deleteByEmail(email);
+    }
+
+    @Override
+    public void markAsVerified(String email, long expireSeconds) {
+        emailAuthRepository.findByEmail(email)
+                .ifPresent(emailAuth -> {
+                    emailAuth.setVerified(true);
+                    emailAuthRepository.save(emailAuth);
+                    log.info("DB 인증 완료 처리: {}", email);
+                });
+    }
+
+    @Override
+    public boolean isVerified(String email) {
+        return emailAuthRepository.existsByEmailAndVerifiedIsTrue(email);
     }
 }

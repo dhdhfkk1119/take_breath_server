@@ -64,11 +64,14 @@ public class EmailService {
         boolean verified = storedCode != null && storedCode.equals(req.getCode());
 
         if (verified) {
-            emailCodeStore.delete(req.getEmail()); // 인증 성공 시 코드 삭제
-
+            emailCodeStore.markAsVerified(req.getEmail(), expireSeconds); // 인증 완료 상태 저장
             // 이벤트 발행
             publisher.publishEvent(new EmailVerifiedEvent(this, req.getEmail()));
         }
         return new EmailResponse(verified);
+    }
+
+    public boolean isVerified(String email) {
+        return emailCodeStore.isVerified(email);
     }
 }

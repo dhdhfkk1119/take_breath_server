@@ -4,11 +4,11 @@ import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception401;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
+import com.take.take_breath.email.EmailCodeStore;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
 import com.take.take_breath.members.dto.request.MemberRequest;
 import com.take.take_breath.members.entity.Member;
-import com.take.take_breath.members.event.MemberRegisteredEvent;
 import com.take.take_breath.members.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +25,14 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
-    private final ApplicationEventPublisher publisher;
-
+    private final EmailCodeStore emailCodeStore;
 
     // 회원가입
     @Transactional
     public void signup(MemberRequest req) {
+        if (!emailCodeStore.isVerified(req.getEmail())) {
+            throw new Exception400("이메일 인증이 필요합니다.");
+        }
 
         String encodedPassword = passwordEncoder.encode(req.getPassword());
 
@@ -52,12 +54,9 @@ public class MemberService {
                 .introduction(req.getIntroduction())
                 .role(role)
                 .status(status)
+                .emailVerified(true)
                 .build();
         memberRepository.save(member);
-
-        // 회원가입 성공 이벤트 발행
-        log.info("[이벤트 발행] MemberRegisteredEvent -> {}", member.getEmail());
-        publisher.publishEvent(new MemberRegisteredEvent(this, member, member.getEmail()));
     }
 
 
@@ -86,6 +85,7 @@ public class MemberService {
         return jwtTokenProvider.createToken(member);
     }
 
+    // 상담사 승인
     @Transactional
     public void approveCounselor(Long memberId) {
         Member counselor = memberRepository.findById(memberId)
