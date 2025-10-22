@@ -17,9 +17,13 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
-                        "/api/members/signup",
-                        "/api/members/login/**",
-                        "/h2-console/**",
-                        "/api/members/emails/**");
+                        "/api/members/signup",           // 회원가입
+                        "/api/members/login",            // 로그인
+                        "/api/members/emails/**",        // 이메일 인증 관련
+                        "/api/members/email/**",         // (혹시 verify 용)
+                        "/h2-console/**",                // H2 콘솔
+                        "/error",                        // 스프링 기본 에러
+                        "/api/test/**"                   // 테스트용
+                );
     }
 }

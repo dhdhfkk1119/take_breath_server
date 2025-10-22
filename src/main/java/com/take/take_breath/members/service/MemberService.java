@@ -86,6 +86,23 @@ public class MemberService {
         return jwtTokenProvider.createToken(member);
     }
 
+    @Transactional
+    public void approveCounselor(Long memberId) {
+        Member counselor = memberRepository.findById(memberId)
+                .orElseThrow(() -> new Exception400("해당 상담사를 찾을 수 없습니다."));
+
+        if(counselor.getRole() != Role.COUNSELOR) {
+            throw new IllegalArgumentException("상담사 계정만 승인할 수 있습니다.");
+        }
+
+        if(counselor.getStatus() !=Status.PENDING) {
+            throw new IllegalArgumentException("이미 승인된 상담사 입니다.");
+        }
+
+        counselor.setStatus(Status.ACTIVE);
+        log.info("상담사 승인 완료: {}", counselor.getEmail());
+    }
+
 
 
 }
