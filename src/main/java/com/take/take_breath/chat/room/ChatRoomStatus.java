@@ -1,4 +1,4 @@
-package com.take.take_breath.chat.domain;
+package com.take.take_breath.chat.room;
 
 public enum ChatRoomStatus {
     ACTIVE,     // 활성

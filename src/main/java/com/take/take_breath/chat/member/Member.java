@@ -1,4 +1,4 @@
-package com.take.take_breath.chat;
+package com.take.take_breath.chat.member;
 
 import jakarta.persistence.*;
 import lombok.*;
