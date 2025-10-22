@@ -1,8 +1,10 @@
 package com.take.take_breath.chat;
 
 import com.take.take_breath._core._utils.ApiUtil;
+import com.take.take_breath._core._utils.ApiUtil.ApiResult;
 import com.take.take_breath.chat.message.ChatMessage;
-import com.take.take_breath.chat.room.ChatRoom;
+import com.take.take_breath.chat.message.ChatMessageDto.ChatMessageRequest;
+import com.take.take_breath.chat.message.ChatMessageDto.ChatMessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -17,15 +19,14 @@ public class ChatWsController {
     // 메세지 전송
     @MessageMapping("/chat.sendMessage.{roomId}")
     @SendTo("/topic/room.{roomId}")
-    public ApiUtil.ApiResult<ChatMessage> sendMessage(
+    public ApiResult<ChatMessageResponse> sendMessage(
             @DestinationVariable Long roomId,
-            ChatMessageRequestDto request
+            ChatMessageRequest request
     ) {
-        System.out.println("[방ID : " + roomId + ", 이름 : " + request.getSenderId() +"] 메세지 : " + request.getContent());
-
-        ChatRoom room = chatService.findRoomById(roomId);
-        ChatMessage chat = chatService.saveMessage(request.getSenderId(), request.getContent(), room);
-        return ApiUtil.success(chat);
+        System.out.println("[방ID : " + roomId + ", 이름 : " + request.getSenderId() + "] 메세지 : " + request.getContent());
+        ChatMessage chat = chatService.saveMessage(request.getSenderId(), request.getContent(), roomId);
+        ChatMessageResponse response = ChatMessageResponse.fromEntity(chat);
+        return ApiUtil.success(response);
     }
 }
 

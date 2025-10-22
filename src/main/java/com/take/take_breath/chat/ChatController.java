@@ -1,7 +1,10 @@
 package com.take.take_breath.chat;
 
 import com.take.take_breath._core._utils.ApiUtil;
+import com.take.take_breath._core._utils.ApiUtil.ApiResult;
 import com.take.take_breath.chat.message.ChatMessage;
+import com.take.take_breath.chat.message.ChatMessageDto;
+import com.take.take_breath.chat.message.ChatMessageDto.ChatMessageResponse;
 import com.take.take_breath.chat.room.ChatRoom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -20,19 +23,30 @@ public class ChatController {
 
     // 채팅방 생성
     @PostMapping("/room")
-    public ApiUtil.ApiResult<ChatRoom> createRoom(@RequestParam String name) {
+    public ApiResult<ChatRoom> createRoom(@RequestParam String name) {
+        System.out.println("채팅방 생성 요청");
         ChatRoom room = chatService.createRoom(name);
         return ApiUtil.success(room);
     }
 
+    // 채팅방 목록 조회
+    @GetMapping("/rooms")
+    public ApiUtil.ApiResult<List<ChatRoom>> getRooms() {
+        System.out.println("채팅방 목록 조회 요청");
+        List<ChatRoom> rooms = chatService.getAllRooms();
+        return ApiUtil.success(rooms);
+    }
+
     // 특정 방 메세지 목록 조회
     @GetMapping("/room/{roomId}/messages")
-    public ApiUtil.ApiResult<List<ChatMessage>> getMessages(@PathVariable Long roomId) {
+    public ApiUtil.ApiResult<List<ChatMessageResponse>> getMessages(@PathVariable Long roomId) {
         List<ChatMessage> messages = chatService.getMessages(roomId);
-        return ApiUtil.success(messages);
+        List<ChatMessageResponse> responseList = messages.stream()
+                .map(ChatMessageResponse::fromEntity)
+                .toList();
+        return ApiUtil.success(responseList);
     }
 }
-
 
 /*
 레거시 - mk1

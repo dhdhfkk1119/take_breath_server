@@ -21,4 +21,12 @@ public class ChatRoom {
     private Long id;
 
     private String name;
+
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;    // 채팅방 생성 시간
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
