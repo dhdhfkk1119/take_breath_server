@@ -6,13 +6,11 @@ import com.take.take_breath.chat.message.ChatMessage;
 import com.take.take_breath.chat.message.ChatMessageDto.ChatMessageFileRequest;
 import com.take.take_breath.chat.message.ChatMessageDto.ChatMessageResponse;
 import com.take.take_breath.chat.room.ChatRoom;
-import com.take.take_breath.chat.room.ChatRoomDto.ChatRoomRequest;
 import com.take.take_breath.chat.room.ChatRoomDto.ChatRoomResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,14 +22,17 @@ public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
 
     // 채팅방 생성
+    /*
     @PostMapping("/room")
     public ApiResult<ChatRoomResponse> createRoom(@RequestBody ChatRoomRequest request) {
         System.out.println("채팅방 생성 요청");
         ChatRoom room = chatService.createRoom(request.getName());
         return ApiUtil.success(ChatRoomResponse.fromEntity(room));
     }
+    */
 
     // 채팅방 목록 조회
+    /*
     @GetMapping("/rooms")
     public ApiUtil.ApiResult<List<ChatRoomResponse>> getRooms() {
         System.out.println("채팅방 목록 조회 요청");
@@ -40,6 +41,28 @@ public class ChatController {
                 .map(ChatRoomResponse::fromEntity)
                 .toList();
         return ApiUtil.success(response);
+    }
+    */
+
+    // 채팅방 생성 + 사용자 등록
+    @PostMapping("/room")
+    public ApiResult<ChatRoomResponse> createRoom(
+            @RequestParam String name,
+            @RequestParam Long userId1,
+            @RequestParam Long userId2
+    ) {
+        ChatRoom room = chatService.createRoom(name, userId1, userId2);
+        return ApiUtil.success(ChatRoomResponse.fromEntity(room, 0));
+    }
+
+    // 자신의 채팅방 목록 조회
+    @GetMapping("/my-rooms")
+    public ApiUtil.ApiResult<List<ChatRoomResponse>> getMyRooms(
+            @RequestParam Long memberId
+    ) {
+        System.out.println("채팅방 목록 조회 요청");
+        List<ChatRoomResponse> rooms = chatService.getMyRooms(memberId);
+        return ApiUtil.success(rooms);
     }
 
     // 특정 방 메세지 목록 조회
@@ -52,11 +75,7 @@ public class ChatController {
         return ApiUtil.success(responseList);
     }
 
-    /**
-     * 이미지 메세지 전송
-     * POST http://localhost:8080/api/chat/room/1/image
-     *
-     */
+    // 이미지 메세지 전송
     @PostMapping("/room/{roomId}/image")
     public ApiResult<ChatMessageResponse> uploadImage(
             @PathVariable Long roomId,

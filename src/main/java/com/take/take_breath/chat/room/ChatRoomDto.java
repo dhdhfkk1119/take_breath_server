@@ -25,7 +25,19 @@ public class ChatRoomDto {
         private String name;
         private String roomType;
         private LocalDateTime createdAt;
+        private Integer unreadCount;    // 안읽은 메세지 갯수
 
+        public static ChatRoomResponse fromEntity(ChatRoom room, Integer unreadCount) {
+            return ChatRoomResponse.builder()
+                    .id(room.getId())
+                    .name(room.getName())
+                    .roomType(room.getRoomType().name())
+                    .createdAt(room.getCreatedAt())
+                    .unreadCount(unreadCount != null ? unreadCount : 0)
+                    .build();
+        }
+
+        /*
         public static ChatRoomResponse fromEntity(ChatRoom room) {
             return ChatRoomResponse.builder()
                     .id(room.getId())
@@ -34,5 +46,6 @@ public class ChatRoomDto {
                     .createdAt(room.getCreatedAt())
                     .build();
         }
+        */
     }
 }

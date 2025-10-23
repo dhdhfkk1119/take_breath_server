@@ -30,16 +30,38 @@ public class ChatMessageDto {
     @AllArgsConstructor
     @Builder
     public static class ChatMessageResponse {
-
         private Long id;
         private String content;
+        private Long senderId;
         private String senderName;
         private Long roomId;
         private String type;
         private String attachmentBase64;
         private LocalDateTime createdAt;
+        private Boolean isRead;
 
         // 엔티티 -> DTO 변환
+        /*
+        public static ChatMessageResponse fromEntity(ChatMessage chat, Boolean isRead) {
+            String base64 = null;
+            if (chat.getAttachmentData() != null) {
+                base64 = Base64.getEncoder().encodeToString(chat.getAttachmentData());
+            }
+
+            return ChatMessageResponse.builder()
+                    .id(chat.getId())
+                    .content(chat.getContent())
+                    .senderId(chat.getSender().getId())
+                    .senderName(chat.getSender().getName())
+                    .roomId(chat.getChatRoom().getId())
+                    .type(chat.getType().name())
+                    .attachmentBase64(base64)
+                    .createdAt(chat.getCreatedAt())
+                    .isRead(isRead)
+                    .build();
+        }
+        */
+
         public static ChatMessageResponse fromEntity(ChatMessage chat) {
             String base64 = null;
             if (chat.getAttachmentData() != null) {
