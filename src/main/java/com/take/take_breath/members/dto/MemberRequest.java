@@ -26,13 +26,6 @@ public class MemberRequest {
     private String phone;
     private String address;
 
-    // 상담사
-    private String license;
-    private String specialty;
-    private String introduction;
-    private String gender;
-    private String profileImage;
-
     // 약간 동의
     private boolean termsService;
     private boolean termsPrivacy;

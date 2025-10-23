@@ -14,4 +14,6 @@ public class CounselorResponse {
     private String specialty;
     private String introduction;
     private String profileImage;
+    private String hashtags;
+    private int price;
 }

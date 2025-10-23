@@ -21,7 +21,7 @@ public class CounselorService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public CounselorResponse signupCounselor(Long memberId, CounselorRequest req) {
+    public CounselorResponse signup(Long memberId, CounselorRequest req) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다"));
         Counselor counselor = req.toEntity(member);
@@ -43,7 +43,12 @@ public class CounselorService {
                 .map(counselor -> CounselorResponse.builder()
                         .id(counselor.getId())
                         .name(counselor.getMember().getName())
+                        .license(counselor.getLicense())
+                        .specialty(counselor.getSpecialty())
+                        .introduction(counselor.getIntroduction())
+                        .hashtags(counselor.getHashtags())
                         .profileImage(counselor.getLicense())
+                        .price(counselor.getPrice())
                         .build())
                 .collect(Collectors.toList());
     }
