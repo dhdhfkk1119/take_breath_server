@@ -10,7 +10,6 @@ import com.take.take_breath.chat.message.ChatMessageRepository;
 import com.take.take_breath.chat.message.MessageStatus;
 import com.take.take_breath.chat.message.MessageType;
 import com.take.take_breath.chat.room.ChatRoom;
-import com.take.take_breath.chat.room.ChatRoomDto;
 import com.take.take_breath.chat.room.ChatRoomDto.ChatRoomResponse;
 import com.take.take_breath.chat.room.ChatRoomRepository;
 import com.take.take_breath.chat.room.RoomType;
@@ -88,7 +87,7 @@ public class ChatService {
     }
 
     // 채팅방 목록 조회 - 내가 참여한 채팅방 목록만 - dto로 반환
-    public List<ChatRoomResponse> getMyRooms(Long memberId) {
+    public List<C> getMyRooms(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다"));
 
@@ -256,3 +255,31 @@ public List<ChatRoom> getAllRooms() {
     return chatRoomRepository.findAll();
 }
 */
+
+/*
+
+
+    // 채팅방 목록 조회 - 내가 참여한 채팅방 목록만 - dto로 반환
+    public List<ChatRoomResponse> getMyRooms(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다"));
+
+        List<ChatRoomMember> myRoomMembers = chatRoomMemberRepository.findByMember(member);
+
+        return myRoomMembers.stream()
+                .map(crm -> {
+                    ChatRoom room = crm.getChatRoom();
+                    int unreadCount = calculateUnreadCount(crm);
+
+                    return ChatRoomResponse.builder()
+                            .id(room.getId())
+                            .name(room.getName())
+                            .roomType(room.getRoomType().name())
+                            .unreadCount(unreadCount)
+                            .createdAt(room.getCreatedAt())
+                            .build();
+                })
+                .toList();
+    }
+
+ */
