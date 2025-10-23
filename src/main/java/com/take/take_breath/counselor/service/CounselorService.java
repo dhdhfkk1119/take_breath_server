@@ -27,29 +27,13 @@ public class CounselorService {
         Counselor counselor = req.toEntity(member);
         counselorRepository.save(counselor);
 
-        return CounselorResponse.builder()
-                .id(counselor.getId())
-                .name(counselor.getMember().getName())
-                .license(counselor.getLicense())
-                .specialty(counselor.getSpecialty())
-                .introduction(counselor.getIntroduction())
-                .profileImage(counselor.getProfileImage())
-                .build();
+        return CounselorResponse.from(counselor);
     }
 
     // 상담사 전체 조회
     public List<CounselorResponse> findAll() {
         return counselorRepository.findAll().stream()
-                .map(counselor -> CounselorResponse.builder()
-                        .id(counselor.getId())
-                        .name(counselor.getMember().getName())
-                        .license(counselor.getLicense())
-                        .specialty(counselor.getSpecialty())
-                        .introduction(counselor.getIntroduction())
-                        .hashtags(counselor.getHashtags())
-                        .profileImage(counselor.getLicense())
-                        .price(counselor.getPrice())
-                        .build())
+                .map(counselor -> CounselorResponse.from(counselor))
                 .collect(Collectors.toList());
     }
 
@@ -58,24 +42,13 @@ public class CounselorService {
         Counselor counselor = counselorRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("상담사를 찾을 수 없습니다."));
 
-        return CounselorResponse.builder()
-                .id(counselor.getId())
-                .name(counselor.getMember().getName())
-                .specialty(counselor.getSpecialty())
-                .introduction(counselor.getIntroduction())
-                .profileImage(counselor.getProfileImage())
-                .build();
+        return CounselorResponse.from(counselor);
     }
 
     // 해시태그 검색
     public List<CounselorResponse> searchByHashtags(String keyword) {
         return counselorRepository.findByHashtagsContaining(keyword).stream()
-                .map(counselor -> CounselorResponse.builder()
-                        .id(counselor.getId())
-                        .name(counselor.getMember().getName())
-                        .specialty(counselor.getSpecialty())
-                        .profileImage(counselor.getProfileImage())
-                        .build())
+                .map(counselor -> CounselorResponse.from(counselor))
                 .collect(Collectors.toList());
     }
 
