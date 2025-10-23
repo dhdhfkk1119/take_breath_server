@@ -6,8 +6,11 @@ import com.take.take_breath.chat.member.Role;
 import com.take.take_breath.chat.member.Status;
 import com.take.take_breath.chat.message.ChatMessage;
 import com.take.take_breath.chat.message.ChatMessageRepository;
+import com.take.take_breath.chat.message.MessageStatus;
+import com.take.take_breath.chat.message.MessageType;
 import com.take.take_breath.chat.room.ChatRoom;
 import com.take.take_breath.chat.room.ChatRoomRepository;
+import com.take.take_breath.chat.room.RoomType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -61,26 +64,42 @@ public class DataLoader implements CommandLineRunner {
                 .build());
 
         // 채팅방 생성
-        ChatRoom room1 = chatRoomRepository.save(ChatRoom.builder().name("test_room1").build());
-        ChatRoom room2 = chatRoomRepository.save(ChatRoom.builder().name("test_room2").build());
+        ChatRoom room1 = chatRoomRepository.save(
+                ChatRoom.builder()
+                        .name("test_room1")
+                        .roomType(RoomType.PRIVATE)
+                        .build()
+        );
+        ChatRoom room2 = chatRoomRepository.save(
+                ChatRoom.builder()
+                        .name("test_room2")
+                        .roomType(RoomType.PRIVATE)
+                        .build()
+        );
 
         // 메세지 추가
         chatMessageRepository.save(ChatMessage.builder()
                 .sender(user1)
                 .content("안녕하세요, room1 첫 메시지입니다.")
                 .chatRoom(room1)
+                .type(MessageType.TEXT)
+                .status(MessageStatus.SENT)
                 .build());
 
         chatMessageRepository.save(ChatMessage.builder()
                 .sender(user2)
                 .content("반가워요, room1 두 번째 메시지입니다.")
                 .chatRoom(room1)
+                .type(MessageType.TEXT)
+                .status(MessageStatus.SENT)
                 .build());
 
         chatMessageRepository.save(ChatMessage.builder()
                 .sender(user3)
                 .content("room2의 첫 대화입니다.")
                 .chatRoom(room2)
+                .type(MessageType.TEXT)
+                .status(MessageStatus.SENT)
                 .build());
 
         System.out.println("초기 데이터 삽입 완료");

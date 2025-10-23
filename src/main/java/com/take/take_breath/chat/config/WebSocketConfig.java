@@ -5,10 +5,12 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-chat")
@@ -20,6 +22,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic");  // 서버 -> 클라
         registry.setApplicationDestinationPrefixes("/app");     // 클라 -> 서버
+    }
+
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+        registration.setMessageSizeLimit(1024 * 1024);        // 메시지 최대 크기 (바이트 단위) → 여기선 1MB
+        registration.setSendBufferSizeLimit(1024 * 1024 * 2); // 송신 버퍼 크기
+        registration.setSendTimeLimit(20 * 1000);             // 송신 제한 시간 (밀리초)
     }
 }
 

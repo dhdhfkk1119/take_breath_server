@@ -6,12 +6,18 @@ import com.take.take_breath.chat.message.ChatMessage;
 import com.take.take_breath.chat.message.ChatMessageDto;
 import com.take.take_breath.chat.message.ChatMessageDto.ChatMessageResponse;
 import com.take.take_breath.chat.room.ChatRoom;
+import com.take.take_breath.chat.room.ChatRoomDto;
+import com.take.take_breath.chat.room.ChatRoomDto.ChatRoomRequest;
+import com.take.take_breath.chat.room.ChatRoomDto.ChatRoomResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,21 +26,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // 채팅방 생성
     @PostMapping("/room")
-    public ApiResult<ChatRoom> createRoom(@RequestParam String name) {
+    public ApiResult<ChatRoomResponse> createRoom(@RequestBody ChatRoomRequest request) {
         System.out.println("채팅방 생성 요청");
-        ChatRoom room = chatService.createRoom(name);
-        return ApiUtil.success(room);
+        ChatRoom room = chatService.createRoom(request.getName());
+        return ApiUtil.success(ChatRoomResponse.fromEntity(room));
     }
 
     // 채팅방 목록 조회
     @GetMapping("/rooms")
-    public ApiUtil.ApiResult<List<ChatRoom>> getRooms() {
+    public ApiUtil.ApiResult<List<ChatRoomResponse>> getRooms() {
         System.out.println("채팅방 목록 조회 요청");
         List<ChatRoom> rooms = chatService.getAllRooms();
-        return ApiUtil.success(rooms);
+        List<ChatRoomResponse> response = rooms.stream()
+                .map(ChatRoomResponse::fromEntity)
+                .toList();
+        return ApiUtil.success(response);
     }
 
     // 특정 방 메세지 목록 조회
@@ -45,6 +55,56 @@ public class ChatController {
                 .map(ChatMessageResponse::fromEntity)
                 .toList();
         return ApiUtil.success(responseList);
+    }
+
+    /**
+     * 이미지 메세지 전송
+     * POST http://localhost:8080/api/chat/room/1/image
+     * @param roomId
+     * @param senderId
+     * @param imageFile
+     * @return
+     */
+    @PostMapping("/room/{roomId}/image")
+    public ApiResult<ChatMessageResponse> uploadImage(
+            @PathVariable Long roomId,
+            @RequestParam Long senderId,
+            @RequestParam("file") MultipartFile imageFile
+    ) {
+        try {
+            ChatMessage chat = chatService.saveImageMessage(roomId, senderId, imageFile);
+            ChatMessageResponse response = ChatMessageResponse.fromEntity(chat);
+
+            // 웹소켓 브로드캐스트
+            messagingTemplate.convertAndSend("/topic/room." + roomId, ApiUtil.success(response));
+
+            return ApiUtil.success(response);
+        } catch (Exception e) {
+            return ApiUtil.fail("이미지 업로드 실패", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 파일 메세지 전송
+     * POST http://localhost:8080/api/chat/room/1/file
+     */
+    @PostMapping("/room/{roomId}/file")
+    public ApiResult<ChatMessageResponse> uploadFile(
+            @PathVariable Long roomId,
+            @RequestParam Long senderId,
+            @RequestParam("file") MultipartFile file
+    ) {
+        try {
+            ChatMessage chat = chatService.saveImageMessage(roomId, senderId, file);
+            ChatMessageResponse response = ChatMessageResponse.fromEntity(chat);
+
+            // 웹소켓 브로드캐스트
+            messagingTemplate.convertAndSend("/topic/room." + roomId, ApiUtil.success(response));
+
+            return ApiUtil.success(response);
+        } catch (Exception e) {
+            return ApiUtil.fail("파일 업로드 실패", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
 
