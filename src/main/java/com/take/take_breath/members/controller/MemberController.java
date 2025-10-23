@@ -1,6 +1,7 @@
 package com.take.take_breath.members.controller;
 
 
+import com.take.take_breath.members.Role;
 import com.take.take_breath.members.service.MemberService;
 import com.take.take_breath.members.dto.MemberRequest;
 import com.take.take_breath.members.dto.MemberResponse;
@@ -16,21 +17,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
 public class MemberController {
+
     private final MemberService memberService;
 
-    // 회원가입
+    // 일반회원 회원가입
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody @Valid MemberRequest req) {
+        req.setRole(Role.USER);
         memberService.signup(req);
-        return ResponseEntity.ok("회원가입 요청이 완료되었습니다.");
+        return ResponseEntity.ok("회원가입이 완료되었습니다.");
     }
 
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody MemberRequest req) {
         String token = memberService.login(req);
-        MemberResponse response = new MemberResponse(token);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok()
+                .header("Authorization", "Bearer " + token)
+                .build();
     }
 
 }

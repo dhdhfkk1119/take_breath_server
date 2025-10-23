@@ -4,6 +4,8 @@ import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception401;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
+import com.take.take_breath.counselor.dto.CounselorRequest;
+import com.take.take_breath.counselor.service.CounselorService;
 import com.take.take_breath.email.EmailCodeStore;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
@@ -28,13 +30,16 @@ public class MemberService {
 
     // 회원가입
     @Transactional
-    public void signup(MemberRequest req) {
+    public Member signup(MemberRequest req) {
         if (!emailCodeStore.isVerified(req.getEmail())) {
             throw new Exception400("이메일 인증이 필요합니다.");
         }
 
-        String encodedPassword = passwordEncoder.encode(req.getPassword());
+        if (!req.isTermsService() || !req.isTermsPrivacy() || !req.isTermsThirdParty()) {
+            throw new Exception400("필수 약관에 동의해야 회원가입이 가능합니다.");
+        }
 
+        String encodedPassword = passwordEncoder.encode(req.getPassword());
         Role role = (req.getRole() != null) ? req.getRole() : Role.USER;
 
         Status status = (role == Role.COUNSELOR)
@@ -43,6 +48,8 @@ public class MemberService {
 
         Member member = req.toEntity(req, encodedPassword, status);
         memberRepository.save(member);
+
+        return member;
     }
 
 

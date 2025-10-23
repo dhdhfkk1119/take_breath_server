@@ -33,6 +33,12 @@ public class MemberRequest {
     private String gender;
     private String profileImage;
 
+    // 약간 동의
+    private boolean termsService;
+    private boolean termsPrivacy;
+    private boolean termsThirdParty;
+    private boolean termsMarketing;
+
     private Role role;
 
     public Member toEntity(MemberRequest req, String encodedPassword, Status status){
@@ -42,14 +48,13 @@ public class MemberRequest {
                 .name(req.getName())
                 .phone(req.getPhone())
                 .address(req.getAddress())
-                .license(req.getLicense())
-                .specialty(req.getSpecialty())
-                .introduction(req.getIntroduction())
-                .gender(req.getGender())
-                .profileImage(req.getProfileImage())
                 .role(role)
                 .status(status)
                 .emailVerified(true)
+                .termsService(req.isTermsService())
+                .termsPrivacy(req.isTermsPrivacy())
+                .termsThirdParty(req.isTermsThirdParty())
+                .termsMarketing(req.isTermsMarketing())
                 .build();
     }
 
