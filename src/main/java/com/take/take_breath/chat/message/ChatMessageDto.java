@@ -1,9 +1,7 @@
 package com.take.take_breath.chat.message;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -14,8 +12,17 @@ public class ChatMessageDto {
     @Setter
     @AllArgsConstructor
     public static class ChatMessageRequest {
-        private Long senderId;   // Member id
+        private Long senderId;
         private String content;  // 메시지 내용
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public class ChatMessageFileRequest {
+        private Long senderId;
+        private MultipartFile file; // 이미지 or 일반 파일
     }
 
     @Getter

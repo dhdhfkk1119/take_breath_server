@@ -3,19 +3,14 @@ package com.take.take_breath.chat;
 import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.ApiUtil.ApiResult;
 import com.take.take_breath.chat.message.ChatMessage;
-import com.take.take_breath.chat.message.ChatMessageDto;
+import com.take.take_breath.chat.message.ChatMessageDto.ChatMessageFileRequest;
 import com.take.take_breath.chat.message.ChatMessageDto.ChatMessageResponse;
 import com.take.take_breath.chat.room.ChatRoom;
-import com.take.take_breath.chat.room.ChatRoomDto;
 import com.take.take_breath.chat.room.ChatRoomDto.ChatRoomRequest;
 import com.take.take_breath.chat.room.ChatRoomDto.ChatRoomResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,19 +55,15 @@ public class ChatController {
     /**
      * 이미지 메세지 전송
      * POST http://localhost:8080/api/chat/room/1/image
-     * @param roomId
-     * @param senderId
-     * @param imageFile
-     * @return
+     *
      */
     @PostMapping("/room/{roomId}/image")
     public ApiResult<ChatMessageResponse> uploadImage(
             @PathVariable Long roomId,
-            @RequestParam Long senderId,
-            @RequestParam("file") MultipartFile imageFile
+            ChatMessageFileRequest request
     ) {
         try {
-            ChatMessage chat = chatService.saveImageMessage(roomId, senderId, imageFile);
+            ChatMessage chat = chatService.saveAttachmentMessage(roomId, request.getSenderId(), request.getFile());
             ChatMessageResponse response = ChatMessageResponse.fromEntity(chat);
 
             // 웹소켓 브로드캐스트
@@ -91,11 +82,10 @@ public class ChatController {
     @PostMapping("/room/{roomId}/file")
     public ApiResult<ChatMessageResponse> uploadFile(
             @PathVariable Long roomId,
-            @RequestParam Long senderId,
-            @RequestParam("file") MultipartFile file
+            ChatMessageFileRequest request
     ) {
         try {
-            ChatMessage chat = chatService.saveImageMessage(roomId, senderId, file);
+            ChatMessage chat = chatService.saveAttachmentMessage(roomId, request.getSenderId(), request.getFile());
             ChatMessageResponse response = ChatMessageResponse.fromEntity(chat);
 
             // 웹소켓 브로드캐스트

@@ -73,6 +73,28 @@ public class ChatService {
         return chatMessageRepository.findByChatRoom(room);
     }
 
+    public ChatMessage saveAttachmentMessage(Long roomId, Long senderId, MultipartFile file) throws IOException {
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new Exception404("채팅방을 찾을 수 없습니다"));
+        Member sender = memberRepository.findById(senderId)
+                .orElseThrow(() -> new Exception404("보낸 사람을 찾을 수 없습니다"));
+
+        MessageType type = file.getContentType() != null && file.getContentType().startsWith("image/")
+                ? MessageType.IMAGE
+                : MessageType.FILE;
+
+        ChatMessage chat = ChatMessage.builder()
+                .chatRoom(room)
+                .sender(sender)
+                .type(type)
+                .status(MessageStatus.SENT)
+                .attachmentData(file.getBytes())
+                .build();
+
+        return chatMessageRepository.save(chat);
+    }
+
+    /*
     public ChatMessage saveImageMessage(
             Long roomId,
             Long senderId,
@@ -120,6 +142,8 @@ public class ChatService {
         // 저장
         return chatMessageRepository.save(chat);
     }
+    */
+
 }
 
 
