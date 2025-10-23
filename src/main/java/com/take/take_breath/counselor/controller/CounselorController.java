@@ -26,21 +26,7 @@ public class CounselorController {
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody @Valid CounselorRequest req) {
 
-        MemberRequest memberReq = MemberRequest.builder()
-                .email(req.getEmail())
-                .password(req.getPassword())
-                .name(req.getName())
-                .phone(req.getPhone())
-                .address(req.getAddress())
-                .termsService(req.isTermsService())
-                .termsPrivacy(req.isTermsPrivacy())
-                .termsThirdParty(req.isTermsThirdParty())
-                .termsMarketing(req.isTermsMarketing())
-                .role(Role.COUNSELOR)
-                .build();
-
-        Member member = memberService.signup(memberReq);
-
+        Member member = memberService.signup(req.toMemberRequest());
         counselorService.signup(member.getId(), req);
 
         return ResponseEntity.ok("상담사 회원가입 요청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.");
