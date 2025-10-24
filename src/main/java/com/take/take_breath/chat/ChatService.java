@@ -1,17 +1,17 @@
 package com.take.take_breath.chat;
 
 import com.take.take_breath._core._exception.Exception404;
-import com.take.take_breath.chat.chat_room_member.ChatRoomMember;
-import com.take.take_breath.chat.chat_room_member.ChatRoomMemberRepository;
-import com.take.take_breath.chat.dto.*;
 import com.take.take_breath.chat.chat_message.ChatMessage;
 import com.take.take_breath.chat.chat_message.ChatMessageRepository;
 import com.take.take_breath.chat.chat_message.MessageType;
 import com.take.take_breath.chat.chat_room.ChatRoom;
 import com.take.take_breath.chat.chat_room.ChatRoomRepository;
 import com.take.take_breath.chat.chat_room.RoomType;
-import com.take.take_breath.members.entity.Member;
-import com.take.take_breath.members.repository.MemberRepository;
+import com.take.take_breath.chat.chat_room_member.ChatRoomMember;
+import com.take.take_breath.chat.chat_room_member.ChatRoomMemberRepository;
+import com.take.take_breath.chat.dto.*;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.members.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,5 @@
 package com.take.take_breath._core._config;
 
-import com.take.take_breath.chat.chat_room_member.ChatRoomMember;
-import com.take.take_breath.chat.chat_room_member.ChatRoomMemberRepository;
 import com.take.take_breath.chat.chat_message.ChatMessage;
 import com.take.take_breath.chat.chat_message.ChatMessageRepository;
 import com.take.take_breath.chat.chat_message.MessageStatus;
@@ -9,15 +7,25 @@ import com.take.take_breath.chat.chat_message.MessageType;
 import com.take.take_breath.chat.chat_room.ChatRoom;
 import com.take.take_breath.chat.chat_room.ChatRoomRepository;
 import com.take.take_breath.chat.chat_room.RoomType;
-import com.take.take_breath.counselor.entity.Counselor;
-import com.take.take_breath.counselor.repository.CounselorRepository;
+import com.take.take_breath.chat.chat_room_member.ChatRoomMember;
+import com.take.take_breath.chat.chat_room_member.ChatRoomMemberRepository;
+import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.counselor.CounselorRepository;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
-import com.take.take_breath.members.entity.Member;
-import com.take.take_breath.members.repository.MemberRepository;
+import com.take.take_breath.terms.MemberTerms;
+import com.take.take_breath.terms.MemberTermsRepository;
+import com.take.take_breath.terms.Terms;
+import com.take.take_breath.terms.TermsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Component
 @RequiredArgsConstructor
@@ -28,6 +36,9 @@ public class DataLoader implements CommandLineRunner {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final MemberRepository memberRepository;
     private final CounselorRepository counselorRepository;
+    private final TermsRepository termsRepository;
+    private final MemberTermsRepository memberTermsRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
@@ -41,23 +52,52 @@ public class DataLoader implements CommandLineRunner {
         System.out.println("테스트 데이터 초기화 시작...");
         System.out.println("========================================");
 
+        // 0. ✅ 약관 생성 (Terms)
+        Terms serviceTerms = createTerms(
+                "서비스 이용약관",
+                "본 약관은 회사가 제공하는 상담 서비스의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.",
+                true  // 필수
+        );
+
+        Terms privacyTerms = createTerms(
+                "개인정보 수집 및 이용",
+                "회사는 서비스 제공을 위해 다음과 같은 개인정보를 수집합니다: 이름, 이메일, 전화번호, 주소 등",
+                true  // 필수
+        );
+
+        Terms thirdPartyTerms = createTerms(
+                "제3자 정보 제공",
+                "회사는 서비스 제공을 위해 필요한 경우 최소한의 정보를 제3자에게 제공할 수 있습니다.",
+                true  // 필수
+        );
+
+        Terms marketingTerms = createTerms(
+                "마케팅 정보 수신",
+                "회사는 회원에게 유용한 정보를 제공하기 위해 이메일, SMS 등으로 마케팅 정보를 발송할 수 있습니다.",
+                false  // 선택
+        );
+
+        System.out.println("✅ 약관 4개 생성 완료");
+
         // 1. 일반 회원 생성 (USER)
         Member user1 = createUser(
                 "user1@example.com",
-                "password123",
+                passwordEncoder.encode("password123"),
                 "김철수",
                 "010-1111-2222",
                 "서울시 강남구",
-                Role.USER
+                Role.USER,
+                serviceTerms, privacyTerms, thirdPartyTerms, marketingTerms
         );
 
         Member user2 = createUser(
                 "user2@example.com",
-                "password123",
+                passwordEncoder.encode("password123"),
                 "이영희",
                 "010-3333-4444",
                 "서울시 서초구",
-                Role.USER
+                Role.USER,
+                serviceTerms, privacyTerms, thirdPartyTerms, marketingTerms
         );
 
         System.out.println("✅ 일반 회원 2명 생성 완료");
@@ -65,7 +105,7 @@ public class DataLoader implements CommandLineRunner {
         // 2. 상담사 회원 생성 (COUNSELOR + Counselor 프로필)
         Member counselorMember1 = createCounselor(
                 "counselor1@example.com",
-                "password123",
+                passwordEncoder.encode("password123"),
                 "박상담",
                 "010-5555-6666",
                 "서울시 강남구",
@@ -73,14 +113,15 @@ public class DataLoader implements CommandLineRunner {
                 "불안장애, 우울증, 스트레스",    // specialty
                 "10년 경력의 전문 상담사입니다. 편안한 상담을 제공합니다.",  // introduction
                 "여성",                        // gender
-                null,                          // profileImage (나중에 추가)
+                null,                          // profileImage
                 "#인지행동치료 #CBT #우울증전문",  // hashtags
-                50000                          // price
+                50000,                         // price
+                serviceTerms, privacyTerms, thirdPartyTerms, marketingTerms
         );
 
         Member counselorMember2 = createCounselor(
                 "counselor2@example.com",
-                "password123",
+                passwordEncoder.encode("password123"),
                 "최상담",
                 "010-7777-8888",
                 "서울시 송파구",
@@ -90,7 +131,8 @@ public class DataLoader implements CommandLineRunner {
                 "남성",
                 null,
                 "#가족상담 #청소년 #부부상담",
-                60000
+                60000,
+                serviceTerms, privacyTerms, thirdPartyTerms, marketingTerms
         );
 
         System.out.println("✅ 상담사 2명 생성 완료 (Counselor 프로필 포함)");
@@ -109,9 +151,9 @@ public class DataLoader implements CommandLineRunner {
         ChatMessage msg4 = createMessage(room1, counselorMember1, "자세히 말씀해주시겠어요?", MessageType.TEXT);
         ChatMessage msg5 = createMessage(room1, user1, "직장에서 업무 압박이 심합니다.", MessageType.TEXT);
 
-        // 김철수는 msg3까지 읽음 처리 (msg4, msg5 안읽음)
+        // 김철수는 msg3까지 읽음 (msg4, msg5 안읽음)
         updateLastReadMessage(room1, user1, msg3.getId());
-        // 박상담은 msg5까지 모두 읽음 처리
+        // 박상담은 msg5까지 모두 읽음
         updateLastReadMessage(room1, counselorMember1, msg5.getId());
 
         System.out.println("✅ 채팅방1에 메시지 5개 추가 (김철수 안읽음 2개)");
@@ -121,7 +163,7 @@ public class DataLoader implements CommandLineRunner {
         ChatMessage msg7 = createMessage(room2, counselorMember1, "언제가 편하신가요?", MessageType.TEXT);
         ChatMessage msg8 = createMessage(room2, user2, "내일 오후 2시 가능한가요?", MessageType.TEXT);
 
-        // 이영희는 msg8까지 읽음 처리 (본인 메시지)
+        // 이영희는 msg8까지 읽음
         updateLastReadMessage(room2, user2, msg8.getId());
         // 박상담은 msg7까지만 읽음 (msg8 안읽음)
         updateLastReadMessage(room2, counselorMember1, msg7.getId());
@@ -132,17 +174,72 @@ public class DataLoader implements CommandLineRunner {
         ChatMessage msg9 = createMessage(room3, user1, "처음 상담 받아봅니다.", MessageType.TEXT);
         ChatMessage msg10 = createMessage(room3, counselorMember2, "환영합니다. 편하게 말씀해주세요.", MessageType.TEXT);
 
-        // 둘 다 msg10까지 읽음 처리
+        // 둘 다 msg10까지 읽음
         updateLastReadMessage(room3, user1, msg10.getId());
         updateLastReadMessage(room3, counselorMember2, msg10.getId());
 
+        /*
+        System.out.println("✅ 채팅방3에 메시지 2개 추가 (안읽음 없음)");
+
+        System.out.println("========================================");
+        System.out.println("테스트 데이터 초기화 완료!");
+        System.out.println("========================================");
+        System.out.println("\n📌 생성된 데이터:");
+        System.out.println("- 약관: 4개 (필수 3개, 선택 1개)");
+        System.out.println("- 회원: 4명 (일반 사용자 2명, 상담사 2명)");
+        System.out.println("- 약관 동의: 16개 (회원당 4개)");
+        System.out.println("- 상담사 프로필: 2개");
+        System.out.println("- 채팅방: 3개 (1:1 PRIVATE)");
+        System.out.println("- 메시지: 10개");
+        System.out.println("\n🔐 로그인 정보:");
+        System.out.println("┌─────────────────────────────────────────────────────┐");
+        System.out.println("│ 일반 사용자                                           │");
+        System.out.println("├─────────────────────────────────────────────────────┤");
+        System.out.println("│ 사용자1: user1@example.com / password123            │");
+        System.out.println("│         (김철수, 채팅방 2개 참여)                     │");
+        System.out.println("│ 사용자2: user2@example.com / password123            │");
+        System.out.println("│         (이영희, 채팅방 1개 참여)                     │");
+        System.out.println("└─────────────────────────────────────────────────────┘");
+        System.out.println("┌─────────────────────────────────────────────────────┐");
+        System.out.println("│ 상담사                                               │");
+        System.out.println("├─────────────────────────────────────────────────────┤");
+        System.out.println("│ 상담사1: counselor1@example.com / password123       │");
+        System.out.println("│         (박상담, 심리상담사 1급, 50,000원)           │");
+        System.out.println("│         전문분야: 불안장애, 우울증, 스트레스          │");
+        System.out.println("│         채팅방 2개 참여                              │");
+        System.out.println("│ 상담사2: counselor2@example.com / password123       │");
+        System.out.println("│         (최상담, 상담심리사 2급, 60,000원)           │");
+        System.out.println("│         전문분야: 가족상담, 부부상담, 청소년상담      │");
+        System.out.println("│         채팅방 1개 참여                              │");
+        System.out.println("└─────────────────────────────────────────────────────┘");
+        System.out.println("\n💬 채팅방 현황:");
+        System.out.println("1️⃣ 김철수 ↔ 박상담: 메시지 5개 (김철수 안읽음 2개)");
+        System.out.println("2️⃣ 이영희 ↔ 박상담: 메시지 3개 (박상담 안읽음 1개)");
+        System.out.println("3️⃣ 김철수 ↔ 최상담: 메시지 2개 (안읽음 없음)");
+        System.out.println("========================================\n");
+        */
+    }
+
+    /**
+     * ✅ 약관 생성
+     */
+    private Terms createTerms(String title, String content, boolean required) {
+        Terms terms = Terms.builder()
+                .title(title)
+                .content(content)
+                .required(required)
+                .build();
+        return termsRepository.save(terms);
     }
 
     /**
      * 일반 회원 생성 (USER)
      */
     private Member createUser(String email, String password, String name,
-                              String phone, String address, Role role) {
+                              String phone, String address, Role role,
+                              Terms serviceTerms, Terms privacyTerms,
+                              Terms thirdPartyTerms, Terms marketingTerms) {
+        // 1. Member 생성
         Member member = Member.builder()
                 .email(email)
                 .password(password)  // ⚠️ 실제로는 암호화 필요 (BCryptPasswordEncoder)
@@ -152,13 +249,17 @@ public class DataLoader implements CommandLineRunner {
                 .role(role)
                 .status(Status.ACTIVE)
                 .emailVerified(true)
-                // 약관 동의 (필수)
-                .termsService(true)
-                .termsPrivacy(true)
-                .termsThirdParty(true)
-                .termsMarketing(false)  // 마케팅 수신 동의는 선택
+                .memberTermsList(new ArrayList<>())
                 .build();
-        return memberRepository.save(member);
+        memberRepository.save(member);
+
+        // 2. ✅ 약관 동의 정보 생성
+        createMemberTerms(member, serviceTerms, true);      // 필수 동의
+        createMemberTerms(member, privacyTerms, true);      // 필수 동의
+        createMemberTerms(member, thirdPartyTerms, true);   // 필수 동의
+        createMemberTerms(member, marketingTerms, false);   // 선택 미동의
+
+        return member;
     }
 
     /**
@@ -168,25 +269,30 @@ public class DataLoader implements CommandLineRunner {
                                    String phone, String address,
                                    String license, String specialty, String introduction,
                                    String gender, String profileImage, String hashtags,
-                                   int price) {
-        // 1. Member 생성 (COUNSELOR 역할)
+                                   int price,
+                                   Terms serviceTerms, Terms privacyTerms,
+                                   Terms thirdPartyTerms, Terms marketingTerms) {
+        // 1. Member 생성
         Member member = Member.builder()
                 .email(email)
-                .password(password)  // ⚠️ 실제로는 암호화 필요
+                .password(password)
                 .name(name)
                 .phone(phone)
                 .address(address)
                 .role(Role.COUNSELOR)
                 .status(Status.ACTIVE)
                 .emailVerified(true)
-                .termsService(true)
-                .termsPrivacy(true)
-                .termsThirdParty(true)
-                .termsMarketing(false)
+                .memberTermsList(new ArrayList<>())
                 .build();
         memberRepository.save(member);
 
-        // 2. Counselor 프로필 생성
+        // 2. 약관 동의
+        createMemberTerms(member, serviceTerms, true);
+        createMemberTerms(member, privacyTerms, true);
+        createMemberTerms(member, thirdPartyTerms, true);
+        createMemberTerms(member, marketingTerms, false);
+
+        // 3. Counselor 프로필 생성
         Counselor counselor = Counselor.builder()
                 .member(member)
                 .license(license)
@@ -199,32 +305,45 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         counselorRepository.save(counselor);
 
-        // 3. Member에 Counselor 연결 (양방향 관계 설정)
+        // 4. Member에 Counselor 연결
         member.setCounselor(counselor);
 
         return member;
     }
 
     /**
-     * 채팅방 생성 및 멤버 추가
+     * ✅ 약관 동의 정보 생성
+     */
+    private void createMemberTerms(Member member, Terms terms, boolean agreed) {
+        MemberTerms memberTerms = MemberTerms.builder()
+                .member(member)
+                .terms(terms)
+                .agreed(agreed)
+                .agreedAt(agreed ? LocalDateTime.now() : null)
+                .build();
+        memberTermsRepository.save(memberTerms);
+
+        // 양방향 관계 설정
+        member.getMemberTermsList().add(memberTerms);
+    }
+
+    /**
+     * 채팅방 생성
      */
     private ChatRoom createChatRoom(String roomName, Member member1, Member member2) {
-        // 1. 채팅방 생성
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(roomName)
-                .roomType(RoomType.PRIVATE)  // 1:1 채팅
+                .roomType(RoomType.PRIVATE)
                 .build();
         chatRoomRepository.save(chatRoom);
 
-        // 2. 채팅방 멤버 추가 (member1)
         ChatRoomMember roomMember1 = ChatRoomMember.builder()
                 .chatRoom(chatRoom)
                 .member(member1)
-                .lastReadMessageId(null)  // 초기값 null
+                .lastReadMessageId(null)
                 .build();
         chatRoomMemberRepository.save(roomMember1);
 
-        // 3. 채팅방 멤버 추가 (member2)
         ChatRoomMember roomMember2 = ChatRoomMember.builder()
                 .chatRoom(chatRoom)
                 .member(member2)
