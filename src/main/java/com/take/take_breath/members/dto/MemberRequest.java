@@ -21,6 +21,9 @@ public class MemberRequest {
     @NotEmpty(message = "비밀번호는 필수 입니다")
     private String password;
 
+    // 비밀번호 확인
+    private String confirmPassword;
+
     // signup시 사용
     private String name;
     private String phone;
