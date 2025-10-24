@@ -1,0 +1,17 @@
+package com.take.take_breath.chat.dto;
+
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
+public class ChatMessageResponse {
+    private Long messageId;
+    private Long senderId;
+    private String senderName;
+    private String content;
+    private String messageType;         // TEXT, IMAGE, FILE
+    private LocalDateTime createdAt;
+    private boolean isRead;             // 읽음 여부 (UI 표시용)
+}
