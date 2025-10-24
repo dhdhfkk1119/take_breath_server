@@ -3,6 +3,7 @@ package com.take.take_breath._core._exception;
 import com.take.take_breath._core._utils.ApiUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -67,5 +68,15 @@ public class MyExceptionHandler {
         log.error("Unknown Server Error", e);
         log.error("======================================================");
         return new ResponseEntity<>(ApiUtil.fail("알 수 없는 서버 오류가 발생했습니다. 관리자에게 문의해주세요.", HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR"), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiUtil.ApiResult<?>> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        log.error("DataIntegrityViolationException: {}", e.getMessage());
+        return new ResponseEntity<>(
+                ApiUtil.fail("이미 존재하는 이메일입니다.", HttpStatus.CONFLICT, "DUPLICATE_EMAIL"),
+                HttpStatus.CONFLICT
+        );
     }
 }

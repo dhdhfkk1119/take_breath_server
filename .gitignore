@@ -261,3 +261,9 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,visualstudiocode,macos,windows,eclipse
+
+# 🔒 Spring Boot 설정 파일 제외
+/src/main/resources/application*.yml
+/src/main/resources/application-asy*.yaml
+/src/main/resources/application-dev*.yaml
+/src/main/resources/application.properties
