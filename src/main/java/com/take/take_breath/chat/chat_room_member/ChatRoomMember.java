@@ -1,8 +1,7 @@
 package com.take.take_breath.chat.chat_room_member;
 
-import com.take.take_breath.chat.member.Member;
-import com.take.take_breath.chat.message.ChatMessage;
-import com.take.take_breath.chat.room.ChatRoom;
+import com.take.take_breath.chat.chat_room.ChatRoom;
+import com.take.take_breath.members.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 

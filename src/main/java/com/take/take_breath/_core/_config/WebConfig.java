@@ -22,6 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/emails/**",                // 이메일 인증 관련
                         "/api/counselors/signup",
                         "/api/counselors/login",
+                        // "/api/chat/**",                  // 테스트 - 채팅 API 예외 처리
                         "/h2-console/**",                // H2 콘솔
                         "/error",                        // 스프링 기본 에러
                         "/api/test/**"                   // 테스트용

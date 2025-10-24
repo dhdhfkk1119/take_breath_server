@@ -1,11 +1,9 @@
 package com.take.take_breath.chat.chat_room_member;
 
-import com.take.take_breath.chat.member.Member;
-import com.take.take_breath.chat.room.ChatRoom;
+import com.take.take_breath.chat.chat_room.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;

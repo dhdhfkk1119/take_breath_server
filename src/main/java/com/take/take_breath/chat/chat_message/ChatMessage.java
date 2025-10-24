@@ -1,7 +1,7 @@
-package com.take.take_breath.chat.message;
+package com.take.take_breath.chat.chat_message;
 
-import com.take.take_breath.chat.member.Member;
-import com.take.take_breath.chat.room.ChatRoom;
+import com.take.take_breath.chat.chat_room.ChatRoom;
+import com.take.take_breath.members.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,11 +9,15 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chat_message_tb")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ChatMessage {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String content;     // 메시지 본문
@@ -32,8 +36,6 @@ public class ChatMessage {
     @Enumerated(EnumType.STRING)
     private MessageStatus status = MessageStatus.SENT;
 
-    // private String attachmentUrl;   // 첨부파일 경로 - 현재는 DB에 넣는 방식 사용
-
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     private byte[] attachmentData;  // DB에 데이터를 직접 저장
@@ -46,29 +48,3 @@ public class ChatMessage {
         this.createdAt = LocalDateTime.now();
     }
 }
-
-
-/*
-@Entity
-@Table(name = "chat_message_tb")
-@Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ChatMessage {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member sender;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chat_room_id", nullable = false)
-    private ChatRoom chat_room_id;
-
-    @Column(nullable = false)
-    private String content;
-}
-*/

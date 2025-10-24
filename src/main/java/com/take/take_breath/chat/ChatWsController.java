@@ -2,10 +2,10 @@ package com.take.take_breath.chat;
 
 import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.ApiUtil.ApiResult;
+import com.take.take_breath.chat.chat_message.ChatMessage;
 import com.take.take_breath.chat.dto.ChatMessageRequest;
 import com.take.take_breath.chat.dto.ChatMessageResponse;
 import com.take.take_breath.chat.dto.MarkAsReadRequest;
-import com.take.take_breath.chat.message.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -85,20 +85,20 @@ public class ChatWsController {
 /*
 
 서버 전달 메세지
-    {
-      "id": 10,
-      "content": "안녕하세요!",
-      "chatRoom": {
-        "id": 1,
-        "name": "room1"
-      },
-      "sender": {
-        "id": 5,
-        "email": "user1@test.com",
-        "name": "홍길동",
-        "role": "USER",
-        "status": "ACTIVE"
-      }
-    }
+{
+  "id": 10,
+  "content": "안녕하세요!",
+  "chatRoom": {
+    "id": 1,
+    "name": "room1"
+  },
+  "sender": {
+    "id": 5,
+    "email": "user1@test.com",
+    "name": "홍길동",
+    "role": "USER",
+    "status": "ACTIVE"
+  }
+}
 
 */

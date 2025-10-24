@@ -1,4 +1,4 @@
-package com.take.take_breath.chat.room;
+package com.take.take_breath.chat.chat_room;
 
 public enum RoomType {
     PRIVATE, // 1:1 채팅

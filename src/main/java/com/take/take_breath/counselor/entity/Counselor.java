@@ -27,5 +27,4 @@ public class Counselor {
     private String profileImage; // 프로필 이미지
     private String hashtags; // 해시태그
     private int price; // 상담료
-
 }

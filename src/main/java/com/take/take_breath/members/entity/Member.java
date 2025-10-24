@@ -24,7 +24,6 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-
     private String name;
 
     private String phone;

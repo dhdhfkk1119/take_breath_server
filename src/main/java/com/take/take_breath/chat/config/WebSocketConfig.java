@@ -1,6 +1,8 @@
 package com.take.take_breath.chat.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -8,8 +10,11 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final JwtChannelInterceptor jwtChannelInterceptor;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -29,6 +34,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registration.setMessageSizeLimit(1024 * 1024);        // 한 번에 받을 수 있는 메시지 크기의 최대치 → 여기선 1MB
         registration.setSendBufferSizeLimit(1024 * 1024 * 2); // 송신 버퍼 크기
         registration.setSendTimeLimit(20 * 1000);             // 송신 제한 시간 (밀리초)
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(jwtChannelInterceptor);
     }
 }
 
