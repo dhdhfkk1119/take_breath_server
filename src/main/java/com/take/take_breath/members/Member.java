@@ -4,6 +4,7 @@ import com.take.take_breath.counselor.Counselor;
 import com.take.take_breath.terms.MemberTerms;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,18 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
+    @ColumnDefault("익명")
+    private String nickname;
+
+    private String profileImage;
+
+    // 회원가입 시 이미지 디폴트값
+    @PrePersist
+    public void prePersist() {
+        if(profileImage == null || profileImage.isEmpty()) {
+            profileImage = "추가될 이미지 경로 예시로 넣어둘게요 /uploads/profile/default/default_profile.png";
+        }
+    }
 
     private String name;
 
