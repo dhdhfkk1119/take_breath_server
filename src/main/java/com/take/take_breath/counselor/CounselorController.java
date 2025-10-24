@@ -1,12 +1,9 @@
-package com.take.take_breath.counselor.controller;
+package com.take.take_breath.counselor;
 
 import com.take.take_breath.counselor.dto.CounselorRequest;
 import com.take.take_breath.counselor.dto.CounselorResponse;
-import com.take.take_breath.counselor.service.CounselorService;
-import com.take.take_breath.members.Role;
-import com.take.take_breath.members.dto.MemberRequest;
-import com.take.take_breath.members.entity.Member;
-import com.take.take_breath.members.service.MemberService;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.members.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,13 +1,8 @@
-package com.take.take_breath.terms.service;
+package com.take.take_breath.terms;
 
-import com.take.take_breath._core._exception.Exception400;
-import com.take.take_breath.members.entity.Member;
-import com.take.take_breath.members.repository.MemberRepository;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.terms.dto.MemberTermsRequest;
-import com.take.take_breath.terms.entity.MemberTerms;
-import com.take.take_breath.terms.entity.Terms;
-import com.take.take_breath.terms.repository.MemberTermsRepository;
-import com.take.take_breath.terms.repository.TermsRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,12 +1,10 @@
-package com.take.take_breath.counselor.service;
+package com.take.take_breath.counselor;
 
 import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath.counselor.dto.CounselorRequest;
 import com.take.take_breath.counselor.dto.CounselorResponse;
-import com.take.take_breath.counselor.entity.Counselor;
-import com.take.take_breath.counselor.repository.CounselorRepository;
-import com.take.take_breath.members.entity.Member;
-import com.take.take_breath.members.repository.MemberRepository;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.members.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

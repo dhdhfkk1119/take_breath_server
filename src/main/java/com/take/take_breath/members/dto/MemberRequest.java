@@ -2,7 +2,7 @@ package com.take.take_breath.members.dto;
 
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
-import com.take.take_breath.members.entity.Member;
+import com.take.take_breath.members.Member;
 import com.take.take_breath.terms.dto.MemberTermsRequest;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;

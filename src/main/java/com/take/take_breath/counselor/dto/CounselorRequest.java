@@ -1,9 +1,9 @@
 package com.take.take_breath.counselor.dto;
 
-import com.take.take_breath.counselor.entity.Counselor;
+import com.take.take_breath.counselor.Counselor;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.dto.MemberRequest;
-import com.take.take_breath.members.entity.Member;
+import com.take.take_breath.members.Member;
 import com.take.take_breath.terms.dto.MemberTermsRequest;
 import lombok.*;
 

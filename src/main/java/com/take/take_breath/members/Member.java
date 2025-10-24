@@ -1,9 +1,7 @@
-package com.take.take_breath.members.entity;
+package com.take.take_breath.members;
 
-import com.take.take_breath.counselor.entity.Counselor;
-import com.take.take_breath.members.Role;
-import com.take.take_breath.members.Status;
-import com.take.take_breath.terms.entity.MemberTerms;
+import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.terms.MemberTerms;
 import jakarta.persistence.*;
 import lombok.*;
 

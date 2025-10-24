@@ -1,10 +1,8 @@
-package com.take.take_breath.email.service;
+package com.take.take_breath.email;
 
 import com.take.take_breath.email.dto.EmailRequest;
 import com.take.take_breath.email.dto.EmailResponse;
-import com.take.take_breath.email.EmailCodeStore;
 import org.springframework.context.ApplicationEventPublisher;
-import com.take.take_breath.email.event.EmailVerifiedEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,6 @@
-package com.take.take_breath.terms.controller;
+package com.take.take_breath.terms;
 
 import com.take.take_breath.terms.dto.MemberTermsRequest;
-import com.take.take_breath.terms.service.TermsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

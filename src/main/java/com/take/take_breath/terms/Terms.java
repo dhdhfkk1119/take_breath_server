@@ -1,4 +1,4 @@
-package com.take.take_breath.terms.entity;
+package com.take.take_breath.terms;
 
 import jakarta.persistence.*;
 import lombok.*;

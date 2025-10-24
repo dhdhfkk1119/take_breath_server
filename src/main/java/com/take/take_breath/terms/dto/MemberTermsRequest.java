@@ -1,8 +1,8 @@
 package com.take.take_breath.terms.dto;
 
-import com.take.take_breath.members.entity.Member;
-import com.take.take_breath.terms.entity.MemberTerms;
-import com.take.take_breath.terms.entity.Terms;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.terms.MemberTerms;
+import com.take.take_breath.terms.Terms;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

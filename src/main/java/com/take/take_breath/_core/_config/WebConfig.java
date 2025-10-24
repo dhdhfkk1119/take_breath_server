@@ -22,9 +22,11 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/emails/**",                // 이메일 인증 관련
                         "/api/counselors/signup",
                         "/api/counselors/login",
-                        "/h2-console/**",                // H2 콘솔
                         "/error",                        // 스프링 기본 에러
-                        "/api/test/**"                   // 테스트용
+                        "/api/test/**",                   // 테스트용
+                        "/api/members/find-email",       // 이메일 찾기
+                        "/api/members/password/reset-request", // 비밀번호 인증 코드 전송
+                        "/api/members/password/reset"    // 비밀번호 재설정
                 );
     }
 }
