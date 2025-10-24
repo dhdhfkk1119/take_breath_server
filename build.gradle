@@ -44,6 +44,16 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // JWT 관련 의존성 추가
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+    // 이메일 발송 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-mail:3.0.5'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
