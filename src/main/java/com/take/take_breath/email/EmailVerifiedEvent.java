@@ -1,4 +1,4 @@
-package com.take.take_breath.email.event;
+package com.take.take_breath.email;
 
 
 import lombok.Getter;

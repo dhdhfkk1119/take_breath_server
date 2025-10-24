@@ -1,6 +1,5 @@
-package com.take.take_breath.counselor.repository;
+package com.take.take_breath.counselor;
 
-import com.take.take_breath.counselor.entity.Counselor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

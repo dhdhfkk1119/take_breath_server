@@ -1,8 +1,8 @@
 package com.take.take_breath._core._jwt;
 
+import com.take.take_breath.members.Member;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
-import com.take.take_breath.members.entity.Member;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

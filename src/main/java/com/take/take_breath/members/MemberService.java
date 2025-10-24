@@ -1,17 +1,22 @@
-package com.take.take_breath.members.service;
+package com.take.take_breath.members;
 
 import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception401;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
-import com.take.take_breath.counselor.dto.CounselorRequest;
-import com.take.take_breath.counselor.service.CounselorService;
 import com.take.take_breath.email.EmailCodeStore;
-import com.take.take_breath.members.Role;
-import com.take.take_breath.members.Status;
+import com.take.take_breath.email.EmailService;
+import com.take.take_breath.email.dto.EmailRequest;
+import com.take.take_breath.email.dto.EmailResponse;
+import com.take.take_breath.members.dto.MemberEmailResponse;
+import com.take.take_breath.members.dto.MemberFindEmailRequest;
 import com.take.take_breath.members.dto.MemberRequest;
-import com.take.take_breath.members.entity.Member;
-import com.take.take_breath.members.repository.MemberRepository;
+import com.take.take_breath.members.dto.PasswordResetRequest;
+import com.take.take_breath.terms.dto.MemberTermsRequest;
+import com.take.take_breath.terms.MemberTerms;
+import com.take.take_breath.terms.Terms;
+import com.take.take_breath.terms.MemberTermsRepository;
+import com.take.take_breath.terms.TermsRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +32,11 @@ public class MemberService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final EmailCodeStore emailCodeStore;
+    private final MemberTermsRepository memberTermsRepository;
+    private final TermsRepository termsRepository;
+    private final EmailService emailService;
+
+
 
     // 회원가입
     @Transactional
@@ -39,19 +49,39 @@ public class MemberService {
             throw new Exception400("비밀번호가 일치하지 않습니다.");
         }
 
-        if (!req.isTermsService() || !req.isTermsPrivacy() || !req.isTermsThirdParty()) {
-            throw new Exception400("필수 약관에 동의해야 회원가입이 가능합니다.");
+        // 필수약관 하나라도 미동의시 예외 발생
+        boolean allRequiredAgreed = req.getAgreements().stream()
+                .filter(request -> {
+                    Terms terms = termsRepository.findById(request.getTermsId())
+                            .orElseThrow(() -> new Exception400("존재하지 않는 약관입니다."));
+                    return terms.isRequired(); // 필수 약관만 필터링
+                })
+                .allMatch(request -> request.isAgreed());
+
+
+        if (!allRequiredAgreed) {
+            throw new Exception400("필수 약관에 모두 동의해야 회원가입이 가능합니다.");
         }
 
         String encodedPassword = passwordEncoder.encode(req.getPassword());
-        Role role = (req.getRole() != null) ? req.getRole() : Role.USER;
 
+        Role role = (req.getRole() != null) ? req.getRole() : Role.USER;
         Status status = (role == Role.COUNSELOR)
                 ? Status.PENDING // 상담사는 관리자 승인대기
                 : Status.ACTIVE; // 일반 유저는 바로 활성화
 
+        // 회원 저장
         Member member = req.toEntity(req, encodedPassword, status);
         memberRepository.save(member);
+
+
+        // 약관 동의 저장
+        for (MemberTermsRequest agreement : req.getAgreements()) {
+            Terms terms = termsRepository.findById(agreement.getTermsId())
+                    .orElseThrow(() -> new Exception400("존재하지 않는 약관입니다."));
+            MemberTerms memberTerms = agreement.toEntity(member, terms);
+            memberTermsRepository.save(memberTerms);
+        }
 
         return member;
     }
@@ -98,6 +128,32 @@ public class MemberService {
 
         counselor.setStatus(Status.ACTIVE);
         log.info("상담사 승인 완료: {}", counselor.getEmail());
+    }
+
+    // 이메일 찾기
+    public MemberEmailResponse findEmail(MemberFindEmailRequest req) {
+        Member member = memberRepository.findByNameAndPhone(req.getName(), req.getPhone())
+                .orElseThrow(() -> new Exception400("일치하는 회원이 없습니다."));
+        return new MemberEmailResponse(member.getEmail());
+    }
+
+    // 비밀번호 재설정
+    @Transactional
+    public void resetPassword(PasswordResetRequest req) {
+        // 1. 이메일 인증 코드 검증
+        EmailRequest emailReq = new EmailRequest(req.getEmail(), req.getCode());
+        EmailResponse emailRes = emailService.verifyCode(emailReq);
+
+        if (!emailRes.isEmailVerified()) {
+            throw new IllegalArgumentException("인증 코드가 올바르지 않습니다.");
+        }
+
+        // 2. 회원 조회
+        Member member = memberRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 회원이 존재하지 않습니다."));
+
+        // 3. 비밀번호 변경
+        member.setPassword(passwordEncoder.encode(req.getNewPassword()));
     }
 
 
