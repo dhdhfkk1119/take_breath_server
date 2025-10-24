@@ -35,6 +35,10 @@ public class MemberService {
             throw new Exception400("이메일 인증이 필요합니다.");
         }
 
+        if (!req.getPassword().equals(req.getConfirmPassword())) {
+            throw new Exception400("비밀번호가 일치하지 않습니다.");
+        }
+
         if (!req.isTermsService() || !req.isTermsPrivacy() || !req.isTermsThirdParty()) {
             throw new Exception400("필수 약관에 동의해야 회원가입이 가능합니다.");
         }
