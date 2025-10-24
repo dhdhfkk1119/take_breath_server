@@ -1,10 +1,13 @@
 package com.take.take_breath.counselor.dto;
 
-import com.take.take_breath.counselor.entity.Counselor;
+import com.take.take_breath.counselor.Counselor;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.dto.MemberRequest;
-import com.take.take_breath.members.entity.Member;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.terms.dto.MemberTermsRequest;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,10 +23,7 @@ public class CounselorRequest {
     private String address;
 
     // 약관
-    private boolean termsService;
-    private boolean termsPrivacy;
-    private boolean termsThirdParty;
-    private boolean termsMarketing;
+    private List<MemberTermsRequest> agreements;
 
     // 상담사 정보
     private String license;
@@ -55,10 +55,7 @@ public class CounselorRequest {
                 .name(this.name)
                 .phone(this.phone)
                 .address(this.address)
-                .termsService(this.termsService)
-                .termsPrivacy(this.termsPrivacy)
-                .termsThirdParty(this.termsThirdParty)
-                .termsMarketing(this.termsMarketing)
+                .agreements(this.agreements)
                 .role(Role.COUNSELOR)
                 .build();
     }

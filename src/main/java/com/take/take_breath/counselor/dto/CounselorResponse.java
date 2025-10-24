@@ -1,6 +1,6 @@
 package com.take.take_breath.counselor.dto;
 
-import com.take.take_breath.counselor.entity.Counselor;
+import com.take.take_breath.counselor.Counselor;
 import lombok.*;
 
 @Getter

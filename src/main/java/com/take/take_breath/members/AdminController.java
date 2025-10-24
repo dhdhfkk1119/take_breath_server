@@ -1,6 +1,5 @@
-package com.take.take_breath.members.controller;
+package com.take.take_breath.members;
 
-import com.take.take_breath.members.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
