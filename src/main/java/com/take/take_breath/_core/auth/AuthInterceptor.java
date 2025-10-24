@@ -4,13 +4,11 @@ import com.take.take_breath._core._exception.Exception401;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._exception.Exception500;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
-import com.take.take_breath.community.community_post.CommunityPost;
 import com.take.take_breath.community.community_post.CommunityPostRepository;
-import com.take.take_breath.community.community_post.CommunityPostService;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
-import com.take.take_breath.members.entity.Member;
-import com.take.take_breath.members.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
+
 
 @Slf4j
 @Component
