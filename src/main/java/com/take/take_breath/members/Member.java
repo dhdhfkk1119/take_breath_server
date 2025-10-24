@@ -1,10 +1,12 @@
-package com.take.take_breath.members.entity;
+package com.take.take_breath.members;
 
-import com.take.take_breath.counselor.entity.Counselor;
-import com.take.take_breath.members.Role;
-import com.take.take_breath.members.Status;
+import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.terms.MemberTerms;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -37,13 +39,11 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Status status;     // PENDING, ACTIVE, SUSPENDED
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<MemberTerms> memberTermsList = new ArrayList<>();
+
     private boolean emailVerified = false;
 
-    // 회원 약관
-    private boolean termsService; // 서비스 이용약관 동의 (필수)
-    private boolean termsPrivacy; // 개인정보 수집 동의 (필수)
-    private boolean termsThirdParty; // 제 3자 제공 동의 (필수)
-    private boolean termsMarketing; // 마케팅 수신 동의 (선택)
 
     // 상담사 프로필 연결
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
