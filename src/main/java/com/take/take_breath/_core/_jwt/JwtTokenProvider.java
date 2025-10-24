@@ -1,6 +1,7 @@
 package com.take.take_breath._core._jwt;
 
 import com.take.take_breath.members.Role;
+import com.take.take_breath.members.Status;
 import com.take.take_breath.members.entity.Member;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -82,6 +83,15 @@ public class JwtTokenProvider {
     public Role getRole(String token) {
         String roleStr = parseClaims(token).get("role", String.class);
         return Role.valueOf(roleStr);
+    }
+
+    /**
+     * 전체 토큰에서 사용자 role(claim)을 추출 합니다.
+     * @return 추출된 사용자 역할(claim)
+     */
+    public Status getStatus(String token) {
+        String statusStr = parseClaims(token).get("status", String.class);
+        return Status.valueOf(statusStr);
     }
 
     /**
