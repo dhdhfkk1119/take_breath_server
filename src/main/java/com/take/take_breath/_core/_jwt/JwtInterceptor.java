@@ -1,6 +1,7 @@
 package com.take.take_breath._core._jwt;
 
 import com.take.take_breath.members.Role;
+import com.take.take_breath.members.Status;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +27,12 @@ public class JwtInterceptor implements HandlerInterceptor {
             String memberEmail = jwtTokenProvider.getSubject(token);
             // request role
             Role memberRole = jwtTokenProvider.getRole(token);
+            // request Status
+            Status memberStatus = jwtTokenProvider.getStatus(token);
 
             request.setAttribute("memberEmail", memberEmail);
             request.setAttribute("memberRole", memberRole);
+            request.setAttribute("memberStatus", memberStatus);
             return true;
         }
 
