@@ -12,6 +12,11 @@ import com.take.take_breath.members.Status;
 import com.take.take_breath.members.dto.MemberRequest;
 import com.take.take_breath.members.entity.Member;
 import com.take.take_breath.members.repository.MemberRepository;
+import com.take.take_breath.terms.dto.MemberTermsRequest;
+import com.take.take_breath.terms.entity.MemberTerms;
+import com.take.take_breath.terms.entity.Terms;
+import com.take.take_breath.terms.repository.MemberTermsRepository;
+import com.take.take_breath.terms.repository.TermsRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +32,8 @@ public class MemberService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final EmailCodeStore emailCodeStore;
+    private final MemberTermsRepository memberTermsRepository;
+    private final TermsRepository termsRepository;
 
     // 회원가입
     @Transactional
@@ -39,19 +46,39 @@ public class MemberService {
             throw new Exception400("비밀번호가 일치하지 않습니다.");
         }
 
-        if (!req.isTermsService() || !req.isTermsPrivacy() || !req.isTermsThirdParty()) {
-            throw new Exception400("필수 약관에 동의해야 회원가입이 가능합니다.");
+        // 필수약관 하나라도 미동의시 예외 발생
+        boolean allRequiredAgreed = req.getAgreements().stream()
+                .filter(request -> {
+                    Terms terms = termsRepository.findById(request.getTermsId())
+                            .orElseThrow(() -> new Exception400("존재하지 않는 약관입니다."));
+                    return terms.isRequired(); // 필수 약관만 필터링
+                })
+                .allMatch(request -> request.isAgreed());
+
+
+        if (!allRequiredAgreed) {
+            throw new Exception400("필수 약관에 모두 동의해야 회원가입이 가능합니다.");
         }
 
         String encodedPassword = passwordEncoder.encode(req.getPassword());
-        Role role = (req.getRole() != null) ? req.getRole() : Role.USER;
 
+        Role role = (req.getRole() != null) ? req.getRole() : Role.USER;
         Status status = (role == Role.COUNSELOR)
                 ? Status.PENDING // 상담사는 관리자 승인대기
                 : Status.ACTIVE; // 일반 유저는 바로 활성화
 
+        // 회원 저장
         Member member = req.toEntity(req, encodedPassword, status);
         memberRepository.save(member);
+
+
+        // 약관 동의 저장
+        for (MemberTermsRequest agreement : req.getAgreements()) {
+            Terms terms = termsRepository.findById(agreement.getTermsId())
+                    .orElseThrow(() -> new Exception400("존재하지 않는 약관입니다."));
+            MemberTerms memberTerms = agreement.toEntity(member, terms);
+            memberTermsRepository.save(memberTerms);
+        }
 
         return member;
     }

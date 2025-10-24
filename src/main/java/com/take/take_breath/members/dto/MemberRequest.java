@@ -3,9 +3,12 @@ package com.take.take_breath.members.dto;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
 import com.take.take_breath.members.entity.Member;
+import com.take.take_breath.terms.dto.MemberTermsRequest;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -29,12 +32,6 @@ public class MemberRequest {
     private String phone;
     private String address;
 
-    // 약간 동의
-    private boolean termsService;
-    private boolean termsPrivacy;
-    private boolean termsThirdParty;
-    private boolean termsMarketing;
-
     private Role role;
 
     public Member toEntity(MemberRequest req, String encodedPassword, Status status){
@@ -47,12 +44,10 @@ public class MemberRequest {
                 .role(role)
                 .status(status)
                 .emailVerified(true)
-                .termsService(req.isTermsService())
-                .termsPrivacy(req.isTermsPrivacy())
-                .termsThirdParty(req.isTermsThirdParty())
-                .termsMarketing(req.isTermsMarketing())
                 .build();
     }
+
+    private List<MemberTermsRequest> agreements;
 
 
 }
