@@ -1,5 +1,8 @@
 package com.take.take_breath.community.community_post;
 
+import com.take.take_breath._core._exception.Exception400;
+import com.take.take_breath._core._exception.Exception403;
+import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath.community.community_category.CommunityCategory;
 import com.take.take_breath.community.community_category.CommunityCategoryRepository;
 import com.take.take_breath.community.community_post_image.CommunityPostImage;
@@ -10,6 +13,8 @@ import com.take.take_breath.community.community_report.CommunityReportRepository
 import com.take.take_breath.community.community_report.CommunityReportStatus;
 import com.take.take_breath.community.community_report_process.CommunityReportProcess;
 import com.take.take_breath.community.community_report_process.CommunityReportProcessRepository;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.members.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,43 +41,74 @@ public class CommunityPostService {
     private final CommunityPostLikeRepository communityPostLikeRepository;
     private final CommunityReportProcessRepository communityReportProcessRepository;
     private final CommunityReportRepository communityReportRepository;
+    private final MemberRepository memberRepository;
 
     /**
-     * 전체 게시글 조회 (좋아요 여부 포함)
+     * 게시글 목록 조회/검색 (키워드, 카테고리, 정렬, 좋아요 여부 포함)
      */
-    public Page<CommunityPostResponse.ListDTO> findAllPosts(Long currentUserId, Pageable pageable) {
-        // 1. 게시글 조회
-        Page<CommunityPost> posts = communityPostRepositoryCustom.findAllWithCategoryAndComments(pageable);
+    public Page<CommunityPostResponse.ListDTO> searchPosts(
+            Long currentUserId,
+            CommunityPostRequest.SearchDTO searchDTO,
+            Pageable pageable) {
 
-        // 2. 게시글 ID 목록 추출
+        Pageable sortedPageable = pageable;
+        CommunityPostSortType sortType = searchDTO.getSortType();
+
+        if (sortType != null) {
+            Sort sort = switch (sortType) {
+                case LATEST -> Sort.by(Sort.Direction.DESC, "createdAt");
+                case LIKES -> Sort.by(Sort.Direction.DESC, "likeCount");
+                case VIEWS -> Sort.by(Sort.Direction.DESC, "viewCount");
+            };
+            sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        }
+
+        boolean hasSearchCondition = (searchDTO.getKeyword() != null && !searchDTO.getKeyword().trim().isEmpty())
+                || (searchDTO.getCategoryIds() != null && !searchDTO.getCategoryIds().isEmpty());
+
+        Page<CommunityPost> posts;
+
+        if (hasSearchCondition) {
+            // 검색 조건이 있으면 findBySearchOption 사용
+            posts = communityPostRepositoryCustom.findBySearchOption(searchDTO, sortedPageable);
+        } else {
+            // 검색 조건이 없으면 findAllWithCategoryAndComments 사용
+            posts = communityPostRepositoryCustom.findAllWithCategoryAndComments(sortedPageable);
+        }
+
         List<Long> postIds = posts.stream()
                 .map(post -> post.getId())
                 .collect(Collectors.toList());
 
-        // 3. 이 사용자가 좋아요 누른 게시글 ID들 조회
+        // 좋아요 여부 조회
         List<Long> likedPostIdsList = communityPostLikeRepository.findLikedPostIds(currentUserId, postIds);
         java.util.Set<Long> likedPostIds = new java.util.HashSet<>(likedPostIdsList);
 
-        // 4. DTO 변환 시 liked 값 전달
-        return posts.map(post -> new CommunityPostResponse.ListDTO(post, likedPostIds.contains(post.getId())));
+        // 댓글 개수 조회
+        Map<Long, Long> commentCounts = communityPostRepositoryCustom.getCommentCountsByPostIds(postIds);
+
+        return posts.map(post -> CommunityPostResponse.ListDTO.builder()
+                .post(post)
+                .liked(likedPostIds.contains(post.getId()))
+                .commentCount(commentCounts.getOrDefault(post.getId(), 0L).intValue())
+                .build());
     }
 
     /**
      * 게시글 상세 조회 (조회수 증가, 좋아요 여부 포함)
      */
     @Transactional
-    public CommunityPostResponse.DetailDTO findPostDetail(Long postId, String commentSortType, Long currentUserId) {
+    public CommunityPostResponse.DetailDTO findPostDetail(Long postId, String commentSortType, Long memberId) {
         CommunityPost post = communityPostRepositoryCustom.findByIdWithComments(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. ID: " + postId));
+                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다. ID: " + postId));
 
         if (post.isDeleted()) {
-            throw new IllegalArgumentException("삭제된 게시글입니다.");
+            throw new Exception400("삭제된 게시글입니다.");
         }
 
         // 좋아요 여부 확인
-        boolean liked = communityPostLikeRepository.existsByPostIdAndUserId(postId, currentUserId);
+        boolean liked = communityPostLikeRepository.existsByPostIdAndMemberId(postId, memberId);
 
-        // 조회수 증가
         post.increaseViewCount();
 
         return CommunityPostResponse.DetailDTO.builder()
@@ -85,20 +122,23 @@ public class CommunityPostService {
      * 게시글 작성
      */
     @Transactional
-    public CommunityPostResponse.ResponseDTO savePost(CommunityPostRequest.SaveDTO saveDTO, Long currentUserId) {
+    public CommunityPostResponse.ResponseDTO savePost(CommunityPostRequest.SaveDTO saveDTO, Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new Exception404("회원을 찾을 수 없습니다."));
 
         // 카테고리 조회
         CommunityCategory category = null;
         if (saveDTO.getCategoryId() != null) {
             category = communityCategoryRepository.findById(saveDTO.getCategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
         }
 
         // 엔티티 생성
         CommunityPost post = CommunityPost.builder()
                 .title(saveDTO.getTitle())
                 .content(saveDTO.getContent())
-                .userId(currentUserId)
+                .member(member)
                 .category(category)
                 .build();
 
@@ -125,16 +165,17 @@ public class CommunityPostService {
      * 게시글 수정
      */
     @Transactional
-    public CommunityPostResponse.ResponseDTO updatePost(Long postId, CommunityPostRequest.UpdateDTO updateDTO, Long currentUserId) {
-        CommunityPost post = communityPostRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+    public CommunityPostResponse.ResponseDTO updatePost(Long postId, CommunityPostRequest.UpdateDTO updateDTO, Long memberId) {
+        // 커스텀 메서드 사용으로 변경 (최소한의 연관관계만 조회)
+        CommunityPost post = communityPostRepositoryCustom.findByIdWithCategory(postId)
+                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
 
-        if (!post.isOwner(currentUserId)) {
-            throw new IllegalArgumentException("본인이 작성한 게시글만 수정할 수 있습니다.");
+        if (!post.isOwner(memberId)) {
+            throw new Exception403("본인이 작성한 게시글만 수정할 수 있습니다.");
         }
 
         if (post.isDeleted()) {
-            throw new IllegalArgumentException("삭제된 게시글은 수정할 수 없습니다.");
+            throw new Exception400("삭제된 게시글은 수정할 수 없습니다.");
         }
 
         // 제목, 내용 수정
@@ -148,7 +189,7 @@ public class CommunityPostService {
         // 카테고리 수정
         if (updateDTO.getCategoryId() != null) {
             CommunityCategory category = communityCategoryRepository.findById(updateDTO.getCategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
             post.setCategory(category);
         }
 
@@ -156,10 +197,10 @@ public class CommunityPostService {
         if (updateDTO.getDeleteImageIds() != null && !updateDTO.getDeleteImageIds().isEmpty()) {
             for (Long imageId : updateDTO.getDeleteImageIds()) {
                 CommunityPostImage image = communityPostImageRepository.findById(imageId)
-                        .orElseThrow(() -> new IllegalArgumentException("삭제할 이미지를 찾을 수 없습니다."));
+                        .orElseThrow(() -> new Exception404("삭제할 이미지를 찾을 수 없습니다."));
 
                 if (!image.getPost().getId().equals(postId)) {
-                    throw new IllegalArgumentException("해당 게시글의 이미지가 아닙니다.");
+                    throw new Exception400("해당 게시글의 이미지가 아닙니다.");
                 }
 
                 post.getImages().remove(image);
@@ -188,75 +229,45 @@ public class CommunityPostService {
      * 게시글 삭제 (Soft Delete)
      */
     @Transactional
-    public void deletePost(Long postId, Long currentUserId) {
-        CommunityPost post = communityPostRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+    public void deletePost(Long postId, Long memberId) {
+        // 커스텀 메서드 사용으로 변경
+        CommunityPost post = communityPostRepositoryCustom.findByIdWithCategory(postId)
+                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
 
-        if (!post.isOwner(currentUserId)) {
-            throw new IllegalArgumentException("본인이 작성한 게시글만 삭제할 수 있습니다.");
+        if (!post.isOwner(memberId)) {
+            throw new Exception403("본인이 작성한 게시글만 삭제할 수 있습니다.");
         }
 
         if (post.isDeleted()) {
-            throw new IllegalArgumentException("이미 삭제된 게시글입니다.");
+            throw new Exception400("이미 삭제된 게시글입니다.");
         }
 
         post.softDelete();
     }
 
     /**
-     * 게시글 검색 (동적 쿼리, 좋아요 여부 포함)
-     */
-    public Page<CommunityPostResponse.ListDTO> searchPosts(
-            Long currentUserId,
-            CommunityPostRequest.SearchDTO searchDTO,
-            Pageable pageable) {
-
-        // 정렬 조건 설정
-        Pageable sortedPageable = pageable;
-        String sortType = searchDTO.getSortType();
-
-        if ("LATEST".equals(sortType)) {
-            sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                    Sort.by(Sort.Direction.DESC, "createdAt"));
-        } else if ("LIKES".equals(sortType)) {
-            sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                    Sort.by(Sort.Direction.DESC, "likeCount"));
-        } else if ("VIEWS".equals(sortType)) {
-            sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                    Sort.by(Sort.Direction.DESC, "viewCount"));
-        }
-
-        Page<CommunityPost> posts = communityPostRepositoryCustom.findBySearchOption(searchDTO, sortedPageable);
-
-        // 게시글 ID 목록 추출
-        List<Long> postIds = posts.stream()
-                .map(post -> post.getId())
-                .collect(Collectors.toList());
-
-        // 좋아요 누른 게시글 ID들 조회
-        List<Long> likedPostIdsList = communityPostLikeRepository.findLikedPostIds(currentUserId, postIds);
-        java.util.Set<Long> likedPostIds = new java.util.HashSet<>(likedPostIdsList);
-
-        return posts.map(post -> new CommunityPostResponse.ListDTO(post, likedPostIds.contains(post.getId())));
-    }
-
-
-    /**
      * 사용자별 게시글 조회 (좋아요 여부 포함)
      */
-    public Page<CommunityPostResponse.ListDTO> findPostsByUserId(Long userId, Long currentUserId, Pageable pageable) {
-        Page<CommunityPost> posts = communityPostRepositoryCustom.findByUserId(userId, pageable);
+    public Page<CommunityPostResponse.ListDTO> findPostsByMemberId(Long targetMemberId, Long memberId, Pageable pageable) {
+        Page<CommunityPost> posts = communityPostRepositoryCustom.findByMemberId(targetMemberId, pageable);
 
-        // 게시글 ID 목록 추출
+        // 게시글 ID 목록 추출 - 람다 표현식 사용
         List<Long> postIds = posts.stream()
                 .map(post -> post.getId())
                 .collect(Collectors.toList());
 
-        // 좋아요 누른 게시글 ID들 조회
-        List<Long> likedPostIdsList = communityPostLikeRepository.findLikedPostIds(currentUserId, postIds);
+        // 좋아요 누른 게시글 IDs 조회
+        List<Long> likedPostIdsList = communityPostLikeRepository.findLikedPostIds(memberId, postIds);
         java.util.Set<Long> likedPostIds = new java.util.HashSet<>(likedPostIdsList);
 
-        return posts.map(post -> new CommunityPostResponse.ListDTO(post, likedPostIds.contains(post.getId())));
+        // 댓글 개수 조회
+        Map<Long, Long> commentCounts = communityPostRepositoryCustom.getCommentCountsByPostIds(postIds);
+
+        return posts.map(post -> CommunityPostResponse.ListDTO.builder()
+                .post(post)
+                .liked(likedPostIds.contains(post.getId()))
+                .commentCount(commentCounts.getOrDefault(post.getId(), 0L).intValue())
+                .build());
     }
 
     /**
@@ -264,27 +275,28 @@ public class CommunityPostService {
      */
     @Transactional
     public void forceDeletePost(Long postId, String reason, Long adminId) {
-        CommunityPost post = communityPostRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        CommunityPost post = communityPostRepositoryCustom.findByIdWithCategory(postId)
+                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
 
         if (post.isDeleted()) {
-            // 이미 삭제 처리된 게시글이라면, 불필요한 재처리 없이 예외를 던져 종료
-            throw new IllegalArgumentException("이미 삭제 처리된 게시글입니다. postId: " + postId);
+            throw new Exception400("이미 삭제 처리된 게시글입니다. postId: " + postId);
         }
+
+        Member admin = memberRepository.findById(adminId)
+                .orElseThrow(() -> new Exception404("관리자 정보를 찾을 수 없습니다. adminId: " + adminId));
 
         post.softDelete();
 
         // 해당 게시글의 모든 PENDING 신고를 APPROVED로 변경
         List<CommunityReport> pendingReports = communityReportRepository
-                .findByPostIdAndStatus(postId, CommunityReportStatus.PENDING);
+                .findByPostIdAndStatus(post.getId(), CommunityReportStatus.PENDING);
 
         pendingReports.forEach(report -> {
             report.setStatus(CommunityReportStatus.APPROVED);
 
-            // 신고 처리 기록 생성
             CommunityReportProcess process = CommunityReportProcess.builder()
                     .report(report)
-                    .adminId(adminId)
+                    .admin(admin)
                     .status(CommunityReportStatus.APPROVED)
                     .adminComment("게시글 강제 삭제로 인한 자동 승인")
                     .build();
@@ -294,5 +306,4 @@ public class CommunityPostService {
         log.warn("[관리자 강제 삭제] postId={}, reason={}, 자동 처리된 신고 수={}",
                 postId, reason, pendingReports.size());
     }
-
 }

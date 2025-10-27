@@ -50,6 +50,6 @@ public class CommunityPostRequest {
     public static class SearchDTO {
         private String keyword;
         private List<Long> categoryIds;
-        private String sortType;
+        private CommunityPostSortType sortType;
     }
 }

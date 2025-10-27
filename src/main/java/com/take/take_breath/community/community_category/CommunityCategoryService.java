@@ -1,5 +1,8 @@
+// CommunityCategoryService.java
+
 package com.take.take_breath.community.community_category;
 
+import com.take.take_breath._core._exception.Exception404;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +32,7 @@ public class CommunityCategoryService {
      */
     public CommunityCategoryResponse.ListDTO findCategoryById(Long id) {
         CommunityCategory category = communityCategoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다. ID: " + id));
 
         return new CommunityCategoryResponse.ListDTO(category);
     }
@@ -55,7 +58,7 @@ public class CommunityCategoryService {
     @Transactional
     public CommunityCategoryResponse.ResponseDTO updateCategory(Long id, CommunityCategoryRequest.UpdateDTO updateDTO, Long adminId) {
         CommunityCategory category = communityCategoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다. ID: " + id));
 
         category.update(updateDTO.getName());
         log.info("[카테고리 수정] adminId={}, categoryId={}, name={}", adminId, id, updateDTO.getName());
@@ -68,7 +71,7 @@ public class CommunityCategoryService {
     @Transactional
     public void deleteCategory(Long id, Long adminId) {
         CommunityCategory category = communityCategoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다. ID: " + id));
 
         communityCategoryRepository.delete(category);
         log.info("[카테고리 삭제] adminId={}, categoryId={}, name={}", adminId, id, category.getName());

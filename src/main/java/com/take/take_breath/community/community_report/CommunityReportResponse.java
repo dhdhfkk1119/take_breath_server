@@ -12,20 +12,22 @@ public class CommunityReportResponse {
     @Data
     public static class CreateDTO {
         private Long id;
-        private String message;
-        private Long postId;
         private Long reporterId;
+        private String reporterName;
+        private Long postId;
         private String reason;
+        private String message;
         private CommunityReportStatus status;
         private String createdAt;
 
         @Builder
         public CreateDTO(CommunityReport report, String message) {
             this.id = report.getId();
-            this.message = message;
+            this.reporterId = report.getReporter().getId();
+            this.reporterName = report.getReporter().getName();
             this.postId = report.getPost().getId();
-            this.reporterId = report.getReporterId();
             this.reason = report.getReason();
+            this.message = message;
             this.status = report.getStatus();
             this.createdAt = report.getTime();
         }
@@ -34,14 +36,20 @@ public class CommunityReportResponse {
     @Data
     public static class ListDTO {
         private Long id;
+        private Long reporterId;
+        private String reporterName;
         private Long postId;
+        private String postTitle;
         private String reason;
         private CommunityReportStatus status;
         private String createdAt;
 
         public ListDTO(CommunityReport report) {
             this.id = report.getId();
+            this.reporterId = report.getReporter().getId();
+            this.reporterName = report.getReporter().getName();
             this.postId = report.getPost().getId();
+            this.postTitle = report.getPost().getTitle();
             this.reason = report.getReason();
             this.status = report.getStatus();
             this.createdAt = report.getTime();
@@ -51,6 +59,8 @@ public class CommunityReportResponse {
     @Data
     public static class DetailDTO {
         private Long id;
+        private Long reporterId;
+        private String reporterName;
         private Long postId;
         private String postTitle;
         private String postContent;
@@ -61,6 +71,8 @@ public class CommunityReportResponse {
 
         public DetailDTO(CommunityReport report) {
             this.id = report.getId();
+            this.reporterId = report.getReporter().getId();
+            this.reporterName = report.getReporter().getName();
             this.postId = report.getPost().getId();
             this.postTitle = report.getPost().getTitle();
             this.postContent = report.getPost().getContent();
@@ -78,21 +90,17 @@ public class CommunityReportResponse {
         private Long id;
         private CommunityReportStatus status;
         private Long adminId;
+        private String adminName;
         private String adminComment;
         private String createdAt;
 
         public AdminCommentDTO(CommunityReportProcess process) {
             this.id = process.getId();
             this.status = process.getStatus();
-            this.adminId = process.getAdminId();
+            this.adminId = process.getAdmin().getId();
+            this.adminName = process.getAdmin().getName();
             this.adminComment = process.getAdminComment();
             this.createdAt = process.getTime();
         }
     }
 }
-
-
-
-
-
-

@@ -22,9 +22,9 @@ public class QCommentReportProcess extends EntityPathBase<CommentReportProcess> 
 
     public static final QCommentReportProcess commentReportProcess = new QCommentReportProcess("commentReportProcess");
 
-    public final StringPath adminComment = createString("adminComment");
+    public final com.take.take_breath.members.QMember admin;
 
-    public final NumberPath<Long> adminId = createNumber("adminId", Long.class);
+    public final StringPath adminComment = createString("adminComment");
 
     public final DateTimePath<java.sql.Timestamp> createdAt = createDateTime("createdAt", java.sql.Timestamp.class);
 
@@ -52,6 +52,7 @@ public class QCommentReportProcess extends EntityPathBase<CommentReportProcess> 
 
     public QCommentReportProcess(Class<? extends CommentReportProcess> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.admin = inits.isInitialized("admin") ? new com.take.take_breath.members.QMember(forProperty("admin"), inits.get("admin")) : null;
         this.report = inits.isInitialized("report") ? new com.take.take_breath.community.comment_report.QCommentReport(forProperty("report"), inits.get("report")) : null;
     }
 

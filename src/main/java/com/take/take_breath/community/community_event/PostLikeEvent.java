@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class PostLikeEvent {
-    private Long postUserId;
+    private Long postMemberId;
     private String postTitle;
-    private Long likerUserId;
+    private Long likerMemberId;
 }

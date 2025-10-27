@@ -5,12 +5,14 @@ import com.take.take_breath._core._utils.DateUtil;
 import com.take.take_breath.community.comment_report_process.CommentReportProcess;
 import com.take.take_breath.community.community_comment.CommunityComment;
 import com.take.take_breath.community.community_report.CommunityReportStatus;
+import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +29,9 @@ public class CommentReport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO
-    private Long reporterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reporter_id", nullable = false)
+    private Member reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id", nullable = false)
@@ -54,6 +57,6 @@ public class CommentReport {
     }
 
     public boolean isOwner(Long checkReporterId) {
-        return this.reporterId != null && this.reporterId.equals(checkReporterId);
+        return this.reporter != null && this.reporter.getId().equals(checkReporterId);
     }
 }

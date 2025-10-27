@@ -4,6 +4,7 @@ import com.take.take_breath.community.community_category.CommunityCategory;
 import com.take.take_breath.community.community_comment.CommunityComment;
 import com.take.take_breath.community.community_post_image.CommunityPostImage;
 import com.take.take_breath.community.community_post_like.CommunityPostLike;
+import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,7 +19,7 @@ import java.util.List;
 @Entity
 @Table(name = "community_post_tb")
 @Data
-@ToString(exclude = {"images", "comments", "likes"})
+@ToString(exclude = {"images", "comments", "likes", "member"})
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -57,9 +58,9 @@ public class CommunityPost {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-
-    // TODO - 추후 연결 예정
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
@@ -101,8 +102,8 @@ public class CommunityPost {
         return this.deletedAt != null;
     }
 
-    public boolean isOwner(Long checkUserId) {
-        return this.userId != null && this.userId.equals(checkUserId);
+    public boolean isOwner(Long checkMemberId) {
+        return this.member != null && this.member.getId().equals(checkMemberId);
     }
 
     public boolean isModified() {

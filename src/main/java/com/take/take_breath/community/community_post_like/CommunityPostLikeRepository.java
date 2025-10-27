@@ -11,14 +11,14 @@ public interface CommunityPostLikeRepository extends JpaRepository<CommunityPost
 
     // 여러 게시글의 좋아요 여부 확인
     @Query("SELECT cpl.post.id FROM CommunityPostLike cpl " +
-            "WHERE cpl.userId = :userId " +
+            "WHERE cpl.member.id = :memberId " +
             "AND cpl.post.id IN :postIds")
-    List<Long> findLikedPostIds(@Param("userId") Long userId,
+    List<Long> findLikedPostIds(@Param("memberId") Long memberId,
                                 @Param("postIds") List<Long> postIds);
 
     // 단일 게시글 좋아요 여부 확인
-    boolean existsByPostIdAndUserId(Long postId, Long userId);
+    boolean existsByPostIdAndMemberId(Long postId, Long memberId);
 
     // 좋아요 조회 (토글 기능용)
-    Optional<CommunityPostLike> findByPostIdAndUserId(Long postId, Long userId);
+    Optional<CommunityPostLike> findByPostIdAndMemberId(Long postId, Long memberId);
 }

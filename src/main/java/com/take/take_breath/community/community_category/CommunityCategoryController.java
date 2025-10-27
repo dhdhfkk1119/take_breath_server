@@ -1,6 +1,10 @@
 package com.take.take_breath.community.community_category;
 
 import com.take.take_breath._core._utils.ApiUtil;
+import com.take.take_breath._core.auth.Auth;
+import com.take.take_breath.members.Role;
+import com.take.take_breath.members.Status;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,13 +45,14 @@ public class CommunityCategoryController {
 
     /**
      * 카테고리 생성 (관리자 전용)
-     * TODO: JWT 인증 구현 후 @Auth(roles = {Role.ADMIN}) 추가
      */
+    @Auth(roles = {Role.ADMIN}, statuses = {Status.ACTIVE})
     @PostMapping("/admin")
     public ResponseEntity<ApiUtil.ApiResult<CommunityCategoryResponse.ResponseDTO>> saveCategory(
             @Valid @RequestBody CommunityCategoryRequest.SaveDTO saveDTO,
-            @RequestParam Long adminId) {
+            HttpServletRequest request) {
 
+        Long adminId = (Long) request.getAttribute("memberId");
         CommunityCategoryResponse.ResponseDTO savedCategory = communityCategoryService.saveCategory(saveDTO, adminId);
         log.info("[카테고리 생성] adminId={}, categoryId={}, name={}", adminId, savedCategory.getId(), savedCategory.getName());
         return ResponseEntity.ok(ApiUtil.success(savedCategory));
@@ -56,12 +61,13 @@ public class CommunityCategoryController {
     /**
      * 카테고리 수정 (관리자 전용)
      */
+    @Auth(roles = {Role.ADMIN}, statuses = {Status.ACTIVE})
     @PutMapping("/{id}/admin")
     public ResponseEntity<ApiUtil.ApiResult<CommunityCategoryResponse.ResponseDTO>> updateCategory(
-            @PathVariable Long id,
-            @Valid @RequestBody CommunityCategoryRequest.UpdateDTO updateDTO,
-            @RequestParam Long adminId) {
+            @PathVariable Long id, @Valid @RequestBody CommunityCategoryRequest.UpdateDTO updateDTO,
+            HttpServletRequest request) {
 
+        Long adminId = (Long) request.getAttribute("memberId");
         CommunityCategoryResponse.ResponseDTO updatedCategory = communityCategoryService.updateCategory(id, updateDTO, adminId);
         log.info("[카테고리 수정] adminId={}, categoryId={}, name={}", adminId, id, updatedCategory.getName());
         return ResponseEntity.ok(ApiUtil.success(updatedCategory));
@@ -70,8 +76,12 @@ public class CommunityCategoryController {
     /**
      * 카테고리 삭제 (관리자 전용)
      */
+    @Auth(roles = {Role.ADMIN}, statuses = {Status.ACTIVE})
     @DeleteMapping("/{id}/admin")
-    public ResponseEntity<ApiUtil.ApiResult<String>> deleteCategory(@PathVariable Long id, @RequestParam Long adminId) {
+    public ResponseEntity<ApiUtil.ApiResult<String>> deleteCategory(
+            @PathVariable Long id, HttpServletRequest request) {
+
+        Long adminId = (Long) request.getAttribute("memberId");
         communityCategoryService.deleteCategory(id, adminId);
         log.info("[카테고리 삭제] adminId={}, categoryId={}", adminId, id);
         return ResponseEntity.ok(ApiUtil.success("카테고리가 삭제되었습니다."));

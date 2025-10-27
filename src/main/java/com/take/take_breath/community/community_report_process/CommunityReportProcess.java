@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.take.take_breath._core._utils.DateUtil;
 import com.take.take_breath.community.community_report.CommunityReport;
 import com.take.take_breath.community.community_report.CommunityReportStatus;
+import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,14 +28,15 @@ public class CommunityReportProcess {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "report_id", nullable = false)
-    @JsonBackReference // 순환 참조 방지
+    @JsonBackReference
     private CommunityReport report;
 
     @Enumerated(EnumType.STRING)
     private CommunityReportStatus status;
 
-    // TODO
-    private Long adminId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id", nullable = false)
+    private Member admin;
 
     @Column(length = 500)
     private String adminComment;
@@ -42,7 +44,7 @@ public class CommunityReportProcess {
     @CreationTimestamp
     private Timestamp createdAt;
 
-    public String getTime(){
+    public String getTime() {
         return DateUtil.timestampFormat(createdAt);
     }
 }

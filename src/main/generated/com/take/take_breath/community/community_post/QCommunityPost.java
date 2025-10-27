@@ -40,13 +40,13 @@ public class QCommunityPost extends EntityPathBase<CommunityPost> {
 
     public final ListPath<com.take.take_breath.community.community_post_like.CommunityPostLike, com.take.take_breath.community.community_post_like.QCommunityPostLike> likes = this.<com.take.take_breath.community.community_post_like.CommunityPostLike, com.take.take_breath.community.community_post_like.QCommunityPostLike>createList("likes", com.take.take_breath.community.community_post_like.CommunityPostLike.class, com.take.take_breath.community.community_post_like.QCommunityPostLike.class, PathInits.DIRECT2);
 
+    public final com.take.take_breath.members.QMember member;
+
     public final NumberPath<Integer> reportCount = createNumber("reportCount", Integer.class);
 
     public final StringPath title = createString("title");
 
     public final DateTimePath<java.sql.Timestamp> updatedAt = createDateTime("updatedAt", java.sql.Timestamp.class);
-
-    public final NumberPath<Long> userId = createNumber("userId", Long.class);
 
     public final NumberPath<Integer> viewCount = createNumber("viewCount", Integer.class);
 
@@ -69,6 +69,7 @@ public class QCommunityPost extends EntityPathBase<CommunityPost> {
     public QCommunityPost(Class<? extends CommunityPost> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.category = inits.isInitialized("category") ? new com.take.take_breath.community.community_category.QCommunityCategory(forProperty("category")) : null;
+        this.member = inits.isInitialized("member") ? new com.take.take_breath.members.QMember(forProperty("member"), inits.get("member")) : null;
     }
 
 }

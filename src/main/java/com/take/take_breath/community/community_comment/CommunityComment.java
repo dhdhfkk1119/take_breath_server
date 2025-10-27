@@ -3,6 +3,7 @@ package com.take.take_breath.community.community_comment;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.take.take_breath._core._utils.DateUtil;
 import com.take.take_breath.community.community_post.CommunityPost;
+import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,8 +35,9 @@ public class CommunityComment {
     @JsonBackReference // 순환 참조 방지
     private CommunityPost post;
 
-    // TODO
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Builder.Default
     @Column(nullable = false)
@@ -66,8 +68,8 @@ public class CommunityComment {
         return this.updatedAt != null && (this.updatedAt.getTime() - this.createdAt.getTime() > 10000);
     }
 
-    public boolean isOwner(Long checkUserId) {
-        return this.userId != null && this.userId.equals(checkUserId);
+    public boolean isOwner(Long checkMemberId) {
+        return this.member != null && this.member.getId().equals(checkMemberId);
     }
 
     public void increaseReportCount() {
