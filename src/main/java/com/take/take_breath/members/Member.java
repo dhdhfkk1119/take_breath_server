@@ -64,6 +64,8 @@ public class Member {
 
     private boolean emailVerified = false;
 
+    @Column(length = 512)
+    private String refreshToken;
 
     // 상담사 프로필 연결
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)

@@ -21,8 +21,8 @@ public class MemberAuthController {
     public ResponseEntity<?> login(@Valid @RequestBody MemberRequestTo.MemberLoginRequest req) {
         MemberResponseTo.Login response = memberService.login(req);
         return ResponseEntity.ok()
-                .header("Authorization", "Bearer " + response.accessToken())
-                .header("Refresh-Token", response.refreshToken())
+                .header("Authorization", "Bearer " + response.getAccessToken())
+                .header("Refresh-Token", response.getRefreshToken())
                 .body(response);
     }
 
