@@ -22,8 +22,10 @@ public class CounselorService {
     @Transactional
     public CounselorResponse signup(Long memberId, CounselorRequest req) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new Exception400("회원이 존재하지 않습니다"));
+                .orElseThrow(() -> new Exception400("회원이 존재하지 않습니다."));
+
         Counselor counselor = req.toEntity(member);
+
         counselorRepository.save(counselor);
 
         return CounselorResponse.from(counselor);
