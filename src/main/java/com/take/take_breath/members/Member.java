@@ -36,7 +36,11 @@ public class Member {
     @PrePersist
     public void prePersist() {
         if(profileImage == null || profileImage.isEmpty()) {
-            profileImage = "추가될 이미지 경로 예시로 넣어둘게요 /uploads/profile/default/default_profile.png";
+            profileImage = "http://localhost:8080/uploads/member-images/default_profile.png";
+        }
+
+        if (nickname == null || nickname.isBlank()) {
+            nickname = "익명";
         }
     }
 
@@ -51,6 +55,9 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private Status status;     // PENDING, ACTIVE, SUSPENDED
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;      // MALE, FEMALE
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberTerms> memberTermsList = new ArrayList<>();
