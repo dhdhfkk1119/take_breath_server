@@ -15,6 +15,7 @@ upload:
   root-dir: ./uploads/
   corp-dir: corp-images/
   member-dir: member-images/
+  chat-image-dir: chat-image/
 
 # ?? ??? ??
 # ERROR > WARN > INFO > DEBUG > TRACE
