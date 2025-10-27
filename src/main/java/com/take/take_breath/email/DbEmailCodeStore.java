@@ -27,6 +27,8 @@ public class DbEmailCodeStore implements EmailCodeStore {
 
         LocalDateTime expireAt = LocalDateTime.now().plusSeconds(expireSeconds);
 
+        log.info("인증 코드 저장 시 expireAt = {}", expireAt);
+
         // 기존 코드가 있으면 삭제 후 새로 저장
         emailAuthRepository.findByEmail(email)
                 .ifPresent(auth -> emailAuthRepository.delete(auth));
@@ -59,6 +61,7 @@ public class DbEmailCodeStore implements EmailCodeStore {
     public void markAsVerified(String email, long expireSeconds) {
         emailAuthRepository.findByEmail(email)
                 .ifPresent(emailAuth -> {
+                    log.info("인증 완료 처리 직전 expireAt = {}", emailAuth.getExpireAt());
                     emailAuth.setVerified(true);
                     emailAuthRepository.save(emailAuth);
                     log.info("DB 인증 완료 처리: {}", email);

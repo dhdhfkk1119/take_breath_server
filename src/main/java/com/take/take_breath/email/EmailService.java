@@ -12,6 +12,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -26,6 +27,9 @@ public class EmailService {
     private static final String SUBJECT = "[TakeBreath] 이메일 인증 코드";
     private static final String BODY_PREFIX = "아래 인증 코드를 입력해 주세요.\n\n인증코드: ";
 
+
+    @Value("${email.code-expire-seconds:300}")
+    private long expireSeconds;
 
     // 실제 메일 발송
     public void send(String to, String code) {
@@ -42,8 +46,7 @@ public class EmailService {
         }
     }
 
-    @Value("${email.code-expire-seconds:300}")
-    private long expireSeconds;
+
 
     private static final SecureRandom random = new SecureRandom();
 
@@ -52,6 +55,8 @@ public class EmailService {
     public void sendVerificationCode(EmailRequest req) {
         String code = String.format("%06d", random.nextInt(1_000_000));
         send(req.getEmail(), code);
+        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(expireSeconds);
+
         emailCodeStore.save(req.getEmail(), code, expireSeconds);
     }
 
