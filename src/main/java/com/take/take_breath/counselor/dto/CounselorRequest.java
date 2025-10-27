@@ -8,6 +8,7 @@ import com.take.take_breath.terms.dto.MemberTermsRequest;
 import lombok.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -18,6 +19,7 @@ public class CounselorRequest {
     // 회원 정보
     private String email;
     private String password;
+    private String confirmPassword;
     private String name;
     private String phone;
     private String address;
@@ -26,7 +28,6 @@ public class CounselorRequest {
     private List<MemberTermsRequest> agreements;
 
     // 상담사 정보
-    private String license;
     private String specialty;
     private String introduction;
     private String gender;
@@ -34,11 +35,13 @@ public class CounselorRequest {
     private String hashtags;
     private int price;
 
+    // 자격증 목록
+    private List<CounselorLicenseRequest> licenses;
+
 
     public Counselor toEntity(Member member) {
-        return Counselor.builder()
+        Counselor counselor = Counselor.builder()
                 .member(member)
-                .license(license)
                 .specialty(specialty)
                 .introduction(introduction)
                 .gender(gender)
@@ -46,12 +49,25 @@ public class CounselorRequest {
                 .hashtags(hashtags)
                 .price(price)
                 .build();
+
+        // 라이선스 목록 변환
+        if (licenses != null && !licenses.isEmpty()) {
+            counselor.setLicenses(
+                    licenses.stream()
+                            .map(licenseReq -> licenseReq.toEntity(counselor))
+                            .collect(Collectors.toList())
+            );
+        }
+
+        return counselor;
+
     }
 
     public MemberRequest toMemberRequest() {
         return MemberRequest.builder()
                 .email(this.email)
                 .password(this.password)
+                .confirmPassword(this.password)
                 .name(this.name)
                 .phone(this.phone)
                 .address(this.address)
