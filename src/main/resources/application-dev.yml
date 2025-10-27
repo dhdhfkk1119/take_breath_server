@@ -65,3 +65,8 @@ spring:
         default_batch_fetch_size: 10
     # data.sql ??? Hibernate ??? ??? ??
     defer-datasource-initialization: true
+
+jwt:
+  secret: yourSecretKeyInBase64
+  validityInMilliseconds: 3600000        # 1시간
+  refresh-expiration-ms: 604800000     # 7일
