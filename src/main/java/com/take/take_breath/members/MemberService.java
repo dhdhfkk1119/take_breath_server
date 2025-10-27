@@ -4,14 +4,12 @@ import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception401;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
+import com.take.take_breath._core._utils.UploadProperties;
 import com.take.take_breath.email.EmailCodeStore;
 import com.take.take_breath.email.EmailService;
 import com.take.take_breath.email.dto.EmailRequest;
 import com.take.take_breath.email.dto.EmailResponse;
-import com.take.take_breath.members.dto.MemberEmailResponse;
-import com.take.take_breath.members.dto.MemberFindEmailRequest;
-import com.take.take_breath.members.dto.MemberRequest;
-import com.take.take_breath.members.dto.PasswordResetRequest;
+import com.take.take_breath.members.dto.*;
 import com.take.take_breath.terms.dto.MemberTermsRequest;
 import com.take.take_breath.terms.MemberTerms;
 import com.take.take_breath.terms.Terms;
@@ -22,6 +20,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import com.take.take_breath._core._utils.UploadFile;
+
+import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -35,6 +38,8 @@ public class MemberService {
     private final MemberTermsRepository memberTermsRepository;
     private final TermsRepository termsRepository;
     private final EmailService emailService;
+    private final UploadFile uploadFile;
+    private final UploadProperties uploadProperties;
 
 
 
@@ -158,6 +163,48 @@ public class MemberService {
         member.setPassword(passwordEncoder.encode(req.getNewPassword()));
     }
 
+    // 회원정보 조회
+    public MemberResponse getMemberInfo(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception400("회원 정보를 찾을 수 없습니다."));
+
+        return new MemberResponse(member);
+    }
+
+    // 회원정보 수정
+    @Transactional
+    public void  updateMemberInfo (String email, String nickname, MultipartFile image) throws IOException {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception400("회원 정보를 찾을 수 없습니다."));
+
+        // 닉네임 수정
+        if (nickname != null && !nickname.isEmpty()) {
+            member.setNickname(nickname);
+        }
+
+        // 프로필 이미지 수정
+        if (image != null && !image.isEmpty()) {
+            // 기존 이미지 삭제 (기본이미지면 건너뜀)
+            uploadFile.deleteProfileImage(member.getProfileImage(), "member");
+
+            // 새 이미지 업로드
+            String uploadedPath = uploadFile.uploadImage(image, "member");
+            member.setProfileImage(uploadedPath);
+        }
+    }
+
+    // 회원탈퇴
+    @Transactional
+    public void deleteMember(String email) throws IOException {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception400("존재하지 않는 회원입니다."));
+
+        // 기본 이미지가 아닐 경우 실제 이미지 파일 삭제
+        uploadFile.deleteProfileImage(member.getProfileImage(), uploadProperties.getMemberDir());
+
+        // 회원 데이터 삭제
+        memberRepository.delete(member);
+    }
 
 
 }

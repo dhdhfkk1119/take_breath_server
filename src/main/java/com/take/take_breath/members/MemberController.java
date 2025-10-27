@@ -3,17 +3,16 @@ package com.take.take_breath.members;
 
 import com.take.take_breath.email.EmailService;
 import com.take.take_breath.email.dto.EmailRequest;
-import com.take.take_breath.members.dto.MemberEmailResponse;
-import com.take.take_breath.members.dto.MemberFindEmailRequest;
-import com.take.take_breath.members.dto.MemberRequest;
-import com.take.take_breath.members.dto.PasswordResetRequest;
+import com.take.take_breath.members.dto.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/members")
@@ -61,4 +60,39 @@ public class MemberController {
         memberService.resetPassword(req);
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
+
+    // 회원정보 불러오기
+    @GetMapping("/info")
+    public ResponseEntity<?> getMemberInfo(HttpServletRequest req) {
+        String email = (String) req.getAttribute("memberEmail");
+        MemberResponse response = memberService.getMemberInfo(email);
+        return ResponseEntity.ok(response);
+    }
+
+    // 회원정보 수정
+    @PatchMapping("/update")
+    public ResponseEntity<?> updateProfile(
+            HttpServletRequest request,
+            @RequestPart(value = "nickname", required = false) String nickname,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) throws IOException {
+        String email = (String) request.getAttribute("memberEmail");
+        memberService.updateMemberInfo(email, nickname, image);
+        return ResponseEntity.ok("회원 정보가 수정되었습니다.");
+    }
+
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok("로그아웃 되었습니다.");
+    }
+
+    // 회원탈퇴
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<?> deleteMember(HttpServletRequest request) throws IOException {
+        String email = (String) request.getAttribute("memberEmail");
+        memberService.deleteMember(email);
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+    }
+
 }
