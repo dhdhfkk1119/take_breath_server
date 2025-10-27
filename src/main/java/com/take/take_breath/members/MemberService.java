@@ -97,6 +97,8 @@ public class MemberService {
         Member member = memberRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new Exception400("존재하지 않는 이메일입니다."));
 
+        System.out.println(">>> PasswordEncoder Bean Type = " + passwordEncoder.getClass().getName());
+
         if (!passwordEncoder.matches(req.getPassword(), member.getPassword())) {
             throw new Exception401("비밀번호가 일치하지 않습니다.");
         }
