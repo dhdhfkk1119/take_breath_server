@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "upload")
 public class UploadProperties {
     private String rootDir;   // ./uploads/
-    private String corpDir;   // corp-images/
+    private String counselorDir;   // counselor-images/
     private String memberDir; // member-images/
     private String chatImageDir;    // chat-image/
 }
