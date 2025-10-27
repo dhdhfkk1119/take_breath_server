@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+
 @Service
 @RequiredArgsConstructor
 public class UploadFile {
@@ -19,7 +20,7 @@ public class UploadFile {
     /**
      * 단일 이미지 업로드
      * @param file 업로드할 파일
-     * @param dirType "member" 또는 "counselor"
+     * @param dirType "member" 또는 "counselor" + "chat"
      * @return 저장된 파일 경로 (예: member-images/20251027_abc123.png)
      */
     public String uploadImage(MultipartFile file, String dirType) throws IOException {
@@ -58,9 +59,9 @@ public class UploadFile {
 
             // URL이면 접두사 제거
             if (imagePath.startsWith("http")) {
-                int idx = imagePath.indexOf("/uploads/");
+                int idx = imagePath.indexOf("/static/uploads/");
                 if (idx != -1) {
-                    imagePath = imagePath.substring(idx + "/uploads/".length());
+                    imagePath = imagePath.substring(idx + "/static/uploads/".length());
                 }
             }
 
@@ -72,6 +73,52 @@ public class UploadFile {
         }
     }
 
+
+
+    /**
+     * 채팅 이미지 읽기
+     * @param relativePath DB에 저장된 상대 경로 (예: chat-image/uuid.jpg)
+     * @return 파일 데이터 (byte[])
+     */
+    public byte[] loadChatImage(String relativePath) throws IOException {
+        if (relativePath == null || relativePath.isEmpty()) {
+            throw new IllegalArgumentException("파일 경로가 없습니다.");
+        }
+
+        // 전체 경로: ./uploads/chat-image/uuid.jpg
+        String fullPath = Paths.get(uploadProperties.getRootDir(), relativePath).toString();
+        Path filePath = Paths.get(fullPath);
+
+        if (!Files.exists(filePath)) {
+            throw new IOException("파일을 찾을 수 없습니다: " + relativePath);
+        }
+
+        return Files.readAllBytes(filePath);
+    }
+
+    /**
+     * 채팅 이미지 삭제
+     * @param relativePath DB에 저장된 상대 경로 (예: chat-image/uuid.jpg)
+     */
+    public void deleteChatImage(String relativePath) {
+        if (relativePath == null || relativePath.isEmpty()) {
+            return;
+        }
+
+        try {
+            String fullPath = Paths.get(uploadProperties.getRootDir(), relativePath).toString();
+            Path filePath = Paths.get(fullPath);
+
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+                System.out.println("✅ 채팅 이미지 삭제 완료: " + fullPath);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("채팅 이미지를 삭제하지 못했습니다", e);
+        }
+    }
+
+
     /**
      * 디렉터리 타입 구분 (yml 기준)
      */
@@ -80,6 +127,8 @@ public class UploadFile {
             return uploadProperties.getMemberDir();
         } else if ("counselor".equalsIgnoreCase(dirType)) {
             return uploadProperties.getCounselorDir();
+        } else if("chat".equalsIgnoreCase(dirType)) {
+            return uploadProperties.getChatImageDir();
         }
         throw new IllegalArgumentException("잘못된 디렉터리 타입입니다: " + dirType);
     }

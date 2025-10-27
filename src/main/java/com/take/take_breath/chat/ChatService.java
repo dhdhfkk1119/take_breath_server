@@ -2,6 +2,8 @@ package com.take.take_breath.chat;
 
 import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception404;
+import com.take.take_breath._core._utils.UploadFile;
+import com.take.take_breath._core._utils.UploadProperties;
 import com.take.take_breath.chat.chat_message.ChatMessage;
 import com.take.take_breath.chat.chat_message.ChatMessageRepository;
 import com.take.take_breath.chat.chat_message.MessageType;
@@ -33,7 +35,8 @@ public class ChatService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final MemberRepository memberRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final FileStorageService fileStorageService;  // 추가
+    private final UploadFile uploadFile;
+    private final UploadProperties uploadProperties;
 
 
     /**
@@ -75,6 +78,7 @@ public class ChatService {
                             .messageType(message.getType().name())
                             .createdAt(message.getTime())
                             .isRead(isRead)
+                            .imageUrl(message.getImageUrl())  // ⭐ 이미지 URL 추가
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -179,18 +183,18 @@ public class ChatService {
             throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
         }
 
-        // 6. 파일 시스템에 저장 (FileStorageService 사용)
-        String attachmentPath = fileStorageService.saveFile(image);
+        // 6. UploadFile을 사용해서 파일 저장
+        String attachmentPath = uploadFile.uploadImage(image, "chat");
 
         // 7. 메시지 생성 및 저장
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(sender)
-                .content("[이미지]")  // 텍스트 내용
+                .content("[이미지]")
                 .type(MessageType.IMAGE)
-                .attachmentPath(attachmentPath)  // 파일 경로 저장
-                .originalFilename(image.getOriginalFilename())  // 원본 파일명 저장
-                .fileSize(image.getSize())  // 파일 크기 저장
+                .attachmentPath(attachmentPath)
+                .originalFilename(image.getOriginalFilename())
+                .fileSize(image.getSize())
                 .build();
         chatMessageRepository.save(message);
 
@@ -231,13 +235,14 @@ public class ChatService {
             throw new IllegalArgumentException("이미지 파일 경로가 없습니다.");
         }
 
-        // 파일 시스템에서 파일 읽기
+        // ⭐ UploadFile을 사용해서 파일 읽기
         try {
-            return fileStorageService.loadFile(message.getAttachmentPath());
+            return uploadFile.loadChatImage(message.getAttachmentPath());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 
 
     /**
