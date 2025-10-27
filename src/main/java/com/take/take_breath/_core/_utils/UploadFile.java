@@ -1,6 +1,5 @@
 package com.take.take_breath._core._utils;
 
-import com.take.take_breath._core._utils.UploadProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +19,7 @@ public class UploadFile {
     /**
      * 단일 이미지 업로드
      * @param file 업로드할 파일
-     * @param dirType "member" 또는 "corp"
+     * @param dirType "member" 또는 "counselor"
      * @return 저장된 파일 경로 (예: member-images/20251027_abc123.png)
      */
     public String uploadImage(MultipartFile file, String dirType) throws IOException {
@@ -49,7 +48,7 @@ public class UploadFile {
     /**
      * 프로필 이미지 삭제
      * @param imagePath DB에 저장된 상대경로 (ex. member-images/xxx.png)
-     * @param dirType "member" 또는 "corp"
+     * @param dirType "member" 또는 "counselor"
      */
     public void deleteProfileImage(String imagePath, String dirType) {
         if (imagePath == null || imagePath.isBlank()) return;
@@ -79,8 +78,8 @@ public class UploadFile {
     private String resolveDirectory(String dirType) {
         if ("member".equalsIgnoreCase(dirType)) {
             return uploadProperties.getMemberDir();
-        } else if ("corp".equalsIgnoreCase(dirType)) {
-            return uploadProperties.getCorpDir();
+        } else if ("counselor".equalsIgnoreCase(dirType)) {
+            return uploadProperties.getCounselorDir();
         }
         throw new IllegalArgumentException("잘못된 디렉터리 타입입니다: " + dirType);
     }
