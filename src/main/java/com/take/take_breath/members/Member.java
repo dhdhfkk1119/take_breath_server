@@ -4,6 +4,7 @@ import com.take.take_breath.counselor.Counselor;
 import com.take.take_breath.terms.MemberTerms;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,22 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
+    @ColumnDefault("익명")
+    private String nickname;
+
+    private String profileImage;
+
+    // 회원가입 시 이미지 디폴트값
+    @PrePersist
+    public void prePersist() {
+        if(profileImage == null || profileImage.isEmpty()) {
+            profileImage = "http://localhost:8080/uploads/member-images/default_profile.png";
+        }
+
+        if (nickname == null || nickname.isBlank()) {
+            nickname = "익명";
+        }
+    }
 
     private String name;
 
@@ -39,11 +56,16 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Status status;     // PENDING, ACTIVE, SUSPENDED
 
+    @Enumerated(EnumType.STRING)
+    private Gender gender;      // MALE, FEMALE
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberTerms> memberTermsList = new ArrayList<>();
 
     private boolean emailVerified = false;
 
+    @Column(length = 512)
+    private String refreshToken;
 
     // 상담사 프로필 연결
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
