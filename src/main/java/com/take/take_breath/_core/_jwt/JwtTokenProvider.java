@@ -38,6 +38,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .subject(member.getEmail())
                 .claim("role", member.getRole().name())
+                .claim("status", member.getStatus().name())
                 .issuedAt(now)
                 .expiration(validity)
                 .signWith(key)

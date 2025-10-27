@@ -1,5 +1,6 @@
 package com.take.take_breath.chat;
 
+import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath.chat.chat_message.ChatMessage;
 import com.take.take_breath.chat.chat_message.ChatMessageRepository;
@@ -32,6 +33,8 @@ public class ChatService {
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final MemberRepository memberRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final FileStorageService fileStorageService;  // 추가
+
 
     /**
      * 채팅방의 메시지 목록 조회 (읽음 여부 포함)
@@ -70,7 +73,7 @@ public class ChatService {
                             .senderName(message.getSender().getName())
                             .content(message.getContent())
                             .messageType(message.getType().name())
-                            .createdAt(message.getCreatedAt())
+                            .createdAt(message.getTime())
                             .isRead(isRead)
                             .build();
                 })
@@ -104,7 +107,7 @@ public class ChatService {
     public Long getUnreadCount(Long chatRoomId, Long memberId) {
         ChatRoomMember roomMember = chatRoomMemberRepository
                 .findByChatRoomIdAndMemberId(chatRoomId, memberId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방에 속하지 않은 사용자입니다."));
+                .orElseThrow(() -> new Exception400("채팅방에 속하지 않은 사용자입니다."));
 
         return chatMessageRepository.countUnreadMessages(
                 chatRoomId,
@@ -176,8 +179,8 @@ public class ChatService {
             throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
         }
 
-        // 6. 이미지 데이터를 byte[]로 변환하여 DB에 저장
-        byte[] imageData = image.getBytes();
+        // 6. 파일 시스템에 저장 (FileStorageService 사용)
+        String attachmentPath = fileStorageService.saveFile(image);
 
         // 7. 메시지 생성 및 저장
         ChatMessage message = ChatMessage.builder()
@@ -185,7 +188,9 @@ public class ChatService {
                 .sender(sender)
                 .content("[이미지]")  // 텍스트 내용
                 .type(MessageType.IMAGE)
-                .attachmentData(imageData)  // 이미지 데이터 저장
+                .attachmentPath(attachmentPath)  // 파일 경로 저장
+                .originalFilename(image.getOriginalFilename())  // 원본 파일명 저장
+                .fileSize(image.getSize())  // 파일 크기 저장
                 .build();
         chatMessageRepository.save(message);
 
@@ -198,8 +203,8 @@ public class ChatService {
                 .senderId(message.getSender().getId())
                 .senderName(message.getSender().getName())
                 .messageType(message.getType().name())
-                .imageUrl("/api/chat/messages/image/" + message.getId())
-                .createdAt(message.getCreatedAt())
+                .imageUrl(message.getImageUrl())  // "/api/chat/messages/image/{id}"
+                .createdAt(message.getTime())
                 .isRead(true)
                 .build();
 
@@ -222,7 +227,16 @@ public class ChatService {
             throw new IllegalArgumentException("이미지 메시지가 아닙니다.");
         }
 
-        return message.getAttachmentData();
+        if (message.getAttachmentPath() == null || message.getAttachmentPath().isEmpty()) {
+            throw new IllegalArgumentException("이미지 파일 경로가 없습니다.");
+        }
+
+        // 파일 시스템에서 파일 읽기
+        try {
+            return fileStorageService.loadFile(message.getAttachmentPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -264,7 +278,7 @@ public class ChatService {
                             .roomName(myRoomMember.getChatRoom().getName())
                             .unreadCount(unreadCount)
                             .lastMessage(lastMessage != null ? lastMessage.getContent() : null)
-                            .lastMessageTime(lastMessage != null ? lastMessage.getCreatedAt() : null)
+                            .lastMessageTime(lastMessage != null ? lastMessage.getTime() : null)
                             .otherMemberId(otherMember != null ? otherMember.getMember().getId() : null)
                             .otherMemberName(otherMember != null ? otherMember.getMember().getName() : null)
                             .build();

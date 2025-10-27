@@ -26,6 +26,7 @@ public class ChatMessageController {
      * 에러 반환
      */
     /*
+        응답
         {
           "success": false,
           "response": null,
@@ -43,6 +44,7 @@ public class ChatMessageController {
      * GET /api/chat/messages?chatRoomId=1&memberId=1
      */
     /*
+        응답
         {
           "success": true,
           "response": [
@@ -85,6 +87,7 @@ public class ChatMessageController {
         return ResponseEntity.ok(ApiUtil.success(messages));
     }
 
+
     /**
      * 메시지 읽음 처리
      * POST /api/chat/messages/read
@@ -117,6 +120,7 @@ public class ChatMessageController {
         );
         return ResponseEntity.ok(ApiUtil.success("메시지를 읽음 처리했습니다."));
     }
+
 
     /**
      * 안읽은 메시지 개수 조회

@@ -21,6 +21,7 @@ public class ChatRoomController {
      * 에러 반환
      */
     /*
+        응답
         {
           "success": false,
           "response": null,
@@ -38,6 +39,7 @@ public class ChatRoomController {
      * GET /api/chat/rooms?memberId=1
      */
     /*
+        응답
         {
           "success": true,
           "response": [
@@ -75,6 +77,7 @@ public class ChatRoomController {
      * POST /api/chat/rooms
      */
     /*
+        요청
         {
           "roomName": "사용자1 - 상담사A 채팅",
           "memberIds": [1, 2]
@@ -114,5 +117,4 @@ public class ChatRoomController {
         CreateChatRoomResponse response = chatService.createChatRoom(request);
         return ResponseEntity.ok(ApiUtil.success(response));
     }
-
 }

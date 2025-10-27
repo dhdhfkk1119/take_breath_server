@@ -12,6 +12,6 @@ public class ImageMessageResponse {
     private String senderName;
     private String messageType;         // IMAGE
     private String imageUrl;            // 이미지 다운로드 URL
-    private LocalDateTime createdAt;
+    private String createdAt;
     private boolean isRead;
 }

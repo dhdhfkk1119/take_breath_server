@@ -50,7 +50,7 @@ public class ChatWsController {
                 .senderName(savedMessage.getSender().getName())
                 .content(savedMessage.getContent())
                 .messageType(savedMessage.getType().name())
-                .createdAt(savedMessage.getCreatedAt())
+                .createdAt(savedMessage.getTime())
                 .isRead(true)  // 발신자는 항상 읽음
                 .build();
 

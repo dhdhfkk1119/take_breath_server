@@ -12,6 +12,6 @@ public class ChatMessageResponse {
     private String senderName;
     private String content;
     private String messageType;         // TEXT, IMAGE, FILE
-    private LocalDateTime createdAt;
+    private String createdAt;
     private boolean isRead;             // 읽음 여부 (UI 표시용)
 }

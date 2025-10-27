@@ -22,15 +22,19 @@ public class QChatMessage extends EntityPathBase<ChatMessage> {
 
     public static final QChatMessage chatMessage = new QChatMessage("chatMessage");
 
-    public final ArrayPath<byte[], Byte> attachmentData = createArray("attachmentData", byte[].class);
+    public final StringPath attachmentPath = createString("attachmentPath");
 
     public final com.take.take_breath.chat.chat_room.QChatRoom chatRoom;
 
     public final StringPath content = createString("content");
 
-    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
+    public final DateTimePath<java.sql.Timestamp> createdAt = createDateTime("createdAt", java.sql.Timestamp.class);
+
+    public final NumberPath<Long> fileSize = createNumber("fileSize", Long.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    public final StringPath originalFilename = createString("originalFilename");
 
     public final com.take.take_breath.members.QMember sender;
 
