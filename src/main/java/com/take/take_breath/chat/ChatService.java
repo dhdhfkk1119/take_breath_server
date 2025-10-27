@@ -36,7 +36,6 @@ public class ChatService {
     private final MemberRepository memberRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final UploadFile uploadFile;
-    private final UploadProperties uploadProperties;
 
 
     /**
@@ -57,7 +56,7 @@ public class ChatService {
         // 2. 현재 사용자의 마지막 읽은 메시지 ID 조회
         ChatRoomMember roomMember = chatRoomMemberRepository
                 .findByChatRoomIdAndMemberId(chatRoomId, memberId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방에 속하지 않은 사용자입니다."));
+                .orElseThrow(() -> new Exception400("채팅방에 속하지 않은 사용자입니다."));
 
         Long lastReadMessageId = roomMember.getLastReadMessageId();
 
@@ -85,52 +84,16 @@ public class ChatService {
     }
 
     /**
-     * 메시지 읽음 처리
-     * - 사용자가 채팅방에서 메시지를 읽었을 때 호출
-     * - lastReadMessageId를 업데이트
-     */
-    public void markAsRead(Long chatRoomId, Long memberId, Long lastMessageId) {
-        // 채팅방 멤버 조회
-        ChatRoomMember roomMember = chatRoomMemberRepository
-                .findByChatRoomIdAndMemberId(chatRoomId, memberId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방에 속하지 않은 사용자입니다."));
-
-        // 기존 lastReadMessageId보다 큰 경우만 업데이트
-        //    (이전 메시지를 다시 읽었다고 lastReadMessageId를 낮추지 않기 위함)
-        if (roomMember.getLastReadMessageId() == null || lastMessageId > roomMember.getLastReadMessageId()) {
-            roomMember.setLastReadMessageId(lastMessageId);
-            roomMember.setLastReadAt(LocalDateTime.now());
-            chatRoomMemberRepository.save(roomMember);
-        }
-    }
-
-    /**
-     * 안읽은 메시지 개수 조회
-     */
-    @Transactional(readOnly = true)
-    public Long getUnreadCount(Long chatRoomId, Long memberId) {
-        ChatRoomMember roomMember = chatRoomMemberRepository
-                .findByChatRoomIdAndMemberId(chatRoomId, memberId)
-                .orElseThrow(() -> new Exception400("채팅방에 속하지 않은 사용자입니다."));
-
-        return chatMessageRepository.countUnreadMessages(
-                chatRoomId,
-                roomMember.getLastReadMessageId(),
-                memberId
-        );
-    }
-
-    /**
      * 텍스트 메시지 전송
      */
     public ChatMessage sendMessage(ChatMessageRequest request) {
         // 채팅방 조회
         ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
-                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("채팅방을 찾을 수 없습니다."));
 
         // 발신자 조회
         Member sender = memberRepository.findById(request.getSenderId())
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("회원을 찾을 수 없습니다."));
 
         // MessageType 기본값 처리
         String messageTypeStr = request.getMessageType();
@@ -159,28 +122,28 @@ public class ChatService {
     public ImageMessageResponse sendImageMessage(ImageUploadRequest request) throws IOException {
         // 1. 채팅방 조회
         ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
-                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("채팅방을 찾을 수 없습니다."));
 
         // 2. 발신자 조회
         Member sender = memberRepository.findById(request.getSenderId())
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("회원을 찾을 수 없습니다."));
 
         // 3. 이미지 파일 검증
         MultipartFile image = request.getImage();
         if (image == null || image.isEmpty()) {
-            throw new IllegalArgumentException("이미지 파일이 없습니다.");
+            throw new Exception400("이미지 파일이 없습니다.");
         }
 
         // 4. 이미지 파일 크기 제한 (예: 10MB)
         long maxSize = 10 * 1024 * 1024; // 10MB
         if (image.getSize() > maxSize) {
-            throw new IllegalArgumentException("이미지 파일 크기는 10MB를 초과할 수 없습니다.");
+            throw new Exception400("이미지 파일 크기는 10MB를 초과할 수 없습니다.");
         }
 
         // 5. 이미지 파일 형식 검증
         String contentType = image.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
+            throw new Exception400("이미지 파일만 업로드 가능합니다.");
         }
 
         // 6. UploadFile을 사용해서 파일 저장
@@ -242,6 +205,43 @@ public class ChatService {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * 안읽은 메시지 개수 조회
+     */
+    @Transactional(readOnly = true)
+    public Long getUnreadCount(Long chatRoomId, Long memberId) {
+        ChatRoomMember roomMember = chatRoomMemberRepository
+                .findByChatRoomIdAndMemberId(chatRoomId, memberId)
+                .orElseThrow(() -> new Exception400("채팅방에 속하지 않은 사용자입니다."));
+
+        return chatMessageRepository.countUnreadMessages(
+                chatRoomId,
+                roomMember.getLastReadMessageId(),
+                memberId
+        );
+    }
+
+    /**
+     * 메시지 읽음 처리
+     * - 사용자가 채팅방에서 메시지를 읽었을 때 호출
+     * - lastReadMessageId를 업데이트
+     */
+    public void markAsRead(Long chatRoomId, Long memberId, Long lastMessageId) {
+        // 채팅방 멤버 조회
+        ChatRoomMember roomMember = chatRoomMemberRepository
+                .findByChatRoomIdAndMemberId(chatRoomId, memberId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방에 속하지 않은 사용자입니다."));
+
+        // 기존 lastReadMessageId보다 큰 경우만 업데이트
+        //    (이전 메시지를 다시 읽었다고 lastReadMessageId를 낮추지 않기 위함)
+        if (roomMember.getLastReadMessageId() == null || lastMessageId > roomMember.getLastReadMessageId()) {
+            roomMember.setLastReadMessageId(lastMessageId);
+            roomMember.setLastReadAt(LocalDateTime.now());
+            chatRoomMemberRepository.save(roomMember);
+        }
+    }
+
 
 
 
@@ -368,6 +368,5 @@ public class ChatService {
                 .members(memberInfos)
                 .build();
     }
-
 }
 
