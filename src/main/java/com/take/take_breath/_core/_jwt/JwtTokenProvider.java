@@ -1,7 +1,8 @@
 package com.take.take_breath._core._jwt;
 
-import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Member;
+import com.take.take_breath.members.Role;
+import com.take.take_breath.members.Status;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -18,66 +19,82 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final SecretKey key;
-    private final long validityInMilliseconds;
+    private final long validityInMilliseconds; // Access Token 유효시간
+    private final long refreshTokenValidity;   // Refresh Token 유효시간
 
-    // 생성자 주입으로 설계해 보자 ( 주입 시 연산을 해야될 경우 직접 생성자를 만들어서 셋팅)
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
-                            @Value("${jwt.expiration-in-ms}") long validityInMilliseconds) {
-        // 1. 주입받은 비밀 키 문자열을 Base64 값을 디코딩 하여 byte 배열로 변환 합니다.
+    public JwtTokenProvider(
+            @Value("${jwt.secret}") String secretKey,
+            @Value("${jwt.validityInMilliseconds}") long validityInMilliseconds,
+            @Value("${jwt.refresh-expiration-ms}") long refreshTokenValidity
+    ) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        // 2. 알고리즘을 사용할 SecretKey 객체를 생성 한다.
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.validityInMilliseconds = validityInMilliseconds;
+        this.refreshTokenValidity = refreshTokenValidity;
     }
 
+    /**
+     * Access Token 생성
+     */
     public String createToken(Member member) {
+        return buildToken(member, validityInMilliseconds);
+    }
+
+    /**
+     * Refresh Token 생성
+     */
+    public String createRefreshToken(Member member) {
+        return buildToken(member, refreshTokenValidity);
+    }
+
+    /**
+     * 토큰 공통 생성 메서드
+     */
+    private String buildToken(Member member, long validity) {
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
-        // 속성 조사해 보기
+        Date expiry = new Date(now.getTime() + validity);
+
         return Jwts.builder()
                 .subject(member.getEmail())
                 .claim("role", member.getRole().name())
+                .claim("status", member.getStatus().name())
                 .issuedAt(now)
-                .expiration(validity)
+                .expiration(expiry)
                 .signWith(key)
                 .compact();
     }
 
     /**
-     * 토큰의 전체 유효성 검증
-     * @param token 검증할 JWT
-     * @return 유효하면 true 반환, 아니면 false
+     * 토큰 검증
      */
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
                     .verifyWith(key)
-                    .build().parseSignedClaims(token);
+                    .build()
+                    .parseSignedClaims(token);
             return true;
         } catch (SecurityException | MalformedJwtException e) {
-            log.error("잘못된 JWT 서명 입니다.", e);
+            log.error("잘못된 JWT 서명입니다.", e);
         } catch (ExpiredJwtException e) {
-            log.error("만료된 JWT 토큰입니다");
+            log.error("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
-            log.error("지원되지 않는 JWT 토큰입니다");
+            log.error("지원되지 않는 JWT 토큰입니다.");
         } catch (Exception e) {
-            log.error("JWT 토큰이 잘못되었습니다");
+            log.error("JWT 토큰이 잘못되었습니다.");
         }
         return false;
     }
 
     /**
-     * 전체 토큰에서 사용자 이메일(Subject)을 추출 합니다.
-     * @return 추출된 사용자 이메일(String)
+     * 사용자 이메일 추출
      */
     public String getSubject(String token) {
-
         return parseClaims(token).getSubject();
     }
 
     /**
-     * 전체 토큰에서 사용자 role(claim)을 추출 합니다.
-     * @return 추출된 사용자 역할(claim)
+     * 사용자 역할 추출
      */
     public Role getRole(String token) {
         String roleStr = parseClaims(token).get("role", String.class);
@@ -85,20 +102,46 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 클레임 정보를 추출하는 기능
+     * 상태 추출
+     */
+    public Status getStatus(String token) {
+        String statusStr = parseClaims(token).get("status", String.class);
+        return Status.valueOf(statusStr);
+    }
+
+    /**
+     * 클레임 추출
      */
     private Claims parseClaims(String token) {
         try {
-            return  Jwts.parser()
+            return Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (ExpiredJwtException e) {
-            // 토큰이 만료되었더라도, 만료 정보를 확인하기 위해 클레임 자체를 반환해 줍니다.
             return e.getClaims();
         }
+    }
 
+    public String regenerateAccessToken(String refreshToken) {
+        if (!validateToken(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 Refresh Token입니다.");
+        }
+
+        String email = getSubject(refreshToken);
+        Role role = getRole(refreshToken);
+
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + validityInMilliseconds);
+
+        return Jwts.builder()
+                .subject(email)
+                .claim("role", role.name())
+                .issuedAt(now)
+                .expiration(validity)
+                .signWith(key)
+                .compact();
     }
 
 }

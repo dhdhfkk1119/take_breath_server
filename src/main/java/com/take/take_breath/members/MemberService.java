@@ -100,6 +100,8 @@ public class MemberService {
         System.out.println(">>> PasswordEncoder Bean Type = " + passwordEncoder.getClass().getName());
 
         if (!passwordEncoder.matches(req.getPassword(), member.getPassword())) {
+            System.out.println("입력 : " + req.getPassword());
+            System.out.println("실제 : " + member.getPassword());
             throw new Exception401("비밀번호가 일치하지 않습니다.");
         }
 
