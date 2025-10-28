@@ -30,13 +30,13 @@ public class QCommunityComment extends EntityPathBase<CommunityComment> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final com.take.take_breath.members.QMember member;
+
     public final com.take.take_breath.community.community_post.QCommunityPost post;
 
     public final NumberPath<Integer> reportCount = createNumber("reportCount", Integer.class);
 
     public final DateTimePath<java.sql.Timestamp> updatedAt = createDateTime("updatedAt", java.sql.Timestamp.class);
-
-    public final NumberPath<Long> userId = createNumber("userId", Long.class);
 
     public QCommunityComment(String variable) {
         this(CommunityComment.class, forVariable(variable), INITS);
@@ -56,6 +56,7 @@ public class QCommunityComment extends EntityPathBase<CommunityComment> {
 
     public QCommunityComment(Class<? extends CommunityComment> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.member = inits.isInitialized("member") ? new com.take.take_breath.members.QMember(forProperty("member"), inits.get("member")) : null;
         this.post = inits.isInitialized("post") ? new com.take.take_breath.community.community_post.QCommunityPost(forProperty("post"), inits.get("post")) : null;
     }
 

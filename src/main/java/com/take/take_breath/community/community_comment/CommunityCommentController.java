@@ -1,6 +1,10 @@
 package com.take.take_breath.community.community_comment;
 
 import com.take.take_breath._core._utils.ApiUtil;
+import com.take.take_breath._core.auth.Auth;
+import com.take.take_breath.members.Role;
+import com.take.take_breath.members.Status;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,55 +35,62 @@ public class CommunityCommentController {
 
     /**
      * 댓글 작성
-     * TODO: JWT 인증 구현 후 @Auth(roles = {Role.USER, Role.ADMIN}) 추가
      */
+    @Auth(statuses = {Status.ACTIVE})
     @PostMapping("/posts/{postId}")
     public ResponseEntity<ApiUtil.ApiResult<CommunityCommentResponse.ResponseDTO>> saveComment(
             @PathVariable Long postId,
             @Valid @RequestBody CommunityCommentRequest.SaveDTO saveDTO,
-            @RequestParam Long userId) {
+            HttpServletRequest request) {
 
-        CommunityCommentResponse.ResponseDTO savedComment = communityCommentService.saveComment(postId, saveDTO, userId);
-        log.info("[댓글 작성] commentId={}, postId={}, userId={}", savedComment.getId(), postId, userId);
+        Long memberId = (Long) request.getAttribute("memberId");
+        CommunityCommentResponse.ResponseDTO savedComment = communityCommentService.saveComment(postId, saveDTO, memberId);
+        log.info("[댓글 작성] commentId={}, postId={}, memberId={}", savedComment.getId(), postId, memberId);
         return ResponseEntity.ok(ApiUtil.success(savedComment));
     }
 
     /**
      * 댓글 수정
      */
+    @Auth(statuses = {Status.ACTIVE})
     @PutMapping("/{commentId}")
     public ResponseEntity<ApiUtil.ApiResult<CommunityCommentResponse.ResponseDTO>> updateComment(
             @PathVariable Long commentId,
             @Valid @RequestBody CommunityCommentRequest.UpdateDTO updateDTO,
-            @RequestParam Long userId) {
+            HttpServletRequest request) {
 
-        CommunityCommentResponse.ResponseDTO updatedComment = communityCommentService.updateComment(commentId, updateDTO, userId);
-        log.info("[댓글 수정] commentId={}, userId={}", commentId, userId);
+        Long memberId = (Long) request.getAttribute("memberId");
+        CommunityCommentResponse.ResponseDTO updatedComment = communityCommentService.updateComment(commentId, updateDTO, memberId);
+        log.info("[댓글 수정] commentId={}, memberId={}", commentId, memberId);
         return ResponseEntity.ok(ApiUtil.success(updatedComment));
     }
 
     /**
      * 댓글 삭제 (Soft Delete)
      */
+    @Auth(statuses = {Status.ACTIVE})
     @DeleteMapping("/{commentId}")
     public ResponseEntity<ApiUtil.ApiResult<String>> deleteComment(
             @PathVariable Long commentId,
-            @RequestParam Long userId) {
+            HttpServletRequest request) {
 
-        communityCommentService.deleteComment(commentId, userId);
-        log.info("[댓글 삭제] commentId={}, userId={}", commentId, userId);
+        Long memberId = (Long) request.getAttribute("memberId");
+        communityCommentService.deleteComment(commentId, memberId);
+        log.info("[댓글 삭제] commentId={}, memberId={}", commentId, memberId);
         return ResponseEntity.ok(ApiUtil.success("댓글이 삭제되었습니다."));
     }
 
     /**
      * 관리자 전용: 댓글 강제 삭제
      */
+    @Auth(roles = {Role.ADMIN}, statuses = {Status.ACTIVE})
     @DeleteMapping("/{commentId}/admin")
     public ResponseEntity<ApiUtil.ApiResult<String>> forceDeleteComment(
             @PathVariable Long commentId,
             @RequestParam String reason,
-            @RequestParam Long adminId) {
+            HttpServletRequest request) {
 
+        Long adminId = (Long) request.getAttribute("memberId");
         communityCommentService.forceDeleteComment(commentId, reason, adminId);
         log.warn("[관리자 댓글 강제 삭제] adminId={}, commentId={}, reason={}", adminId, commentId, reason);
         return ResponseEntity.ok(ApiUtil.success("댓글이 강제 삭제되었습니다."));

@@ -1,6 +1,9 @@
 package com.take.take_breath.community.community_post_like;
 
 import com.take.take_breath._core._utils.ApiUtil;
+import com.take.take_breath._core.auth.Auth;
+import com.take.take_breath.members.Status;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +19,16 @@ public class CommunityPostLikeController {
 
     /**
      * 좋아요 토글 (좋아요/취소)
-     * TODO: JWT 인증 구현 후 @Auth(roles = {Role.USER, Role.ADMIN}) 추가
      */
+    @Auth(statuses = {Status.ACTIVE})
     @PostMapping("/{postId}/like")
     public ResponseEntity<ApiUtil.ApiResult<CommunityPostLikeResponse.ResponseDTO>> toggleLike(
             @PathVariable Long postId,
-            @RequestParam Long userId) {  // TODO: JWT에서 추출로 변경
+            HttpServletRequest request) {
 
-        CommunityPostLikeResponse.ResponseDTO response = communityPostLikeService.toggleLike(postId, userId);
-        log.info("[좋아요 토글] postId={}, userId={}, liked={}", postId, userId, response.getLiked());
+        Long memberId = (Long) request.getAttribute("memberId");
+        CommunityPostLikeResponse.ResponseDTO response = communityPostLikeService.toggleLike(postId, memberId);
+        log.info("[좋아요 토글] postId={}, memberId={}, liked={}", postId, memberId, response.getLiked());
         return ResponseEntity.ok(ApiUtil.success(response));
     }
 
@@ -40,15 +44,16 @@ public class CommunityPostLikeController {
 
     /**
      * 좋아요 여부 확인
-     * TODO: JWT 인증 구현 후 @Auth 추가
      */
+    @Auth(statuses = {Status.ACTIVE})
     @GetMapping("/{postId}/like/status")
     public ResponseEntity<ApiUtil.ApiResult<Boolean>> checkLikeStatus(
             @PathVariable Long postId,
-            @RequestParam Long userId) {  // TODO: JWT에서 추출로 변경
+            HttpServletRequest request) {
 
-        boolean liked = communityPostLikeService.isLiked(postId, userId);
-        log.info("[좋아요 여부 확인] postId={}, userId={}, liked={}", postId, userId, liked);
+        Long memberId = (Long) request.getAttribute("memberId");
+        boolean liked = communityPostLikeService.isLiked(postId, memberId);
+        log.info("[좋아요 여부 확인] postId={}, memberId={}, liked={}", postId, memberId, liked);
         return ResponseEntity.ok(ApiUtil.success(liked));
     }
 }

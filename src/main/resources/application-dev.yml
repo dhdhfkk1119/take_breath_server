@@ -13,7 +13,7 @@ server:
 # ??? ?? ? ?? ?? ??
 upload:
   root-dir: ./uploads/
-  corp-dir: corp-images/
+  counselor-dir: counselor-images/
   member-dir: member-images/
 
 # ?? ??? ??
@@ -21,10 +21,21 @@ upload:
 logging:
   level:
     root: INFO  # ?? ?????? INFO ??? ??
-    com.tenco: DEBUG # ? ????? DEBUG ?? ?? ??
+    com.take: DEBUG # ? ????? DEBUG ?? ?? ??
 
 # spring ?? ??
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tb.mailSender423@gmail.com
+    password: dpfmgohpiuhhmevc
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   mustache:
     # ??? ??? ???? .mustache? ???? Mustache
     # ??? ??? ????? ??
@@ -44,7 +55,7 @@ spring:
   # ??? ??? ?? ?? (H2 ???? ??????)
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/take_breath?useSSL=false&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/take_breath?useSSl=false&serverTimezone=Asia/Seoul
     username: root
     password: asd1234
 
@@ -65,3 +76,8 @@ spring:
         default_batch_fetch_size: 10
     # data.sql ??? Hibernate ??? ??? ??
     defer-datasource-initialization: true
+# jwt
+jwt:
+  secret: 'VGhpc0lzQVNlY3JldEtleUZvckpXVFNhZmUhIT8xMjM0NTY='
+  validityInMilliseconds: 3600000        # 1시간
+  refresh-expiration-ms: 604800000     # 7일

@@ -12,6 +12,8 @@ public class CommentReportProcessResponse {
         private Long processId;
         private Long reportId;
         private String commentContent;
+        private Long adminId;
+        private String adminName;
         private CommunityReportStatus status;
         private String adminComment;
         private String createdAt;
@@ -21,6 +23,8 @@ public class CommentReportProcessResponse {
             this.processId = process.getId();
             this.reportId = process.getReport().getId();
             this.commentContent = process.getReport().getComment().getContent();
+            this.adminId = process.getAdmin().getId();
+            this.adminName = process.getAdmin().getName();
             this.status = process.getStatus();
             this.adminComment = process.getAdminComment();
             this.createdAt = process.getTime();
@@ -33,6 +37,7 @@ public class CommentReportProcessResponse {
         private Long commentId;
         private String commentContent;
         private Long reporterId;
+        private String reporterName;
         private String reason;
         private CommunityReportStatus status;
         private String createdAt;
@@ -42,7 +47,8 @@ public class CommentReportProcessResponse {
             this.reportId = report.getId();
             this.commentId = report.getComment().getId();
             this.commentContent = report.getComment().getContent();
-            this.reporterId = report.getReporterId();
+            this.reporterId = report.getReporter().getId();
+            this.reporterName = report.getReporter().getName();
             this.reason = report.getReason();
             this.status = report.getStatus();
             this.createdAt = report.getTime();
@@ -52,7 +58,8 @@ public class CommentReportProcessResponse {
             this.reportId = report.getId();
             this.commentId = report.getComment().getId();
             this.commentContent = deletedCommentContent;
-            this.reporterId = report.getReporterId();
+            this.reporterId = report.getReporter().getId();
+            this.reporterName = report.getReporter().getName();
             this.reason = report.getReason();
             this.status = report.getStatus();
             this.createdAt = report.getTime();
@@ -66,6 +73,7 @@ public class CommentReportProcessResponse {
         private Long commentId;
         private String commentContent;
         private Long reporterId;
+        private String reporterName;
         private String reason;
         private CommunityReportStatus status;
         private String createdAt;
@@ -76,7 +84,8 @@ public class CommentReportProcessResponse {
             this.reportId = report.getId();
             this.commentId = report.getComment().getId();
             this.commentContent = report.getComment().getContent();
-            this.reporterId = report.getReporterId();
+            this.reporterId = report.getReporter().getId();
+            this.reporterName = report.getReporter().getName();
             this.reason = report.getReason();
             this.status = report.getStatus();
             this.createdAt = report.getTime();

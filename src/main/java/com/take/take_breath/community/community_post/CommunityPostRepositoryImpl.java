@@ -1,5 +1,6 @@
 package com.take.take_breath.community.community_post;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -8,13 +9,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import static com.take.take_breath.community.community_post.QCommunityPost.communityPost;
-import static com.take.take_breath.community.community_comment.QCommunityComment.communityComment;
-import static com.take.take_breath.community.community_category.QCommunityCategory.communityCategory;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.take.take_breath.community.community_category.QCommunityCategory.communityCategory;
+import static com.take.take_breath.community.community_comment.QCommunityComment.communityComment;
+import static com.take.take_breath.community.community_post.QCommunityPost.communityPost;
+import static com.take.take_breath.community.community_post_image.QCommunityPostImage.communityPostImage;
+import static com.take.take_breath.members.QMember.member;
 
 @Repository
 @RequiredArgsConstructor
@@ -30,6 +37,7 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
                 .selectFrom(communityPost)
                 .distinct()
                 .leftJoin(communityPost.category, communityCategory).fetchJoin()
+                .leftJoin(communityPost.member, member).fetchJoin()
                 .where(communityPost.deletedAt.isNull())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -45,12 +53,53 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
         return new PageImpl<>(posts, pageable, total != null ? total : 0L);
     }
 
+    // 댓글 개수 조회
+    @Override
+    public Map<Long, Long> getCommentCountsByPostIds(List<Long> postIds) {
+        if (postIds == null || postIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        List<Tuple> results = queryFactory
+                .select(communityComment.post.id, communityComment.count())
+                .from(communityComment)
+                .where(
+                        communityComment.post.id.in(postIds),
+                        communityComment.deletedAt.isNull()
+                )
+                .groupBy(communityComment.post.id)
+                .fetch();
+
+        return results.stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(communityComment.post.id),
+                        tuple -> tuple.get(communityComment.count())
+                ));
+    }
+
     // 상세 조회 (comments 포함)
     @Override
     public Optional<CommunityPost> findByIdWithComments(Long postId) {
         CommunityPost post = queryFactory
                 .selectFrom(communityPost)
+                .leftJoin(communityPost.category, communityCategory).fetchJoin()
+                .leftJoin(communityPost.member, member).fetchJoin()
                 .leftJoin(communityPost.comments, communityComment).fetchJoin()
+                .where(
+                        communityPost.id.eq(postId),
+                        communityPost.deletedAt.isNull()
+                )
+                .fetchOne();
+
+        return Optional.ofNullable(post);
+    }
+
+    @Override
+    public Optional<CommunityPost> findByIdWithCategory(Long postId) {
+        CommunityPost post = queryFactory
+                .selectFrom(communityPost)
+                .leftJoin(communityPost.category, communityCategory).fetchJoin()
+                .leftJoin(communityPost.member, member).fetchJoin()
                 .where(
                         communityPost.id.eq(postId),
                         communityPost.deletedAt.isNull()
@@ -67,6 +116,7 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
                 .selectFrom(communityPost)
                 .distinct()
                 .leftJoin(communityPost.category, communityCategory).fetchJoin()
+                .leftJoin(communityPost.member, member).fetchJoin()
                 .where(
                         communityPost.deletedAt.isNull(),
                         keywordContains(searchDTO.getKeyword()),
@@ -99,13 +149,15 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
                 .fetch();
     }
 
-    // userId로 게시글 목록 조회
+    // memberId로 게시글 목록 조회
     @Override
-    public Page<CommunityPost> findByUserId(Long userId, Pageable pageable) {
+    public Page<CommunityPost> findByMemberId(Long memberId, Pageable pageable) {
         List<CommunityPost> posts = queryFactory
                 .selectFrom(communityPost)
+                .leftJoin(communityPost.category, communityCategory).fetchJoin()
+                .leftJoin(communityPost.member, member).fetchJoin()
                 .where(
-                        communityPost.userId.eq(userId),
+                        communityPost.member.id.eq(memberId),
                         communityPost.deletedAt.isNull()
                 )
                 .offset(pageable.getOffset())
@@ -117,7 +169,7 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
                 .select(communityPost.count())
                 .from(communityPost)
                 .where(
-                        communityPost.userId.eq(userId),
+                        communityPost.member.id.eq(memberId),
                         communityPost.deletedAt.isNull()
                 )
                 .fetchOne();
@@ -154,7 +206,6 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
         return communityPost.category.id.in(categoryIds);
     }
 
-    // Pageable의 Sort를 QueryDSL OrderSpecifier로 변환
     private OrderSpecifier<?>[] getOrderSpecifier(Pageable pageable) {
         if (pageable.getSort().isEmpty()) {
             return new OrderSpecifier[]{communityPost.createdAt.desc()};
@@ -173,6 +224,6 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
                         default -> communityPost.createdAt.desc();
                     };
                 })
-                .toArray(OrderSpecifier[]::new);
+                .toArray(size -> new OrderSpecifier<?>[size]);
     }
 }
