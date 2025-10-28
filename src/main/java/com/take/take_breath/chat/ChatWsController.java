@@ -35,11 +35,6 @@ public class ChatWsController {
     public ApiResult<ChatMessageResponse> sendMessage(
             @DestinationVariable Long roomId,
             ChatMessageRequest request) {
-
-        System.out.println("[방ID: " + roomId +
-                ", 발신자ID: " + request.getSenderId() +
-                "] 메시지: " + request.getContent());
-
         // 1. 메시지 저장 (자동으로 발신자는 읽음 처리됨)
         ChatMessage savedMessage = chatService.sendMessage(request);
 
@@ -81,24 +76,3 @@ public class ChatWsController {
         );
     }
 }
-
-/*
-
-서버 전달 메세지
-{
-  "id": 10,
-  "content": "안녕하세요!",
-  "chatRoom": {
-    "id": 1,
-    "name": "room1"
-  },
-  "sender": {
-    "id": 5,
-    "email": "user1@test.com",
-    "name": "홍길동",
-    "role": "USER",
-    "status": "ACTIVE"
-  }
-}
-
-*/

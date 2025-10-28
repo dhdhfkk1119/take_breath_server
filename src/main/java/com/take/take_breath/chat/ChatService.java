@@ -3,7 +3,6 @@ package com.take.take_breath.chat;
 import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath._core._utils.UploadFile;
-import com.take.take_breath._core._utils.UploadProperties;
 import com.take.take_breath.chat.chat_message.ChatMessage;
 import com.take.take_breath.chat.chat_message.ChatMessageRepository;
 import com.take.take_breath.chat.chat_message.MessageType;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +35,7 @@ public class ChatService {
     private final SimpMessagingTemplate messagingTemplate;
     private final UploadFile uploadFile;
 
+    private static final int REQUIRED_POINT = 500;
 
     /**
      * 채팅방의 메시지 목록 조회 (읽음 여부 포함)
@@ -77,7 +76,6 @@ public class ChatService {
                             .messageType(message.getType().name())
                             .createdAt(message.getTime())
                             .isRead(isRead)
-                            .imageUrl(message.getImageUrl())  // ⭐ 이미지 URL 추가
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -87,15 +85,13 @@ public class ChatService {
      * 텍스트 메시지 전송
      */
     public ChatMessage sendMessage(ChatMessageRequest request) {
-        // 채팅방 조회
         ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
                 .orElseThrow(() -> new Exception404("채팅방을 찾을 수 없습니다."));
-
-        // 발신자 조회
         Member sender = memberRepository.findById(request.getSenderId())
                 .orElseThrow(() -> new Exception404("회원을 찾을 수 없습니다."));
 
-
+        // 사용자의 포인트가 500보다 많은지 검증 && 사용자의 타입이
+        if(request.get)
 
         // MessageType 기본값 처리
         String messageTypeStr = request.getMessageType();
@@ -111,7 +107,8 @@ public class ChatService {
                 .type(MessageType.valueOf(messageTypeStr))
                 .build();
 
-        // 상담사가 아닌 사용자라면
+        // 사용자의 포인트를 차감 ⬇
+        // 차감한 만큼 상담사에게 포인트 전달 ⬆
 
         chatMessageRepository.save(message);
 
@@ -175,7 +172,6 @@ public class ChatService {
                 .senderId(message.getSender().getId())
                 .senderName(message.getSender().getName())
                 .messageType(message.getType().name())
-                .imageUrl(message.getImageUrl())  // "/api/chat/messages/image/{id}"
                 .createdAt(message.getTime())
                 .isRead(true)
                 .build();
@@ -233,16 +229,12 @@ public class ChatService {
      * - lastReadMessageId를 업데이트
      */
     public void markAsRead(Long chatRoomId, Long memberId, Long lastMessageId) {
-        // 채팅방 멤버 조회
         ChatRoomMember roomMember = chatRoomMemberRepository
                 .findByChatRoomIdAndMemberId(chatRoomId, memberId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방에 속하지 않은 사용자입니다."));
+                .orElseThrow(() -> new Exception400("채팅방에 속하지 않은 사용자입니다."));
 
-        // 기존 lastReadMessageId보다 큰 경우만 업데이트
-        //    (이전 메시지를 다시 읽었다고 lastReadMessageId를 낮추지 않기 위함)
         if (roomMember.getLastReadMessageId() == null || lastMessageId > roomMember.getLastReadMessageId()) {
-            roomMember.setLastReadMessageId(lastMessageId);
-            roomMember.setLastReadAt(LocalDateTime.now());
+            roomMember.updateLastRead(lastMessageId);
             chatRoomMemberRepository.save(roomMember);
         }
     }
@@ -335,7 +327,7 @@ public class ChatService {
         // 5. 채팅방 생성
         ChatRoom chatRoom = ChatRoom.builder()
                 .name(roomName)
-                .roomType(RoomType.PRIVATE)  // 1:1 채팅
+                .roomType(RoomType.COUNSELING)  // 1:1 채팅
                 .build();
         chatRoomRepository.save(chatRoom);
 
@@ -369,9 +361,7 @@ public class ChatService {
                 .roomId(chatRoom.getId())
                 .roomName(chatRoom.getName())
                 .roomType(chatRoom.getRoomType().name())
-                .createdAt(chatRoom.getCreatedAt())
                 .members(memberInfos)
                 .build();
     }
 }
-

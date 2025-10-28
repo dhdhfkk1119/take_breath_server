@@ -6,63 +6,60 @@ import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.util.unit.DataUnit;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chat_message_tb")
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor @Builder
 public class ChatMessage {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "content")
     private String content;     // 메시지 본문
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member sender;      // 보낸 사람
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private ChatRoom chatRoom;  // 채팅방
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
     private MessageType type = MessageType.TEXT;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
     private MessageStatus status = MessageStatus.SENT;
 
-    // 파일 저장 경로 (상대 경로)
-    // 예: "2025/10/27/a3f5b2c1-4d8e-4f1a-9c3b-1e5f6a7b8c9d.jpg"
+    // 파일 저장 경로 (상대 경로) - "2025/10/27/a3f5b2c1-4d8e-4f1a-9c3b-1e5f6a7b8c9d.jpg"
+    @Column(name = "attachment_path")
     private String attachmentPath;
 
-    // 원본 파일명 (선택사항)
-    // 예: "강아지사진.jpg"
+    // 원본 파일명 (선택사항) - "강아지사진.jpg"
+    @Column(name = "original_filename")
     private String originalFilename;
 
     // 파일 크기 (byte 단위)
+    @Column(name = "file_size")
     private Long fileSize;
 
     @CreationTimestamp
+    @Column(updatable = false, nullable = false)
     private Timestamp createdAt;    // 메세지 생성 시간
 
-    public String getTime(){
+    public String getTime() {
         return DateUtil.chatFormat(createdAt);
-    }
-
-    // 이미지 URL 생성
-    public String getImageUrl() {
-        if (this.type == MessageType.IMAGE && this.id != null) {
-            return "/api/chat/messages/image/" + this.id;
-        }
-        return null;
     }
 }
