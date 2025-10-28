@@ -5,6 +5,8 @@ import com.take.take_breath.counselor.dto.CounselorRequest;
 import com.take.take_breath.counselor.dto.CounselorResponse;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
+import com.take.take_breath.members.MemberService;
+import com.take.take_breath.members.Status;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,15 +20,19 @@ import java.util.stream.Collectors;
 public class CounselorService {
     private final CounselorRepository counselorRepository;
     private final MemberRepository memberRepository;
+    private final CounselorApprovalRepository counselorApprovalRepository;
+    private final MemberService memberService;
 
     @Transactional
-    public CounselorResponse signup(Long memberId, CounselorRequest req) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new Exception400("회원이 존재하지 않습니다."));
+    public CounselorResponse signup(CounselorRequest req) {
+        Member member = memberService.signup(req.toMemberRequest());
 
         Counselor counselor = req.toEntity(member);
 
-        counselorRepository.save(counselor);
+        counselorRepository.saveAndFlush(counselor);
+//        counselor.setStatus(Status.PENDING);
+        CounselorApproval approval = req.toApproval(counselor);
+        counselorApprovalRepository.save(approval);
 
         return CounselorResponse.from(counselor);
     }

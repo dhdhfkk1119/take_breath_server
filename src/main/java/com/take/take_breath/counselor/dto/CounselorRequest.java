@@ -1,7 +1,9 @@
 package com.take.take_breath.counselor.dto;
 
 import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.counselor.CounselorApproval;
 import com.take.take_breath.members.Role;
+import com.take.take_breath.members.Status;
 import com.take.take_breath.members.dto.MemberRequest;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.terms.dto.MemberTermsRequest;
@@ -48,6 +50,7 @@ public class CounselorRequest {
                 .profileImage(profileImage)
                 .hashtags(hashtags)
                 .price(price)
+                .status(Status.PENDING)
                 .build();
 
         // 라이선스 목록 변환
@@ -60,7 +63,15 @@ public class CounselorRequest {
         }
 
         return counselor;
+    }
 
+    // 승인 엔티티
+    public CounselorApproval toApproval(Counselor counselor) {
+        return CounselorApproval.builder()
+                .counselor(counselor)
+                .status(Status.PENDING)
+                .reason(null)
+                .build();
     }
 
     public MemberRequest toMemberRequest() {

@@ -22,10 +22,7 @@ public class CounselorController {
     // 상담사 회원가입
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody @Valid CounselorRequest req) {
-
-        Member member = memberService.signup(req.toMemberRequest());
-        counselorService.signup(member.getId(), req);
-
+        counselorService.signup(req);
         return ResponseEntity.ok("상담사 회원가입 요청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.");
     }
 
