@@ -45,12 +45,21 @@ public class MemberAuthService {
         String accessToken = jwtTokenProvider.createToken(member);
         String refreshToken = jwtTokenProvider.createRefreshToken(member);
 
-        // 보통 refreshToken은 DB에 저장해둡니다 (재발급 검증용)
         member.setRefreshToken(refreshToken);
         memberRepository.save(member);
 
-        return new MemberResponseTo.Login(accessToken, refreshToken);
+        return new MemberResponseTo.Login(
+                accessToken,
+                refreshToken,
+                member.getId(),
+                member.getName(),
+                member.getEmail(),
+                member.getProfileImage(),
+                member.getRole().name(),
+                member.getStatus().name()
+        );
     }
+
 
     // 토큰 정보 등록하기
     public String refreshAccessToken(String refreshToken) {
