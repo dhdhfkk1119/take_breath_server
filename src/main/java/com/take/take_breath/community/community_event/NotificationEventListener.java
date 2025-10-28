@@ -15,25 +15,27 @@ public class NotificationEventListener {
 
     @EventListener
     public void handleCommentCreated(CommentCreatedEvent event) {
-        log.info("[이벤트 처리] 댓글 작성 알림: postUserId={}, postTitle={}",
-                event.getPostUserId(), event.getPostTitle());
+        log.info("[이벤트 처리] 댓글 작성 알림: postMemberId={}, postTitle={}",
+                event.getPostMemberId(), event.getPostTitle());
 
         notificationService.sendComment(
-                event.getPostUserId().toString(),
+                event.getPostMemberId().toString(),
                 event.getPostTitle(),
-                event.getCommenterUserId().toString()
+                event.getCommenterMemberId().toString(),
+                event.getCommenterMemberName()
         );
     }
 
     @EventListener
     public void handlePostLike(PostLikeEvent event) {
-        log.info("[이벤트 처리] 게시글 좋아요 알림: postUserId={}, postTitle={}",
-                event.getPostUserId(), event.getPostTitle());
+        log.info("[이벤트 처리] 게시글 좋아요 알림: postMemberId={}, postTitle={}",
+                event.getPostMemberId(), event.getPostTitle());
 
         notificationService.sendPostLike(
-                event.getPostUserId().toString(),
+                event.getPostMemberId().toString(),
                 event.getPostTitle(),
-                event.getLikerUserId().toString()
+                event.getLikerMemberId().toString(),
+                event.getLikerMemberName()
         );
     }
 }

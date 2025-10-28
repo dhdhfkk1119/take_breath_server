@@ -32,7 +32,7 @@ public class QCommunityReport extends EntityPathBase<CommunityReport> {
 
     public final StringPath reason = createString("reason");
 
-    public final NumberPath<Long> reporterId = createNumber("reporterId", Long.class);
+    public final com.take.take_breath.members.QMember reporter;
 
     public final EnumPath<CommunityReportStatus> status = createEnum("status", CommunityReportStatus.class);
 
@@ -55,6 +55,7 @@ public class QCommunityReport extends EntityPathBase<CommunityReport> {
     public QCommunityReport(Class<? extends CommunityReport> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.post = inits.isInitialized("post") ? new com.take.take_breath.community.community_post.QCommunityPost(forProperty("post"), inits.get("post")) : null;
+        this.reporter = inits.isInitialized("reporter") ? new com.take.take_breath.members.QMember(forProperty("reporter"), inits.get("reporter")) : null;
     }
 
 }

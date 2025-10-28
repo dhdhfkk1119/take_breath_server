@@ -10,7 +10,8 @@ public class CommunityCommentResponse {
     public static class ResponseDTO {
         private Long id;
         private String content;
-        private Long userId;  // TODO - User 연동 후 userName으로 변경
+        private Long memberId;
+        private String memberName;
         private String createdAt;
         private String updatedAt;
         private boolean isModified;
@@ -20,7 +21,8 @@ public class CommunityCommentResponse {
         public ResponseDTO(CommunityComment comment) {
             this.id = comment.getId();
             this.content = comment.getContent();
-            this.userId = comment.getUserId();
+            this.memberId = comment.getMember() != null ? comment.getMember().getId() : null;
+            this.memberName = comment.getMember() != null ? comment.getMember().getName() : null;
             this.createdAt = DateUtil.timestampFormat(comment.getCreatedAt());
             this.updatedAt = DateUtil.timestampFormat(comment.getUpdatedAt());
             this.isDeleted = comment.isDeleted();

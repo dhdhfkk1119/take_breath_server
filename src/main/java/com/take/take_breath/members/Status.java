@@ -1,7 +1,8 @@
 package com.take.take_breath.members;
 
 public enum Status {
-    PENDING,
+    PENDING, // 관리자 승인 대기
     ACTIVE,
-    SUSPENDED
+    SUSPENDED, // 이용 정지
+    REJECTED // 승인 거절
 }

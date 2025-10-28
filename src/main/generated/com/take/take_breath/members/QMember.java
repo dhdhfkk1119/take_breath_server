@@ -46,6 +46,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath profileImage = createString("profileImage");
 
+    public final StringPath refreshToken = createString("refreshToken");
+
     public final EnumPath<Role> role = createEnum("role", Role.class);
 
     public final EnumPath<Status> status = createEnum("status", Status.class);

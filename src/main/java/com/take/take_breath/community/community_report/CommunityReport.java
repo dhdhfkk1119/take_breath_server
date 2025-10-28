@@ -2,14 +2,11 @@ package com.take.take_breath.community.community_report;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.take.take_breath._core._utils.DateUtil;
-import com.take.take_breath.community.community_comment.CommunityComment;
 import com.take.take_breath.community.community_post.CommunityPost;
 import com.take.take_breath.community.community_report_process.CommunityReportProcess;
+import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -21,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"reporter", "post", "adminComments"})
 @Table(name = "community_report_tb")
 public class CommunityReport {
 
@@ -28,8 +26,9 @@ public class CommunityReport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO
-    private Long reporterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reporter_id", nullable = false)
+    private Member reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
@@ -55,7 +54,6 @@ public class CommunityReport {
     }
 
     public boolean isOwner(Long checkReporterId) {
-        return this.reporterId != null && this.reporterId.equals(checkReporterId);
+        return this.reporter != null && this.reporter.getId().equals(checkReporterId);
     }
 }
-

@@ -24,9 +24,9 @@ public class QCommunityPostLike extends EntityPathBase<CommunityPostLike> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final com.take.take_breath.community.community_post.QCommunityPost post;
+    public final com.take.take_breath.members.QMember member;
 
-    public final NumberPath<Long> userId = createNumber("userId", Long.class);
+    public final com.take.take_breath.community.community_post.QCommunityPost post;
 
     public QCommunityPostLike(String variable) {
         this(CommunityPostLike.class, forVariable(variable), INITS);
@@ -46,6 +46,7 @@ public class QCommunityPostLike extends EntityPathBase<CommunityPostLike> {
 
     public QCommunityPostLike(Class<? extends CommunityPostLike> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.member = inits.isInitialized("member") ? new com.take.take_breath.members.QMember(forProperty("member"), inits.get("member")) : null;
         this.post = inits.isInitialized("post") ? new com.take.take_breath.community.community_post.QCommunityPost(forProperty("post"), inits.get("post")) : null;
     }
 

@@ -1,6 +1,7 @@
 package com.take.take_breath.counselor;
 
 import com.take.take_breath.members.Member;
+import com.take.take_breath.members.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,10 @@ public class Counselor {
     private String specialty; // 전문 분야 (ex: 우울, 불안, 대인관계 등)
     private int price; // 상담료
     private String hashtags; // 해시태그 (추후 분리 가능)
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.PENDING;
 
     // 자격증 리스트 (1:N 관계)
     @OneToMany(mappedBy = "counselor", cascade = CascadeType.ALL, orphanRemoval = true)
