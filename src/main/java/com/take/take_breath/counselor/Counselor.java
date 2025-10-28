@@ -32,6 +32,9 @@ public class Counselor {
     private int price; // 상담료
     private String hashtags; // 해시태그 (추후 분리 가능)
 
+    @Column(nullable = false)
+    private int point = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.PENDING;
