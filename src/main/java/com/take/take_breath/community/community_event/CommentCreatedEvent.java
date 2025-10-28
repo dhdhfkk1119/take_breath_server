@@ -6,7 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class CommentCreatedEvent {
-    private Long postUserId;
+    private Long postMemberId;
     private String postTitle;
-    private Long commenterUserId;
+    private Long commenterMemberId;
+    private String commenterMemberName;
 }

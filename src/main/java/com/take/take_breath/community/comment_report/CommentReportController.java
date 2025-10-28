@@ -1,6 +1,9 @@
 package com.take.take_breath.community.comment_report;
 
 import com.take.take_breath._core._utils.ApiUtil;
+import com.take.take_breath._core.auth.Auth;
+import com.take.take_breath.members.Status;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,44 +25,47 @@ public class CommentReportController {
 
     /**
      * 댓글 신고
-     * TODO: JWT 인증 구현 후 @Auth(roles = {Role.USER}) 추가
      */
+    @Auth(statuses = {Status.ACTIVE})
     @PostMapping("/comments/{commentId}")
     public ResponseEntity<ApiUtil.ApiResult<CommentReportResponse.CreateDTO>> reportComment(
             @PathVariable Long commentId,
             @Valid @RequestBody CommentReportRequest.CreateDTO createDTO,
-            @RequestParam Long userId) {  // TODO: JWT에서 추출로 변경
+            HttpServletRequest request) {
 
-        CommentReportResponse.CreateDTO response = reportService.createReport(commentId, userId, createDTO);
-        log.info("[댓글 신고] reportId={}, commentId={}, userId={}", response.getId(), commentId, userId);
+        Long memberId = (Long) request.getAttribute("memberId");
+        CommentReportResponse.CreateDTO response = reportService.createReport(commentId, memberId, createDTO);
+        log.info("[댓글 신고] reportId={}, commentId={}, memberId={}", response.getId(), commentId, memberId);
         return ResponseEntity.ok(ApiUtil.success(response));
     }
 
     /**
      * 내 신고 내역 목록 조회
-     * TODO: JWT 인증 구현 후 @Auth(roles = {Role.USER}) 추가
      */
+    @Auth(statuses = {Status.ACTIVE})
     @GetMapping
     public ResponseEntity<ApiUtil.ApiResult<List<CommentReportResponse.ListDTO>>> findMyReports(
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam Long userId) {  // TODO: JWT에서 추출로 변경
+            HttpServletRequest request) {
 
-        List<CommentReportResponse.ListDTO> reports = reportService.findAllMyReports(userId, pageable);
-        log.info("[내 신고 내역 조회] userId={}, count={}", userId, reports.size());
+        Long memberId = (Long) request.getAttribute("memberId");
+        List<CommentReportResponse.ListDTO> reports = reportService.findAllMyReports(memberId, pageable);
+        log.info("[내 신고 내역 조회] memberId={}, count={}", memberId, reports.size());
         return ResponseEntity.ok(ApiUtil.success(reports));
     }
 
     /**
      * 신고 내역 상세 조회
-     * TODO: JWT 인증 구현 후 @Auth(roles = {Role.USER}) 추가
      */
+    @Auth(statuses = {Status.ACTIVE})
     @GetMapping("/{reportId}")
     public ResponseEntity<ApiUtil.ApiResult<CommentReportResponse.DetailDTO>> getReportDetail(
             @PathVariable Long reportId,
-            @RequestParam Long userId) {  // TODO: JWT에서 추출로 변경
+            HttpServletRequest request) {
 
-        CommentReportResponse.DetailDTO reportDetail = reportService.detail(reportId, userId);
-        log.info("[신고 내역 상세 조회] reportId={}, userId={}", reportId, userId);
+        Long memberId = (Long) request.getAttribute("memberId");
+        CommentReportResponse.DetailDTO reportDetail = reportService.detail(reportId, memberId);
+        log.info("[신고 내역 상세 조회] reportId={}, memberId={}", reportId, memberId);
         return ResponseEntity.ok(ApiUtil.success(reportDetail));
     }
 }

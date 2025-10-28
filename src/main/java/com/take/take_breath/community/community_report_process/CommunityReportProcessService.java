@@ -1,9 +1,13 @@
 package com.take.take_breath.community.community_report_process;
 
+import com.take.take_breath._core._exception.Exception400;
+import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath.community.community_post.CommunityPost;
 import com.take.take_breath.community.community_report.CommunityReport;
 import com.take.take_breath.community.community_report.CommunityReportRepository;
 import com.take.take_breath.community.community_report.CommunityReportStatus;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.members.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,6 +26,7 @@ public class CommunityReportProcessService {
 
     private final CommunityReportRepository reportRepository;
     private final CommunityReportProcessRepository processRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 신고 처리 상태 업데이트 (관리자 전용)
@@ -30,17 +35,20 @@ public class CommunityReportProcessService {
     public CommunityReportProcessResponse.ProcessDTO updateStatus(Long reportId, Long adminId,
                                                                   CommunityReportProcessRequest.UpdateStatusDTO updateStatusDTO) {
         CommunityReport report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new IllegalArgumentException("신고 내역을 찾을 수 없습니다. ID: " + reportId));
+                .orElseThrow(() -> new Exception404("신고 내역을 찾을 수 없습니다. ID: " + reportId));
 
         if (report.getStatus() != CommunityReportStatus.PENDING) {
-            throw new IllegalArgumentException("이미 처리된 신고입니다. 현재 상태: " + report.getStatus());
+            throw new Exception400("이미 처리된 신고입니다. 현재 상태: " + report.getStatus());
         }
+
+        Member admin = memberRepository.findById(adminId)
+                .orElseThrow(() -> new Exception404("관리자를 찾을 수 없습니다."));
 
         report.setStatus(updateStatusDTO.getStatus());
 
         CommunityReportProcess process = CommunityReportProcess.builder()
                 .report(report)
-                .adminId(adminId)
+                .admin(admin)
                 .status(updateStatusDTO.getStatus())
                 .adminComment(updateStatusDTO.getAdminComment())
                 .build();
@@ -57,13 +65,13 @@ public class CommunityReportProcessService {
                     .findByPostIdAndStatus(post.getId(), CommunityReportStatus.PENDING);
 
             otherPendingReports.stream()
-                    .filter(r -> !r.getId().equals(reportId))  // 현재 처리중인 신고 제외
+                    .filter(r -> !r.getId().equals(reportId))
                     .forEach(r -> {
                         r.setStatus(CommunityReportStatus.APPROVED);
 
                         CommunityReportProcess autoProcess = CommunityReportProcess.builder()
                                 .report(r)
-                                .adminId(adminId)
+                                .admin(admin)
                                 .status(CommunityReportStatus.APPROVED)
                                 .adminComment("동일 게시글 신고 승인으로 인한 자동 처리")
                                 .build();
@@ -107,7 +115,7 @@ public class CommunityReportProcessService {
      */
     public CommunityReportProcessResponse.DetailDTO detail(Long reportId) {
         CommunityReport report = reportRepository.findByIdWithAdminComments(reportId)
-                .orElseThrow(() -> new IllegalArgumentException("신고 내역을 찾을 수 없습니다. ID: " + reportId));
+                .orElseThrow(() -> new Exception404("신고 내역을 찾을 수 없습니다. ID: " + reportId));
 
         log.info("[관리자 신고 상세 조회] reportId={}", reportId);
 

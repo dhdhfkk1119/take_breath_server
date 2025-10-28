@@ -12,6 +12,8 @@ public class CommunityReportProcessResponse {
         private Long processId;
         private Long reportId;
         private String postTitle;
+        private Long adminId;
+        private String adminName;
         private CommunityReportStatus status;
         private String adminComment;
         private String createdAt;
@@ -21,6 +23,8 @@ public class CommunityReportProcessResponse {
             this.processId = process.getId();
             this.reportId = process.getReport().getId();
             this.postTitle = process.getReport().getPost().getTitle();
+            this.adminId = process.getAdmin().getId();
+            this.adminName = process.getAdmin().getName();
             this.status = process.getStatus();
             this.adminComment = process.getAdminComment();
             this.createdAt = process.getTime();
@@ -33,6 +37,7 @@ public class CommunityReportProcessResponse {
         private Long postId;
         private String postTitle;
         private Long reporterId;
+        private String reporterName;
         private String reason;
         private CommunityReportStatus status;
         private String createdAt;
@@ -42,7 +47,8 @@ public class CommunityReportProcessResponse {
             this.reportId = report.getId();
             this.postId = report.getPost().getId();
             this.postTitle = report.getPost().getTitle();
-            this.reporterId = report.getReporterId();
+            this.reporterId = report.getReporter().getId();
+            this.reporterName = report.getReporter().getName();
             this.reason = report.getReason();
             this.status = report.getStatus();
             this.createdAt = report.getTime();
@@ -53,7 +59,8 @@ public class CommunityReportProcessResponse {
             this.reportId = report.getId();
             this.postId = report.getPost().getId();
             this.postTitle = deletedPostTitle;
-            this.reporterId = report.getReporterId();
+            this.reporterId = report.getReporter().getId();
+            this.reporterName = report.getReporter().getName();
             this.reason = report.getReason();
             this.status = report.getStatus();
             this.createdAt = report.getTime();
@@ -68,6 +75,7 @@ public class CommunityReportProcessResponse {
         private String postTitle;
         private String postContent;
         private Long reporterId;
+        private String reporterName;
         private String reason;
         private CommunityReportStatus status;
         private String createdAt;
@@ -79,14 +87,15 @@ public class CommunityReportProcessResponse {
             this.postId = report.getPost().getId();
             this.postTitle = report.getPost().getTitle();
             this.postContent = report.getPost().getContent();
-            this.reporterId = report.getReporterId();
+            this.reporterId = report.getReporter().getId();
+            this.reporterName = report.getReporter().getName();
             this.reason = report.getReason();
             this.status = report.getStatus();
             this.createdAt = report.getTime();
 
             if (deletedPostTitle != null) {
                 this.postTitle = deletedPostTitle;
-                this.postContent = "(삭제된 게시글)";
+                this.postContent = "삭제된 게시글";
                 this.isPostDeleted = true;
             } else {
                 this.postTitle = report.getPost().getTitle();

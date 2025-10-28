@@ -1,6 +1,10 @@
 package com.take.take_breath.community.community_report_process;
 
 import com.take.take_breath._core._utils.ApiUtil;
+import com.take.take_breath._core.auth.Auth;
+import com.take.take_breath.members.Role;
+import com.take.take_breath.members.Status;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +26,15 @@ public class CommunityReportProcessController {
 
     /**
      * 신고 처리 상태 업데이트 (관리자 전용)
-     * TODO: JWT 인증 구현 후 @Auth(roles = {Role.ADMIN}) 추가
      */
+    @Auth(roles = {Role.ADMIN}, statuses = {Status.ACTIVE})
     @PostMapping("/{reportId}/status")
     public ResponseEntity<ApiUtil.ApiResult<CommunityReportProcessResponse.ProcessDTO>> updateStatus(
             @PathVariable Long reportId,
             @Valid @RequestBody CommunityReportProcessRequest.UpdateStatusDTO updateStatusDTO,
-            @RequestParam Long adminId) {  // TODO: JWT에서 추출로 변경
+            HttpServletRequest request) {
 
+        Long adminId = (Long) request.getAttribute("memberId");
         CommunityReportProcessResponse.ProcessDTO response = processService.updateStatus(reportId, adminId, updateStatusDTO);
         log.info("[신고 처리] processId={}, reportId={}, status={}", response.getProcessId(), reportId, updateStatusDTO.getStatus());
         return ResponseEntity.ok(ApiUtil.success(response));
@@ -37,8 +42,8 @@ public class CommunityReportProcessController {
 
     /**
      * 전체 신고 목록 조회 (관리자 전용)
-     * TODO: JWT 인증 구현 후 @Auth(roles = {Role.ADMIN}) 추가
      */
+    @Auth(roles = {Role.ADMIN}, statuses = {Status.ACTIVE})
     @GetMapping
     public ResponseEntity<ApiUtil.ApiResult<List<CommunityReportProcessResponse.ListDTO>>> findAllReports(
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -50,8 +55,8 @@ public class CommunityReportProcessController {
 
     /**
      * 신고 상세 조회 (관리자 전용)
-     * TODO: JWT 인증 구현 후 @Auth(roles = {Role.ADMIN}) 추가
      */
+    @Auth(roles = {Role.ADMIN}, statuses = {Status.ACTIVE})
     @GetMapping("/{reportId}")
     public ResponseEntity<ApiUtil.ApiResult<CommunityReportProcessResponse.DetailDTO>> getReportDetail(
             @PathVariable Long reportId) {

@@ -1,6 +1,5 @@
 package com.take.take_breath.community.community_post;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.take.take_breath._core._utils.DateUtil;
 import com.take.take_breath.community.community_comment.CommunityComment;
 import com.take.take_breath.community.community_comment.CommunityCommentResponse;
@@ -18,6 +17,8 @@ public class CommunityPostResponse {
     public static class ListDTO {
         private Long id;
         private String title;
+        private Long memberId;
+        private String memberName;
         private Long categoryId;
         private String categoryName;
         private String preview;
@@ -30,22 +31,22 @@ public class CommunityPostResponse {
         private boolean liked;
 
         @Builder
-        public ListDTO(CommunityPost post, boolean liked) {
+        public ListDTO(CommunityPost post, boolean liked, int commentCount) {
             this.id = post.getId();
             this.title = post.getTitle();
+            this.memberId = post.getMember() != null ? post.getMember().getId() : null;
+            this.memberName = post.getMember() != null ? post.getMember().getName() : null;
             this.categoryId = post.getCategory() != null ? post.getCategory().getId() : null;
             this.categoryName = post.getCategory() != null ? post.getCategory().getName() : null;
             this.likeCount = post.getLikeCount();
             this.viewCount = post.getViewCount();
-            this.commentCount = post.getComments() != null ? post.getComments().size() : 0;
+            this.commentCount = commentCount;
             this.createdAt = DateUtil.timestampFormat(post.getCreatedAt());
             this.isModified = post.isModified();
             this.liked = liked;
 
             // 썸네일: 첫 번째 이미지만
-            this.thumbnail = post.getImages() != null && !post.getImages().isEmpty()
-                    ? post.getImages().get(0).getImageUrl()
-                    : null;
+            this.thumbnail = post.getThumbnailImageUrl();
 
             // 내용 미리보기 (50자)
             String content = post.getContent();
@@ -61,7 +62,8 @@ public class CommunityPostResponse {
         private Long id;
         private String title;
         private String content;
-        private Long userId;
+        private Long memberId;
+        private String memberName;
         private String categoryName;
         private Long categoryId;
         private int likeCount;
@@ -79,7 +81,8 @@ public class CommunityPostResponse {
             this.id = post.getId();
             this.title = post.getTitle();
             this.content = post.getContent();
-            this.userId = post.getUserId();
+            this.memberId = post.getMember() != null ? post.getMember().getId() : null;
+            this.memberName = post.getMember() != null ? post.getMember().getName() : null;
             this.categoryName = post.getCategory() != null ? post.getCategory().getName() : null;
             this.categoryId = post.getCategory() != null ? post.getCategory().getId() : null;
             this.likeCount = post.getLikeCount();
@@ -90,23 +93,27 @@ public class CommunityPostResponse {
             this.isModified = post.isModified();
             this.liked = liked;
 
-            // 이미지 URL 리스트
             this.imageUrls = post.getImages() != null
                     ? post.getImages().stream()
                     .map(image -> image.getImageUrl())
                     .collect(Collectors.toList())
                     : List.of();
 
-            // 댓글 정렬
             if (post.getComments() != null) {
-                this.comments = post.getComments().stream()
+                List<CommunityComment> activeComments = post.getComments().stream()
                         .filter(comment -> !comment.isDeleted())
+                        .toList();
+
+                this.commentCount = activeComments.size();
+
+                this.comments = activeComments.stream()
                         .sorted("latest".equalsIgnoreCase(commentSortType)
                                 ? Comparator.comparing((CommunityComment comment) -> comment.getCreatedAt()).reversed()
                                 : Comparator.comparing((CommunityComment comment) -> comment.getCreatedAt()))
                         .map(comment -> new CommunityCommentResponse.ResponseDTO(comment))
                         .collect(Collectors.toList());
             } else {
+                this.commentCount = 0;
                 this.comments = List.of();
             }
         }
@@ -118,14 +125,20 @@ public class CommunityPostResponse {
         private Long id;
         private String title;
         private String content;
+        private Long memberId;
+        private String memberName;
         private Long categoryId;
+        private String createdAt;
 
         @Builder
         public ResponseDTO(CommunityPost post) {
             this.id = post.getId();
             this.title = post.getTitle();
             this.content = post.getContent();
+            this.memberId = post.getMember().getId();
+            this.memberName = post.getMember().getName();
             this.categoryId = post.getCategory().getId();
+            this.createdAt = DateUtil.timestampFormat(post.getCreatedAt());
         }
     }
 }

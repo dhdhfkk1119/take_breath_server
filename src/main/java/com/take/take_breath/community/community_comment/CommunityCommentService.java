@@ -1,5 +1,8 @@
 package com.take.take_breath.community.community_comment;
 
+import com.take.take_breath._core._exception.Exception400;
+import com.take.take_breath._core._exception.Exception403;
+import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath.community.comment_report.CommentReport;
 import com.take.take_breath.community.comment_report.CommentReportRepository;
 import com.take.take_breath.community.comment_report_process.CommentReportProcess;
@@ -8,6 +11,8 @@ import com.take.take_breath.community.community_event.CommentCreatedEvent;
 import com.take.take_breath.community.community_post.CommunityPost;
 import com.take.take_breath.community.community_post.CommunityPostRepository;
 import com.take.take_breath.community.community_report.CommunityReportStatus;
+import com.take.take_breath.members.Member;
+import com.take.take_breath.members.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,6 +30,7 @@ public class CommunityCommentService {
 
     private final CommunityCommentRepository communityCommentRepository;
     private final CommunityPostRepository communityPostRepository;
+    private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final CommentReportProcessRepository commentReportProcessRepository;
     private final CommentReportRepository commentReportRepository;
@@ -33,30 +39,33 @@ public class CommunityCommentService {
      * 댓글 작성
      */
     @Transactional
-    public CommunityCommentResponse.ResponseDTO saveComment(Long postId, CommunityCommentRequest.SaveDTO saveDTO, Long currentUserId) {
+    public CommunityCommentResponse.ResponseDTO saveComment(Long postId, CommunityCommentRequest.SaveDTO saveDTO, Long currentMemberId) {
 
         CommunityPost post = communityPostRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. ID: " + postId));
+                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다. ID: " + postId));
+
+        Member member = memberRepository.findById(currentMemberId)
+                .orElseThrow(() -> new Exception404("회원을 찾을 수 없습니다. ID: " + currentMemberId));
 
         if (post.isDeleted()) {
-            throw new IllegalArgumentException("삭제된 게시글에는 댓글을 작성할 수 없습니다.");
+            throw new Exception400("삭제된 게시글에는 댓글을 작성할 수 없습니다.");
         }
 
         CommunityComment comment = CommunityComment.builder()
                 .content(saveDTO.getContent())
                 .post(post)
-                .userId(currentUserId)
+                .member(member)
                 .build();
 
         CommunityComment savedComment = communityCommentRepository.save(comment);
 
         eventPublisher.publishEvent(
-                new CommentCreatedEvent(post.getUserId(), post.getTitle(), currentUserId)
+                new CommentCreatedEvent(post.getMember().getId(), post.getTitle(), currentMemberId, member.getNickname())
         );
 
         post.addComment(savedComment);
 
-        log.info("[댓글 작성] commentId={}, postId={}, userId={}", savedComment.getId(), postId, currentUserId);
+        log.info("[댓글 작성] commentId={}, postId={}, memberId={}", savedComment.getId(), postId, currentMemberId);
         return new CommunityCommentResponse.ResponseDTO(savedComment);
     }
 
@@ -73,21 +82,21 @@ public class CommunityCommentService {
      * 댓글 수정
      */
     @Transactional
-    public CommunityCommentResponse.ResponseDTO updateComment(Long commentId, CommunityCommentRequest.UpdateDTO updateDTO, Long currentUserId) {
+    public CommunityCommentResponse.ResponseDTO updateComment(Long commentId, CommunityCommentRequest.UpdateDTO updateDTO, Long currentMemberId) {
         CommunityComment comment = communityCommentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다. ID: " + commentId));
+                .orElseThrow(() -> new Exception404("댓글을 찾을 수 없습니다. ID: " + commentId));
 
-        if (!comment.isOwner(currentUserId)) {
-            throw new IllegalArgumentException("본인이 작성한 댓글만 수정할 수 있습니다.");
+        if (!comment.isOwner(currentMemberId)) {
+            throw new Exception403("본인이 작성한 댓글만 수정할 수 있습니다.");
         }
 
         if (comment.isDeleted()) {
-            throw new IllegalArgumentException("삭제된 댓글은 수정할 수 없습니다.");
+            throw new Exception400("삭제된 댓글은 수정할 수 없습니다.");
         }
 
         comment.update(updateDTO.getContent());
 
-        log.info("[댓글 수정] commentId={}, userId={}", commentId, currentUserId);
+        log.info("[댓글 수정] commentId={}, memberId={}", commentId, currentMemberId);
         return new CommunityCommentResponse.ResponseDTO(comment);
     }
 
@@ -95,21 +104,21 @@ public class CommunityCommentService {
      * 댓글 삭제 (Soft Delete)
      */
     @Transactional
-    public void deleteComment(Long commentId, Long currentUserId) {
+    public void deleteComment(Long commentId, Long currentMemberId) {
         CommunityComment comment = communityCommentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다. ID: " + commentId));
+                .orElseThrow(() -> new Exception404("댓글을 찾을 수 없습니다. ID: " + commentId));
 
-        if (!comment.isOwner(currentUserId)) {
-            throw new IllegalArgumentException("본인이 작성한 댓글만 삭제할 수 있습니다.");
+        if (!comment.isOwner(currentMemberId)) {
+            throw new Exception403("본인이 작성한 댓글만 삭제할 수 있습니다.");
         }
 
         if (comment.isDeleted()) {
-            throw new IllegalArgumentException("이미 삭제된 댓글입니다.");
+            throw new Exception400("이미 삭제된 댓글입니다.");
         }
 
         comment.softDelete();
 
-        log.info("[댓글 삭제] commentId={}, userId={}", commentId, currentUserId);
+        log.info("[댓글 삭제] commentId={}, memberId={}", commentId, currentMemberId);
     }
 
     /**
@@ -118,17 +127,18 @@ public class CommunityCommentService {
     @Transactional
     public void forceDeleteComment(Long commentId, String reason, Long adminId) {
         CommunityComment comment = communityCommentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("댓글을 찾을 수 없습니다."));
 
         if (comment.isDeleted()) {
-            // 이미 삭제된 댓글이라면 불필요한 재처리 없이 예외를 던져 종료
-            throw new IllegalArgumentException("이미 삭제 처리된 댓글입니다. commentId: " + commentId);
+            throw new Exception400("이미 삭제 처리된 댓글입니다. commentId: " + commentId);
         }
+
+        Member admin = memberRepository.findById(adminId)
+                .orElseThrow(() -> new Exception404("관리자 정보를 찾을 수 없습니다. adminId: " + adminId));
 
         comment.softDelete();
         comment.increaseReportCount();
 
-        // 해당 댓글의 모든 PENDING 신고를 APPROVED로 변경
         List<CommentReport> pendingReports = commentReportRepository
                 .findByCommentIdAndStatus(commentId, CommunityReportStatus.PENDING);
 
@@ -137,7 +147,7 @@ public class CommunityCommentService {
 
             CommentReportProcess process = CommentReportProcess.builder()
                     .report(report)
-                    .adminId(adminId)
+                    .admin(admin)
                     .status(CommunityReportStatus.APPROVED)
                     .adminComment("댓글 강제 삭제로 인한 자동 승인")
                     .build();
