@@ -40,21 +40,15 @@ public class ChatMessage {
     @Enumerated(EnumType.STRING)
     private MessageStatus status = MessageStatus.SENT;
 
-    /**
-     * 파일 저장 경로 (상대 경로)
-     * 예: "2025/10/27/a3f5b2c1-4d8e-4f1a-9c3b-1e5f6a7b8c9d.jpg"
-     */
+    // 파일 저장 경로 (상대 경로)
+    // 예: "2025/10/27/a3f5b2c1-4d8e-4f1a-9c3b-1e5f6a7b8c9d.jpg"
     private String attachmentPath;
 
-    /**
-     * 원본 파일명 (선택사항)
-     * 예: "강아지사진.jpg"
-     */
+    // 원본 파일명 (선택사항)
+    // 예: "강아지사진.jpg"
     private String originalFilename;
 
-    /**
-     * 파일 크기 (byte 단위, 선택사항)
-     */
+    // 파일 크기 (byte 단위)
     private Long fileSize;
 
     @CreationTimestamp

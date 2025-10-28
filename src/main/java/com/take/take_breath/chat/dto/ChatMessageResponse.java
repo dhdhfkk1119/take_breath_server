@@ -14,5 +14,6 @@ public class ChatMessageResponse {
     private String messageType;         // TEXT, IMAGE, FILE
     private String createdAt;
     private boolean isRead;             // 읽음 여부 (UI 표시용)
-    private String imageUrl;  // 해당 url은 서버에서 이미지를 출력하는 api임
+    private String imageUrl;  // 프로젝트 내부 url을 전달
+    // private String currentPoint;    // 현재 사용자 남은 포인트에 대해서
 }

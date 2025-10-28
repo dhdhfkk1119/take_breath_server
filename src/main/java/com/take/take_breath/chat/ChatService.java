@@ -95,6 +95,8 @@ public class ChatService {
         Member sender = memberRepository.findById(request.getSenderId())
                 .orElseThrow(() -> new Exception404("회원을 찾을 수 없습니다."));
 
+
+
         // MessageType 기본값 처리
         String messageTypeStr = request.getMessageType();
         if (messageTypeStr == null || messageTypeStr.trim().isEmpty()) {
@@ -108,6 +110,9 @@ public class ChatService {
                 .content(request.getContent())
                 .type(MessageType.valueOf(messageTypeStr))
                 .build();
+
+        // 상담사가 아닌 사용자라면
+
         chatMessageRepository.save(message);
 
         // 발신자는 자동으로 읽음 처리

@@ -17,6 +17,10 @@ upload:
   member-dir: member-images/
   chat-image-dir: chat-images/
 
+# 페이징 기본값
+pagination:
+  default-page-size: 20
+  
 # ?? ??? ??
 # ERROR > WARN > INFO > DEBUG > TRACE
 logging:
