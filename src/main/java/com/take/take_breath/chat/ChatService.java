@@ -297,18 +297,18 @@ public class ChatService {
     public CreateChatRoomResponse createChatRoom(CreateChatRoomRequest request) {
         // 1. 유효성 검증
         if (request.getMemberIds() == null || request.getMemberIds().isEmpty()) {
-            throw new IllegalArgumentException("참여할 회원이 없습니다.");
+            throw new Exception400("참여할 회원이 없습니다.");
         }
 
         // 1:1 채팅이므로 2명만 허용
         if (request.getMemberIds().size() != 2) {
-            throw new IllegalArgumentException("1:1 채팅은 2명만 참여 가능합니다.");
+            throw new Exception400("1:1 채팅은 2명만 참여 가능합니다.");
         }
 
         // 2. 회원 존재 여부 확인
         List<Member> members = memberRepository.findAllById(request.getMemberIds());
         if (members.size() != request.getMemberIds().size()) {
-            throw new IllegalArgumentException("존재하지 않는 회원이 포함되어 있습니다.");
+            throw new Exception404("존재하지 않는 회원이 포함되어 있습니다.");
         }
 
         // 3. 이미 두 회원 간의 채팅방이 있는지 확인 (중복 방지)
