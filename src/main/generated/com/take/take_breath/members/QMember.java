@@ -30,15 +30,23 @@ public class QMember extends EntityPathBase<Member> {
 
     public final BooleanPath emailVerified = createBoolean("emailVerified");
 
+    public final EnumPath<Gender> gender = createEnum("gender", Gender.class);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final ListPath<com.take.take_breath.terms.MemberTerms, com.take.take_breath.terms.QMemberTerms> memberTermsList = this.<com.take.take_breath.terms.MemberTerms, com.take.take_breath.terms.QMemberTerms>createList("memberTermsList", com.take.take_breath.terms.MemberTerms.class, com.take.take_breath.terms.QMemberTerms.class, PathInits.DIRECT2);
 
     public final StringPath name = createString("name");
 
+    public final StringPath nickname = createString("nickname");
+
     public final StringPath password = createString("password");
 
     public final StringPath phone = createString("phone");
+
+    public final StringPath profileImage = createString("profileImage");
+
+    public final StringPath refreshToken = createString("refreshToken");
 
     public final EnumPath<Role> role = createEnum("role", Role.class);
 

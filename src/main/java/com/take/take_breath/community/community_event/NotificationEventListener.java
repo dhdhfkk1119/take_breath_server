@@ -21,7 +21,8 @@ public class NotificationEventListener {
         notificationService.sendComment(
                 event.getPostMemberId().toString(),
                 event.getPostTitle(),
-                event.getCommenterMemberId().toString()
+                event.getCommenterMemberId().toString(),
+                event.getCommenterMemberName()
         );
     }
 
@@ -33,7 +34,8 @@ public class NotificationEventListener {
         notificationService.sendPostLike(
                 event.getPostMemberId().toString(),
                 event.getPostTitle(),
-                event.getLikerMemberId().toString()
+                event.getLikerMemberId().toString(),
+                event.getLikerMemberName()
         );
     }
 }

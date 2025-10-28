@@ -27,7 +27,7 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    @ColumnDefault("익명")
+    @ColumnDefault("'익명'")
     private String nickname;
 
     private String profileImage;

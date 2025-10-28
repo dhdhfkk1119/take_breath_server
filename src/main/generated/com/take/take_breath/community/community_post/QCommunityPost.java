@@ -44,6 +44,8 @@ public class QCommunityPost extends EntityPathBase<CommunityPost> {
 
     public final NumberPath<Integer> reportCount = createNumber("reportCount", Integer.class);
 
+    public final StringPath thumbnailImageUrl = createString("thumbnailImageUrl");
+
     public final StringPath title = createString("title");
 
     public final DateTimePath<java.sql.Timestamp> updatedAt = createDateTime("updatedAt", java.sql.Timestamp.class);

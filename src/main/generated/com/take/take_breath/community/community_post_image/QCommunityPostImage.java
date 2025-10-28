@@ -22,6 +22,8 @@ public class QCommunityPostImage extends EntityPathBase<CommunityPostImage> {
 
     public static final QCommunityPostImage communityPostImage = new QCommunityPostImage("communityPostImage");
 
+    public final DateTimePath<java.sql.Timestamp> createdAt = createDateTime("createdAt", java.sql.Timestamp.class);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath imageUrl = createString("imageUrl");

@@ -60,7 +60,7 @@ public class CommunityCommentService {
         CommunityComment savedComment = communityCommentRepository.save(comment);
 
         eventPublisher.publishEvent(
-                new CommentCreatedEvent(post.getMember().getId(), post.getTitle(), currentMemberId)
+                new CommentCreatedEvent(post.getMember().getId(), post.getTitle(), currentMemberId, member.getNickname())
         );
 
         post.addComment(savedComment);

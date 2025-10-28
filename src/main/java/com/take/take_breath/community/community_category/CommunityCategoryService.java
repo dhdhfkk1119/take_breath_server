@@ -2,7 +2,9 @@
 
 package com.take.take_breath.community.community_category;
 
+import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception404;
+import com.take.take_breath.community.community_post.CommunityPostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.List;
 public class CommunityCategoryService {
 
     private final CommunityCategoryRepository communityCategoryRepository;
+    private final CommunityPostRepository communityPostRepository;
 
     /**
      * 전체 카테고리 목록 조회
@@ -72,6 +75,13 @@ public class CommunityCategoryService {
     public void deleteCategory(Long id, Long adminId) {
         CommunityCategory category = communityCategoryRepository.findById(id)
                 .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다. ID: " + id));
+
+        long postCount = communityPostRepository.countByCategoryId(id);
+        if (postCount > 0) {
+            throw new Exception400(
+                    String.format("해당 카테고리를 사용하는 게시글이 %d개 있어 삭제할 수 없습니다.", postCount)
+            );
+        }
 
         communityCategoryRepository.delete(category);
         log.info("[카테고리 삭제] adminId={}, categoryId={}, name={}", adminId, id, category.getName());

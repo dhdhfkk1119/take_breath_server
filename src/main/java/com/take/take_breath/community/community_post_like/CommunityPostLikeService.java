@@ -60,7 +60,7 @@ public class CommunityPostLikeService {
             liked = true;
 
             eventPublisher.publishEvent(
-                    new PostLikeEvent(post.getMember().getId(), post.getTitle(), currentMemberId)
+                    new PostLikeEvent(post.getMember().getId(), post.getTitle(), currentMemberId, member.getNickname())
             );
 
             log.info("[좋아요 추가] postId={}, currentMemberId={}", postId, currentMemberId);

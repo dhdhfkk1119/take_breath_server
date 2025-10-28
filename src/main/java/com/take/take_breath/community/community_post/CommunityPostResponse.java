@@ -46,9 +46,7 @@ public class CommunityPostResponse {
             this.liked = liked;
 
             // 썸네일: 첫 번째 이미지만
-            this.thumbnail = post.getImages() != null && !post.getImages().isEmpty()
-                    ? post.getImages().get(0).getImageUrl()
-                    : null;
+            this.thumbnail = post.getThumbnailImageUrl();
 
             // 내용 미리보기 (50자)
             String content = post.getContent();

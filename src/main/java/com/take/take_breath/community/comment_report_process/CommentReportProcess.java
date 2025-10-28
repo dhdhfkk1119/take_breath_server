@@ -6,10 +6,7 @@ import com.take.take_breath.community.comment_report.CommentReport;
 import com.take.take_breath.community.community_report.CommunityReportStatus;
 import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -20,6 +17,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"report", "admin"})
 public class CommentReportProcess {
 
     @Id

@@ -83,7 +83,7 @@ public class CommunityCommentController {
     /**
      * 관리자 전용: 댓글 강제 삭제
      */
-    @Auth(statuses = {Status.ACTIVE})
+    @Auth(roles = {Role.ADMIN}, statuses = {Status.ACTIVE})
     @DeleteMapping("/{commentId}/admin")
     public ResponseEntity<ApiUtil.ApiResult<String>> forceDeleteComment(
             @PathVariable Long commentId,

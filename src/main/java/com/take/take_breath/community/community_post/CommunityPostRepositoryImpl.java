@@ -84,7 +84,6 @@ public class CommunityPostRepositoryImpl implements CommunityPostRepositoryCusto
                 .selectFrom(communityPost)
                 .leftJoin(communityPost.category, communityCategory).fetchJoin()
                 .leftJoin(communityPost.member, member).fetchJoin()
-                .leftJoin(communityPost.images, communityPostImage).fetchJoin()
                 .leftJoin(communityPost.comments, communityComment).fetchJoin()
                 .where(
                         communityPost.id.eq(postId),

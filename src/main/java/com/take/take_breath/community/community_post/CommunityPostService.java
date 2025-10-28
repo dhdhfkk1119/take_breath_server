@@ -24,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -144,14 +145,15 @@ public class CommunityPostService {
 
         CommunityPost savedPost = communityPostRepository.save(post);
 
-        // 이미지 저장
+        // 이미지 저장 및 썸네일 설정
         if (saveDTO.getImageUrls() != null && !saveDTO.getImageUrls().isEmpty()) {
+            savedPost.setThumbnailImageUrl(saveDTO.getImageUrls().get(0));
+
             for (String imageUrl : saveDTO.getImageUrls()) {
                 CommunityPostImage image = CommunityPostImage.builder()
                         .imageUrl(imageUrl)
                         .post(savedPost)
                         .build();
-                communityPostImageRepository.save(image);
                 savedPost.addImage(image);
             }
         }
@@ -166,8 +168,8 @@ public class CommunityPostService {
      */
     @Transactional
     public CommunityPostResponse.ResponseDTO updatePost(Long postId, CommunityPostRequest.UpdateDTO updateDTO, Long memberId) {
-        // 커스텀 메서드 사용으로 변경 (최소한의 연관관계만 조회)
-        CommunityPost post = communityPostRepositoryCustom.findByIdWithCategory(postId)
+        // 게시글과 이미지, 카테고리를 함께 조회
+        CommunityPost post = communityPostRepository.findById(postId)
                 .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
 
         if (!post.isOwner(memberId)) {
@@ -178,14 +180,8 @@ public class CommunityPostService {
             throw new Exception400("삭제된 게시글은 수정할 수 없습니다.");
         }
 
-        // 제목, 내용 수정
-        if (updateDTO.getTitle() != null && !updateDTO.getTitle().trim().isEmpty()) {
-            post.setTitle(updateDTO.getTitle());
-        }
-        if (updateDTO.getContent() != null && !updateDTO.getContent().trim().isEmpty()) {
-            post.setContent(updateDTO.getContent());
-        }
-
+        post.setTitle(updateDTO.getTitle());
+        post.setContent(updateDTO.getContent());
         // 카테고리 수정
         if (updateDTO.getCategoryId() != null) {
             CommunityCategory category = communityCategoryRepository.findById(updateDTO.getCategoryId())
@@ -195,17 +191,8 @@ public class CommunityPostService {
 
         // 이미지 삭제
         if (updateDTO.getDeleteImageIds() != null && !updateDTO.getDeleteImageIds().isEmpty()) {
-            for (Long imageId : updateDTO.getDeleteImageIds()) {
-                CommunityPostImage image = communityPostImageRepository.findById(imageId)
-                        .orElseThrow(() -> new Exception404("삭제할 이미지를 찾을 수 없습니다."));
 
-                if (!image.getPost().getId().equals(postId)) {
-                    throw new Exception400("해당 게시글의 이미지가 아닙니다.");
-                }
-
-                post.getImages().remove(image);
-                communityPostImageRepository.delete(image);
-            }
+            post.getImages().removeIf(image -> updateDTO.getDeleteImageIds().contains(image.getId()));
         }
 
         // 이미지 추가
@@ -215,10 +202,16 @@ public class CommunityPostService {
                         .imageUrl(imageUrl)
                         .post(post)
                         .build();
-                communityPostImageRepository.save(image);
                 post.addImage(image);
             }
         }
+
+        // 모든 이미지 변경 후 썸네일 재설정
+        String newThumbnailUrl = post.getImages().stream()
+                .min((image1, image2) -> image1.getCreatedAt().compareTo(image2.getCreatedAt()))
+                .map(image -> image.getImageUrl())
+                .orElse(null);
+        post.setThumbnailImageUrl(newThumbnailUrl);
 
         return CommunityPostResponse.ResponseDTO.builder()
                 .post(post)

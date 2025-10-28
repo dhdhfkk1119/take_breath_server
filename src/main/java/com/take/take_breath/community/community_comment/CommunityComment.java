@@ -5,10 +5,7 @@ import com.take.take_breath._core._utils.DateUtil;
 import com.take.take_breath.community.community_post.CommunityPost;
 import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -20,6 +17,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"post", "member"})
 @Table(name = "community_comment_tb")
 public class CommunityComment {
 
