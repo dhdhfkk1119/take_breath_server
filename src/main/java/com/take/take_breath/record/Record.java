@@ -1,7 +1,6 @@
 package com.take.take_breath.record;
 
 import com.take.take_breath._core._utils.DateUtil;
-import com.take.take_breath.chat.chat_message.MessageType;
 import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,10 +11,14 @@ import java.util.List;
 
 @Entity
 @Table(name = "record_tb")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Record {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -31,19 +34,32 @@ public class Record {
     @Column(name = "record_date", nullable = false)
     private Timestamp recordDate; // 기록 날짜
 
-    @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<RecordFile> imageFileList = new ArrayList<>();
+    @Column(name = "update_date", nullable = false)
+    private Timestamp updatedDate; // 수정 날짜
 
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<RecordFile> audioFileList = new ArrayList<>();
+    private List<RecordFile> files = new ArrayList<>();
 
-    @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<RecordFile> videoFileList = new ArrayList<>();
-
-    public String getTime(){
+    public String getTime() {
         return DateUtil.chatFormat(recordDate);
+    }
+
+    public List<RecordFile> getImageFiles() {
+        return files.stream()
+                .filter(f -> f.getFileType() == FileType.IMAGE)
+                .toList();
+    }
+
+    public List<RecordFile> getAudioFiles() {
+        return files.stream()
+                .filter(f -> f.getFileType() == FileType.AUDIO)
+                .toList();
+    }
+
+    public List<RecordFile> getVideoFiles() {
+        return files.stream()
+                .filter(f -> f.getFileType() == FileType.VIDEO)
+                .toList();
     }
 }

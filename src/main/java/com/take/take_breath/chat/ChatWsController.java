@@ -1,14 +1,11 @@
 package com.take.take_breath.chat;
 
-import com.take.take_breath._core._exception.InsufficientPointException;
 import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.ApiUtil.ApiResult;
-import com.take.take_breath.chat.chat_message.ChatMessage;
 import com.take.take_breath.chat.dto.ChatMessageRequest;
 import com.take.take_breath.chat.dto.ChatMessageResponse;
 import com.take.take_breath.chat.dto.MarkAsReadRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;

@@ -51,3 +51,13 @@ public class PageUtil {
         }
     }
 }
+
+/*
+직군별 업스킬 핵시
+     - 함수호출-툴링 설계, 프롬프트 안전장치, 로그로 품질평가
+
+프롬프트 운여 템플릿
+    - rtf - role(역할), task(과업), facts(사실), output(형식), constraints(제약)
+
+
+*/
