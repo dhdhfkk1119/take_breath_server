@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상담사 관리</title>
+    <link rel="stylesheet" href="/css/admin-common.css">
+    <link rel="stylesheet" href="/css/admin-counselors.css">
+</head>
+<body>
+<div class="header">
+    <h1>상담사 승인 관리</h1>
+    <nav>
+        <a href="/api/admin/view/dashboard">대시보드</a>
+        <a href="/api/admin/view/logout" class="btn btn-danger">로그아웃</a>
+    </nav>
+</div>
+
+<div class="container">
+    {{#message}}
+        <div class="alert alert-success">{{message}}</div>
+    {{/message}}
+
+    {{#error}}
+        <div class="alert alert-error">{{error}}</div>
+    {{/error}}
+
+    {{#counselors}}
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>이름</th>
+                <th>이메일</th>
+                <th>전문분야</th>
+                <th>자격증</th>
+                <th>승인 처리</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#counselors}}
+                <tr>
+                    <td>{{id}}</td>
+                    <td>{{name}}</td>
+                    <td>{{email}}</td>
+                    <td>{{specialty}}</td>
+                    <td>
+                        {{#licenses}}
+                            <div class="license-badge" onclick="openImageModal('{{licenseName}}', '{{licenseNumber}}', '{{licenseRegiNumber}}', '{{licenseImage}}')">
+                                📄 {{licenseName}}
+                            </div>
+                        {{/licenses}}
+                        {{^licenses}}
+                            <span style="color: #999;">자격증 없음</span>
+                        {{/licenses}}
+                    </td>
+                    <td>
+                        <form action="/api/admin/view/counselors/{{id}}/approve" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-success">승인</button>
+                        </form>
+                        <button type="button" class="btn btn-danger" onclick="openRejectModal({{id}})">거절</button>
+                    </td>
+                </tr>
+            {{/counselors}}
+            </tbody>
+        </table>
+    {{/counselors}}
+
+    {{^counselors}}
+        <div class="empty-state">
+            <h2>승인 대기 중인 상담사가 없습니다</h2>
+            <p>모든 신청이 처리되었습니다.</p>
+        </div>
+    {{/counselors}}
+</div>
+
+<!-- 거절 사유 입력 모달 -->
+<div id="rejectModal" class="modal">
+    <div class="modal-content">
+        <h3>거절 사유 입력</h3>
+        <form id="rejectForm" method="post">
+            <textarea name="rejectReason" placeholder="거절 사유를 입력해주세요..." required></textarea>
+            <div class="modal-buttons">
+                <button type="button" class="btn" onclick="closeRejectModal()">취소</button>
+                <button type="submit" class="btn btn-danger">거절 확정</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 자격증 이미지 모달 -->
+<div id="imageModal" class="modal">
+    <div class="image-modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 id="licenseTitle">자격증 정보</h3>
+            <button class="btn btn-danger" onclick="closeImageModal()">닫기</button>
+        </div>
+        <img id="licenseImageDisplay" src="" alt="자격증 이미지">
+        <div class="license-info">
+            <p><strong>자격증명:</strong> <span id="licenseNameDisplay"></span></p>
+            <p><strong>자격증 번호:</strong> <span id="licenseNumberDisplay"></span></p>
+            <p><strong>등록 번호:</strong> <span id="licenseRegiNumberDisplay"></span></p>
+        </div>
+    </div>
+</div>
+
+<script src="/js/admin-counselors.js"></script>
+</body>
+</html>
