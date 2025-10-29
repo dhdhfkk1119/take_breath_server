@@ -26,7 +26,7 @@ public class CounselorListDTO {
         // 자격증 리스트
         this.licenses = counselor.getLicenses() != null
                 ? counselor.getLicenses().stream()
-                .map(LicenseDTO::new)
+                .map(license -> new LicenseDTO(license))
                 .collect(Collectors.toList())
                 : List.of();
     }
