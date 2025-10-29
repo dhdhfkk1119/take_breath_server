@@ -1,5 +1,6 @@
 package com.take.take_breath.chat;
 
+import com.take.take_breath._core._exception.InsufficientPointException;
 import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.ApiUtil.ApiResult;
 import com.take.take_breath.chat.chat_message.ChatMessage;
@@ -7,6 +8,7 @@ import com.take.take_breath.chat.dto.ChatMessageRequest;
 import com.take.take_breath.chat.dto.ChatMessageResponse;
 import com.take.take_breath.chat.dto.MarkAsReadRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -35,21 +37,7 @@ public class ChatWsController {
     public ApiResult<ChatMessageResponse> sendMessage(
             @DestinationVariable Long roomId,
             ChatMessageRequest request) {
-        // 1. 메시지 저장 (자동으로 발신자는 읽음 처리됨)
-        ChatMessage savedMessage = chatService.sendMessage(request);
-
-        // 2. Entity -> DTO 변환
-        ChatMessageResponse response = ChatMessageResponse.builder()
-                .messageId(savedMessage.getId())
-                .senderId(savedMessage.getSender().getId())
-                .senderName(savedMessage.getSender().getName())
-                .content(savedMessage.getContent())
-                .messageType(savedMessage.getType().name())
-                .createdAt(savedMessage.getTime())
-                .isRead(true)  // 발신자는 항상 읽음
-                .build();
-
-        // 3. 구독자들에게 브로드캐스트
+        ChatMessageResponse response = chatService.sendMessage(request);
         return ApiUtil.success(response);
     }
 
@@ -63,7 +51,6 @@ public class ChatWsController {
     public ApiResult<String> markAsRead(
             @DestinationVariable Long roomId,
             MarkAsReadRequest request) {
-
         chatService.markAsRead(
                 request.getChatRoomId(),
                 request.getMemberId(),
