@@ -44,6 +44,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath phone = createString("phone");
 
+    public final NumberPath<Integer> point = createNumber("point", Integer.class);
+
     public final StringPath profileImage = createString("profileImage");
 
     public final StringPath refreshToken = createString("refreshToken");

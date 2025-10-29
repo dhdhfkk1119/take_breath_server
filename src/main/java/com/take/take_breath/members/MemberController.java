@@ -4,10 +4,12 @@ package com.take.take_breath.members;
 import com.take.take_breath.email.EmailService;
 import com.take.take_breath.email.dto.EmailRequest;
 import com.take.take_breath.members.dto.*;
-import jakarta.servlet.http.HttpServlet;
+import com.take.take_breath.members.login.newlogin.MemberRequestTo;
+import com.take.take_breath.members.login.newlogin.MemberResponseTo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +19,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
+@Slf4j
 public class MemberController {
 
     private final MemberService memberService;
@@ -33,12 +36,22 @@ public class MemberController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody MemberRequest req) {
-        String token = memberService.login(req);
-        return ResponseEntity.ok()
-                .header("Authorization", "Bearer " + token)
-                .build();
+    public ResponseEntity<?> login(@Valid @RequestBody MemberRequestTo.MemberLoginRequest req) {
+        MemberResponseTo.Login response = memberService.login(req);
+
+        log.info("로그인 컨트롤러 : {}",response);
+        // 기본 헤더 세팅
+        ResponseEntity.BodyBuilder builder = ResponseEntity.ok()
+                .header("Authorization", "Bearer " + response.getAccessToken());
+
+        // autoLogin이 true일 때만 Refresh Token 헤더 추가
+        if (req.isAutoLogin()) {
+            builder.header("Refresh-Token", response.getRefreshToken());
+        }
+
+        return builder.body(response);
     }
+
 
     // 이메일 찾기
     @PostMapping("/find-email")
