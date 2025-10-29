@@ -22,7 +22,7 @@ public class AdminCounselorController {
     public String list(Model model) {
         List<CounselorListDTO> counselorList = adminCounselorService.findPendingCounselors()
                 .stream()
-                .map(CounselorListDTO::new)
+                .map(counselor -> new CounselorListDTO(counselor))
                 .toList();
 
         model.addAttribute("counselors", counselorList);
