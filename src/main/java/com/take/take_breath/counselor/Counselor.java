@@ -1,8 +1,11 @@
 package com.take.take_breath.counselor;
 
 import com.take.take_breath.members.Member;
+import com.take.take_breath.members.Status;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -12,20 +15,31 @@ import lombok.*;
 @Builder
 @Table(name = "counselor_tb")
 public class Counselor {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 회원 1명당 상담사 1명 (1:1 관계)
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    private String license; // 자격
-    private String specialty; // 전문분야
-    private String introduction; // 소개
+    private String introduction; // 상담사 소개
     private String gender; // 성별
-    private String profileImage; // 프로필 이미지
-    private String hashtags; // 해시태그
+    private String profileImage; // 프로필 이미지 경로
+    private String specialty; // 전문 분야 (ex: 우울, 불안, 대인관계 등)
     private int price; // 상담료
+    private String hashtags; // 해시태그 (추후 분리 가능)
 
+    @Column(nullable = false)
+    private int point = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.PENDING;
+
+    // 자격증 리스트 (1:N 관계)
+    @OneToMany(mappedBy = "counselor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CounselorLicense> licenses;
 }

@@ -5,6 +5,11 @@ import com.take.take_breath._core._exception.Exception401;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
 import com.take.take_breath._core._utils.UploadProperties;
+import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.counselor.CounselorApproval;
+import com.take.take_breath.counselor.CounselorApprovalRepository;
+import com.take.take_breath.counselor.CounselorRepository;
+import com.take.take_breath.counselor.dto.CounselorRequest;
 import com.take.take_breath.email.EmailCodeStore;
 import com.take.take_breath.email.EmailService;
 import com.take.take_breath.email.dto.EmailRequest;
@@ -40,6 +45,8 @@ public class MemberService {
     private final EmailService emailService;
     private final UploadFile uploadFile;
     private final UploadProperties uploadProperties;
+    private final CounselorRepository counselorRepository;
+    private final CounselorApprovalRepository counselorApprovalRepository;
 
 
 
@@ -79,7 +86,6 @@ public class MemberService {
         Member member = req.toEntity(req, encodedPassword, status);
         memberRepository.save(member);
 
-
         // 약관 동의 저장
         for (MemberTermsRequest agreement : req.getAgreements()) {
             Terms terms = termsRepository.findById(agreement.getTermsId())
@@ -97,7 +103,11 @@ public class MemberService {
         Member member = memberRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new Exception400("존재하지 않는 이메일입니다."));
 
+        System.out.println(">>> PasswordEncoder Bean Type = " + passwordEncoder.getClass().getName());
+
         if (!passwordEncoder.matches(req.getPassword(), member.getPassword())) {
+            System.out.println("입력 : " + req.getPassword());
+            System.out.println("실제 : " + member.getPassword());
             throw new Exception401("비밀번호가 일치하지 않습니다.");
         }
 

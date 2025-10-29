@@ -67,6 +67,9 @@ public class Member {
     @Column(length = 512)
     private String refreshToken;
 
+    @Column(nullable = false)
+    private int point = 0;
+
     // 상담사 프로필 연결
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     private Counselor counselor;
