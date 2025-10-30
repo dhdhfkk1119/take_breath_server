@@ -25,7 +25,12 @@ public class AdminCounselorController {
                 .map(counselor -> new CounselorListDTO(counselor))
                 .toList();
 
+        // 레이아웃 설정
         model.addAttribute("counselors", counselorList);
+        model.addAttribute("pageTitle", "상담사 관리");
+        model.addAttribute("isCounselors", true);
+        model.addAttribute("additionalCss", new String[]{"/css/admin-counselors.css"});
+        model.addAttribute("scripts", new String[]{"/js/admin-counselors.js"});
         return "admin/counselors";
     }
 

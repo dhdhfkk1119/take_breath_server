@@ -1,15 +1,70 @@
 package com.take.take_breath.admin.view.dto;
 
+import com.take.take_breath.counselor.CounselorRepository;
+import com.take.take_breath.members.MemberRepository;
+import com.take.take_breath.members.Role;
+import com.take.take_breath.members.Status;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class DashboardStatsDTO {
     private long totalMembers;
+    private long activeMembers;
+    private long suspendedMembers;
+    private long withdrawalMembers;
+
     private long totalCounselors;
     private long activeCounselors;
     private long pendingCounselors;
+
+    private long userCount;
+    private long counselorCount;
+    private long adminCount;
+
+    private long helpButtonClicks;
+
+    /**
+     * 정적 팩토리 메서드 - Repository에서 통계 데이터 생성
+     */
+    public static DashboardStatsDTO from(MemberRepository memberRepository,
+                                         CounselorRepository counselorRepository) {
+        // 회원 통계
+        long totalMembers = memberRepository.count();
+        long activeMembers = memberRepository.countByStatus(Status.ACTIVE);
+        long suspendedMembers = memberRepository.countByStatus(Status.SUSPENDED);
+        long withdrawalMembers = memberRepository.countByStatus(Status.WITHDRAWAL);
+
+        // 상담사 통계
+        long totalCounselors = counselorRepository.count();
+        long activeCounselors = counselorRepository.countByStatus(Status.ACTIVE);
+        long pendingCounselors = counselorRepository.countByStatus(Status.PENDING);
+
+        // 역할별 통계
+        long userCount = memberRepository.countByRole(Role.USER);
+        long counselorCount = memberRepository.countByRole(Role.COUNSELOR);
+        long adminCount = memberRepository.countByRole(Role.ADMIN);
+
+        // 도우미 버튼 클릭 수 (추후 구현)
+        long helpButtonClicks = 0L;
+
+        return DashboardStatsDTO.builder()
+                .totalMembers(totalMembers)
+                .activeMembers(activeMembers)
+                .suspendedMembers(suspendedMembers)
+                .withdrawalMembers(withdrawalMembers)
+                .totalCounselors(totalCounselors)
+                .activeCounselors(activeCounselors)
+                .pendingCounselors(pendingCounselors)
+                .userCount(userCount)
+                .counselorCount(counselorCount)
+                .adminCount(adminCount)
+                .helpButtonClicks(helpButtonClicks)
+                .build();
+    }
 }

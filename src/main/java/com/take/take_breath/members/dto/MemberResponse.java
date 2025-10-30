@@ -21,6 +21,10 @@ public class MemberResponse {
     private Status status;
     private Gender gender;
 
+    // 탈퇴 관련
+    private Boolean needWithdrawalConfirm;  // 탈퇴 확인 필요 여부
+    private Long daysLeft;                   // 남은 일수
+
     public MemberResponse(Member member) {
         this.email = member.getEmail();
         this.nickname = member.getNickname();
