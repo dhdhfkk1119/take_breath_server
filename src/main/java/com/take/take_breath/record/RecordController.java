@@ -1,10 +1,12 @@
 package com.take.take_breath.record;
 
 import com.take.take_breath._core._utils.ApiUtil;
-import com.take.take_breath.record.dto.RecordRequest;
-import com.take.take_breath.record.dto.RecordResponse;
+import com.take.take_breath._core._utils.PageUtil;
+import com.take.take_breath.record.dto.RecordListResponse;
 import com.take.take_breath.record.dto.RecordSaveRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,21 +17,29 @@ import org.springframework.web.bind.annotation.*;
 public class RecordController {
     private final RecordService recordService;
 
-    // 기록 목록 조회(페이징) - get
     // 정렬 - 날짜 - 최신순
+    /**
+     * 기록 목록 조회(페이징) - get
+     * @param request
+     * @param page
+     * @param size
+     * @return
+     */
     @GetMapping
     public ResponseEntity<?> getRecords(
+            HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "recordDate") String sortField,
-            @RequestParam(defaultValue = "desc") String sortType
-    ) {
-        return ResponseEntity.ok(ApiUtil.success(
-                recordService.getRecordList(
-                        page, size, sortField, sortType)));
+            @RequestParam(defaultValue = "10") int size) {
+        String memberEmail = (String) request.getAttribute("memberEmail");
+        Page<RecordListResponse> records = recordService.getRecordList(memberEmail, page, size);
+        return ResponseEntity.ok(ApiUtil.success(PageUtil.PageResponse.of(records)));
     }
 
-    // 기록 상세 조회 - get
+    /**
+     * 기록 상세 조회
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getRecord(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(ApiUtil.success(recordService.getRecord(id)));
@@ -38,10 +48,10 @@ public class RecordController {
     // 기록 저장 - post
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> saveRecord(
-            @RequestParam Long memberId,
-            @ModelAttribute RecordSaveRequest request
+            HttpServletRequest request,
+            @ModelAttribute RecordSaveRequest recordRequest
     ) {
-        Long recordId = record
+        Long recordId = reco
     }
 
     // 기록 수정 - put

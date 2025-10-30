@@ -24,25 +24,36 @@ public class RecordService {
 
     private final String commonSavedPath = "/uploads/record/images/";
 
+    /**
+     * 특정 사용자의 기록 목록 조회(페이징)
+     * @param page
+     * @param size
+     * @return
+     */
     @Transactional(readOnly = true)
-    public Page<RecordListResponse> getRecordList(int page, int size, String sortField, String sortType) {
-        Sort.Direction direction = sortType.equalsIgnoreCase("asc")
-                ? Sort.Direction.ASC : Sort.Direction.DESC;
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
-
-        return recordRepository.findAll(pageable)
-                .map(RecordListResponse::fromEntity);
+    public Page<RecordListResponse> getRecordList(String email, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return recordRepository.findByMemberEmail(email, pageable).map(RecordListResponse::fromEntity);
     }
-
+    
+    /**
+     * 특정 기록 상세 조회
+     * @param id
+     * @return
+     */
     @Transactional(readOnly = true)
     public RecordResponse getRecord(Long id) {
         Record record = recordRepository.findById(id)
                 .orElseThrow(() -> new Exception404("해당 기록이 존재하지 않습니다"));
-
         return RecordResponse.fromEntity(record);
     }
 
+    /**
+     * 기록 저장
+     * @param memberId
+     * @param request
+     * @return
+     */
     public Long saveRecord(Long memberId, RecordSaveRequest request) {
         // 작성자 조회
         Member member = memberRepository.findById(memberId)
