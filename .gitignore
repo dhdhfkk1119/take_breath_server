@@ -267,3 +267,4 @@ $RECYCLE.BIN/
 /src/main/resources/application-asy*.yaml
 /src/main/resources/application-dev*.yaml
 /src/main/resources/application.properties
+/src/main/generated/
