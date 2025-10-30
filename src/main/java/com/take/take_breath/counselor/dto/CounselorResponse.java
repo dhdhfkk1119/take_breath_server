@@ -37,7 +37,7 @@ public class CounselorResponse {
                 .licenses(
                         counselor.getLicenses() != null
                                 ? counselor.getLicenses().stream()
-                                .map(CounselorLicenseResponse::from)
+                                .map(license -> CounselorLicenseResponse.from(license))
                                 .collect(Collectors.toList())
                                 : null
                 )

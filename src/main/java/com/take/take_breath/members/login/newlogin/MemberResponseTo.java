@@ -14,5 +14,11 @@ public class MemberResponseTo {
     public static class Login{
         private String accessToken;
         private String refreshToken;
+        private Long id;
+        private String name;
+        private String email;
+        private String profileImageUrl;
+        private String role;
+        private String status;
     }
 }
