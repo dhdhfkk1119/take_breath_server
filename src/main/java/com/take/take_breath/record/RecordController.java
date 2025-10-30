@@ -1,5 +1,6 @@
 package com.take.take_breath.record;
 
+import com.take.take_breath._core._exception.Exception500;
 import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.PageUtil;
 import com.take.take_breath.record.dto.RecordListResponse;
@@ -10,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/records")
@@ -51,10 +54,22 @@ public class RecordController {
             HttpServletRequest request,
             @ModelAttribute RecordSaveRequest recordRequest
     ) {
-        Long recordId = reco
+        try {
+            System.out.println("---------------------------------");
+            System.out.println(recordRequest.getTitle());
+            System.out.println(recordRequest.getContent());
+            System.out.println(recordRequest.getRecordDate());
+            System.out.println(recordRequest.getImageFiles());
+            System.out.println("---------------------------------");
+            String email = request.getAttribute("memberEmail").toString();
+            Long recordId = recordService.saveRecord(email, recordRequest);
+            return ResponseEntity.ok(ApiUtil.success(recordId));
+        } catch (IOException e) {
+            throw new Exception500("현재 파일 저장에 문제가 생겼습니다.");
+        }
     }
 
-    // 기록 수정 - put
+    // 기록 수정 - put - 파일 데이터도 수정 필요
 
     // 기록 삭제 - delete - 로컬 데이터도 삭제
 
@@ -85,3 +100,4 @@ public class RecordController {
  * "numberOfElements": 10
  * }
  */
+// 2025-10-30T10:00:00

@@ -15,6 +15,10 @@ upload:
   root-dir: ./uploads/
   counselor-dir: counselor-images/
   member-dir: member-images/
+  chat-dir: chat-images/
+  record-image-dir: records/images/
+  record-audio-dir: records/audio/
+  record-video-dir: records/videos/
 
 # 페이징 기본값
 pagination:
@@ -81,6 +85,7 @@ spring:
     # data.sql ??? Hibernate ??? ??? ??
     defer-datasource-initialization: true
 # jwt
+
 jwt:
   secret: 'VGhpc0lzQVNlY3JldEtleUZvckpXVFNhZmUhIT8xMjM0NTY='
   validityInMilliseconds: 3600000        # 1시간

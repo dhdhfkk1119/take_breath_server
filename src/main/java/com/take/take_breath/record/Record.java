@@ -4,6 +4,7 @@ import com.take.take_breath._core._utils.DateUtil;
 import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -34,32 +35,37 @@ public class Record {
     @Column(name = "record_date", nullable = false)
     private Timestamp recordDate; // 기록 날짜
 
+    @UpdateTimestamp
     @Column(name = "update_date", nullable = false)
     private Timestamp updatedDate; // 수정 날짜
 
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<RecordFile> files = new ArrayList<>();
+    private List<RecordFile> recordFiles  = new ArrayList<>();
 
     public String getTime() {
         return DateUtil.chatFormat(recordDate);
     }
 
     public List<RecordFile> getImageFiles() {
-        return files.stream()
+        return recordFiles.stream()
                 .filter(f -> f.getFileType() == FileType.IMAGE)
                 .toList();
     }
 
     public List<RecordFile> getAudioFiles() {
-        return files.stream()
+        return recordFiles.stream()
                 .filter(f -> f.getFileType() == FileType.AUDIO)
                 .toList();
     }
 
     public List<RecordFile> getVideoFiles() {
-        return files.stream()
+        return recordFiles.stream()
                 .filter(f -> f.getFileType() == FileType.VIDEO)
                 .toList();
+    }
+
+    public void addRecordFile(RecordFile recordFile) {
+        this.recordFiles.add(recordFile);
     }
 }

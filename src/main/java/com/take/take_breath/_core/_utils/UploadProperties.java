@@ -14,4 +14,7 @@ public class UploadProperties {
     private String counselorDir;   // counselor-images/
     private String memberDir; // member-images/
     private String chatImageDir;    // chat-images/
+    private String recordImageDir;  // records/images/
+    private String recordAudioDir;  // records/audio/
+    private String recordVideoDir;  // records/videos/
 }

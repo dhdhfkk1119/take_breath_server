@@ -1,5 +1,6 @@
 package com.take.take_breath._core._utils;
 
+import com.take.take_breath.record.dto.UploadedFileInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -47,6 +50,91 @@ public class UploadFile {
     }
 
     /**
+     * Record 이미지 파일들 업로드 (다중 파일)
+     * @param files 업로드할 이미지 파일 리스트
+     * @return 저장된 파일 정보 리스트 (UploadedFileInfo)
+     */
+    public List<UploadedFileInfo> uploadRecordImages(List<MultipartFile> files) throws IOException {
+        return uploadRecordFiles(files, uploadProperties.getRecordImageDir());
+    }
+
+    /**
+     * Record 오디오 파일들 업로드 (다중 파일)
+     * @param files 업로드할 오디오 파일 리스트
+     * @return 저장된 파일 정보 리스트 (UploadedFileInfo)
+     */
+    public List<UploadedFileInfo> uploadRecordAudios(List<MultipartFile> files) throws IOException {
+        return uploadRecordFiles(files, uploadProperties.getRecordAudioDir());
+    }
+
+    /**
+     * Record 비디오 파일들 업로드 (다중 파일)
+     * @param files 업로드할 비디오 파일 리스트
+     * @return 저장된 파일 정보 리스트 (UploadedFileInfo)
+     */
+    public List<UploadedFileInfo> uploadRecordVideos(List<MultipartFile> files) throws IOException {
+        return uploadRecordFiles(files, uploadProperties.getRecordVideoDir());
+    }
+
+    /**
+     * Record 파일들 업로드 공통 로직
+     * @param files 업로드할 파일 리스트
+     * @param subDir 하위 디렉터리 (records/images/, records/audio/, records/videos/)
+     * @return 저장된 파일 정보 리스트
+     */
+    private List<UploadedFileInfo> uploadRecordFiles(List<MultipartFile> files, String subDir) throws IOException {
+        List<UploadedFileInfo> uploadedFiles = new ArrayList<>();
+
+        if (files == null || files.isEmpty()) {
+            return uploadedFiles;
+        }
+
+        // 전체 업로드 경로: ./uploads/records/images/
+        String fullUploadPath = Paths.get(uploadProperties.getRootDir(), subDir).toString();
+
+        // 디렉터리 없으면 생성
+        createUploadDirectory(fullUploadPath);
+
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                continue;
+            }
+
+            // 원본 파일명
+            String originalFileName = file.getOriginalFilename();
+
+            // 파일 확장자 추출
+            String ext = getFileExtension(originalFileName);
+
+            // 유니크 파일명 생성
+            String savedFileName = generateUniqueFileName(ext);
+
+            // 저장 경로
+            Path savePath = Paths.get(fullUploadPath, savedFileName);
+
+            // 파일 저장
+            file.transferTo(savePath);
+
+            // DB 저장용 상대 경로 (예: records/images/20251027_120000_abc123.png)
+            String relativePath = Paths.get(subDir, savedFileName).toString().replace("\\", "/");
+
+            // 파일 정보 객체 생성
+            UploadedFileInfo fileInfo = UploadedFileInfo.builder()
+                    .originalFileName(originalFileName)
+                    .savedFileName(savedFileName)
+                    .filePath(relativePath)
+                    .fileSize(file.getSize())
+                    .contentType(file.getContentType())
+                    .build();
+
+            uploadedFiles.add(fileInfo);
+        }
+
+        return uploadedFiles;
+    }
+
+
+    /**
      * 프로필 이미지 삭제
      * @param imagePath DB에 저장된 상대경로 (ex. member-images/xxx.png)
      * @param dirType "member" 또는 "counselor"
@@ -72,8 +160,6 @@ public class UploadFile {
             throw new RuntimeException("프로필 이미지를 삭제하지 못했습니다", e);
         }
     }
-
-
 
     /**
      * 채팅 이미지 읽기
