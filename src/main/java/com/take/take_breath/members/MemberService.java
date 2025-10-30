@@ -45,10 +45,7 @@ public class MemberService {
     private final EmailService emailService;
     private final UploadFile uploadFile;
     private final UploadProperties uploadProperties;
-    private final CounselorRepository counselorRepository;
-    private final CounselorApprovalRepository counselorApprovalRepository;
-
-
+    private final MemberWithdrawalService memberWithdrawalService;
 
     // 회원가입
     @Transactional
@@ -99,7 +96,7 @@ public class MemberService {
 
 
     // 로그인
-    public String login(MemberRequest req) {
+    public LoginResult login(MemberRequest req) {
         Member member = memberRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new Exception400("존재하지 않는 이메일입니다."));
 
@@ -123,8 +120,14 @@ public class MemberService {
             throw new Exception403("이용 정지된 계정입니다.");
         }
 
+        if (member.getStatus() == Status.WITHDRAWAL) {
+            long daysLeft = memberWithdrawalService.getDaysUntilDeletion(member);
+            return new LoginResult(null, true, daysLeft);
+        }
+
         String token = jwtTokenProvider.createToken(member);
-        return jwtTokenProvider.createToken(member);
+        return new LoginResult(token, false, null);
+
     }
 
     // 상담사 승인
@@ -200,20 +203,5 @@ public class MemberService {
             member.setProfileImage(uploadedPath);
         }
     }
-
-    // 회원탈퇴
-    @Transactional
-    public void deleteMember(String email) throws IOException {
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new Exception400("존재하지 않는 회원입니다."));
-
-        // 기본 이미지가 아닐 경우 실제 이미지 파일 삭제
-        uploadFile.deleteProfileImage(member.getProfileImage(), uploadProperties.getMemberDir());
-
-        // 회원 데이터 삭제
-        memberRepository.delete(member);
-    }
-
-
 }
 

@@ -4,7 +4,6 @@ package com.take.take_breath.members;
 import com.take.take_breath.email.EmailService;
 import com.take.take_breath.email.dto.EmailRequest;
 import com.take.take_breath.members.dto.*;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/members")
@@ -21,7 +21,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final EmailService emailService;
-
+    private final MemberWithdrawalService memberWithdrawalService;
 
     // 일반회원 회원가입
     @PostMapping("/signup")
@@ -34,11 +34,23 @@ public class MemberController {
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody MemberRequest req) {
-        String token = memberService.login(req);
+        LoginResult result = memberService.login(req);
+
+        // 탈퇴 대기 중인 회원
+        if (result.isNeedWithdrawalConfirm()) {
+            return ResponseEntity.ok(Map.of(
+                    "needWithdrawalConfirm", true,
+                    "daysLeft", result.getDaysLeft(),
+                    "message", result.getDaysLeft() + "일 후 계정이 완전히 삭제됩니다. 복구하시겠습니까?"
+            ));
+        }
+
+        // 정상 로그인
         return ResponseEntity.ok()
-                .header("Authorization", "Bearer " + token)
+                .header("Authorization", "Bearer " + result.getToken())
                 .build();
     }
+
 
     // 이메일 찾기
     @PostMapping("/find-email")
@@ -87,12 +99,25 @@ public class MemberController {
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
-    // 회원탈퇴
-    @DeleteMapping("/withdraw")
-    public ResponseEntity<?> deleteMember(HttpServletRequest request) throws IOException {
+    // 회원 탈퇴 요청
+    @PostMapping("/withdrawal")
+    public ResponseEntity<?> requestWithdrawal(
+            HttpServletRequest request,
+            @RequestBody(required = false) Map<String, String> body) {
+
         String email = (String) request.getAttribute("memberEmail");
-        memberService.deleteMember(email);
-        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+        String reason = (body != null && body.containsKey("reason")) ? body.get("reason") : "";
+
+        memberWithdrawalService.requestWithdrawal(email, reason);
+        return ResponseEntity.ok("탈퇴 요청이 완료되었습니다. 3개월 후 자동으로 삭제됩니다.");
+    }
+
+    // 탈퇴 취소
+    @PostMapping("/cancel-withdrawal")
+    public ResponseEntity<?> cancelWithdrawal(HttpServletRequest request) {
+        String email = (String) request.getAttribute("memberEmail");
+        memberWithdrawalService.cancelWithdrawal(email);
+        return ResponseEntity.ok("계정이 복구되었습니다.");
     }
 
 }

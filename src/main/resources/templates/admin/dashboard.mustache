@@ -22,6 +22,11 @@
         <div class="number">{{stats.suspendedMembers}}</div>
         <div class="label">이용 정지</div>
     </div>
+    <div class="stat-card warning">
+        <h3>탈퇴 대기</h3>
+        <div class="number">{{stats.withdrawalMembers}}</div>
+        <div class="label">3개월 내 자동 삭제</div>
+    </div>
 </div>
 
 <!-- 상담사 통계 -->
@@ -82,6 +87,7 @@
         totalMembers: {{stats.totalMembers}},
         activeMembers: {{stats.activeMembers}},
         suspendedMembers: {{stats.suspendedMembers}},
+        withdrawalMembers: {{stats.withdrawalMembers}},
         totalCounselors: {{stats.totalCounselors}},
         activeCounselors: {{stats.activeCounselors}},
         pendingCounselors: {{stats.pendingCounselors}},
