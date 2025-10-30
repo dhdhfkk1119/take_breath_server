@@ -15,6 +15,8 @@ import com.take.take_breath.email.EmailService;
 import com.take.take_breath.email.dto.EmailRequest;
 import com.take.take_breath.email.dto.EmailResponse;
 import com.take.take_breath.members.dto.*;
+import com.take.take_breath.members.login.newlogin.MemberRequestTo;
+import com.take.take_breath.members.login.newlogin.MemberResponseTo;
 import com.take.take_breath.terms.dto.MemberTermsRequest;
 import com.take.take_breath.terms.MemberTerms;
 import com.take.take_breath.terms.Terms;
@@ -98,16 +100,11 @@ public class MemberService {
     }
 
 
-    // 로그인
-    public String login(MemberRequest req) {
+    public MemberResponseTo.Login login(MemberRequestTo.MemberLoginRequest req) {
         Member member = memberRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new Exception400("존재하지 않는 이메일입니다."));
 
-        System.out.println(">>> PasswordEncoder Bean Type = " + passwordEncoder.getClass().getName());
-
         if (!passwordEncoder.matches(req.getPassword(), member.getPassword())) {
-            System.out.println("입력 : " + req.getPassword());
-            System.out.println("실제 : " + member.getPassword());
             throw new Exception401("비밀번호가 일치하지 않습니다.");
         }
 
@@ -123,9 +120,33 @@ public class MemberService {
             throw new Exception403("이용 정지된 계정입니다.");
         }
 
-        String token = jwtTokenProvider.createToken(member);
-        return jwtTokenProvider.createToken(member);
+        // 항상 Access Token은 발급
+        String accessToken = jwtTokenProvider.createToken(member);
+        String refreshToken = null;
+
+        // 자동 로그인일 경우 Refresh Token 발급 및 저장
+        if (req.isAutoLogin()) {
+            refreshToken = jwtTokenProvider.createRefreshToken(member);
+            member.setRefreshToken(refreshToken);
+            memberRepository.save(member);
+        } else {
+            // 일반 로그인일 경우 기존 refreshToken 제거 (선택사항)
+            member.setRefreshToken(null);
+            memberRepository.save(member);
+        }
+
+        return new MemberResponseTo.Login(
+                accessToken,
+                refreshToken, // autoLogin=false면 null일 수 있음
+                member.getId(),
+                member.getName(),
+                member.getEmail(),
+                member.getProfileImage(),
+                member.getRole().name(),
+                member.getStatus().name()
+        );
     }
+
 
     // 상담사 승인
     @Transactional
@@ -212,6 +233,22 @@ public class MemberService {
 
         // 회원 데이터 삭제
         memberRepository.delete(member);
+    }
+
+    public String refreshAccessToken(String refreshToken) {
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new Exception401("유효하지 않은 토큰입니다.");
+        }
+
+        String email = jwtTokenProvider.getSubject(refreshToken);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception400("존재하지 않는 사용자입니다."));
+
+        if (!refreshToken.equals(member.getRefreshToken())) {
+            throw new Exception403("등록되지 않은 토큰입니다.");
+        }
+
+        return jwtTokenProvider.regenerateAccessToken(refreshToken);
     }
 
 
