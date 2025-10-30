@@ -47,8 +47,8 @@ public class MemberService {
     private final EmailService emailService;
     private final UploadFile uploadFile;
     private final UploadProperties uploadProperties;
-    private final CounselorRepository counselorRepository;
-    private final CounselorApprovalRepository counselorApprovalRepository;
+    private final MemberWithdrawalService memberWithdrawalService;
+
 
 
 
@@ -124,17 +124,25 @@ public class MemberService {
         String accessToken = jwtTokenProvider.createToken(member);
         String refreshToken = null;
 
+        if (member.getStatus() == Status.WITHDRAWAL) {
+            // 탈퇴 처리 중인 계정의 경우, 최소 정보 (AccessToken, Status, 남은 일수)만 반환
+            long daysLeft = memberWithdrawalService.getDaysUntilDeletion(member);
+            return new MemberResponseTo.Login(accessToken, member.getStatus().name(), daysLeft);
+        }
+
         // 자동 로그인일 경우 Refresh Token 발급 및 저장
         if (req.isAutoLogin()) {
             refreshToken = jwtTokenProvider.createRefreshToken(member);
             member.setRefreshToken(refreshToken);
-            memberRepository.save(member);
+            // memberRepository.save(member)는 로직이 끝난 후 한 번만 호출하는 것이 효율적일 수 있습니다.
         } else {
-            // 일반 로그인일 경우 기존 refreshToken 제거 (선택사항)
+            // 일반 로그인일 경우 기존 refreshToken 제거
             member.setRefreshToken(null);
-            memberRepository.save(member);
         }
 
+        memberRepository.save(member); // Refresh Token 변경사항 저장
+
+        // 일반 로그인 (Status.ACTIVE 등)
         return new MemberResponseTo.Login(
                 accessToken,
                 refreshToken, // autoLogin=false면 null일 수 있음
@@ -144,6 +152,7 @@ public class MemberService {
                 member.getProfileImage(),
                 member.getRole().name(),
                 member.getStatus().name()
+                // daysLeft는 DTO 생성자에서 null로 처리됨
         );
     }
 
