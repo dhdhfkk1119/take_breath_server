@@ -1,6 +1,7 @@
 package com.take.take_breath.members;
 
 
+import com.take.take_breath._core.auth.Auth;
 import com.take.take_breath.email.EmailService;
 import com.take.take_breath.email.dto.EmailRequest;
 import com.take.take_breath.members.dto.*;
@@ -77,6 +78,7 @@ public class MemberController {
     }
 
     // 회원정보 불러오기
+    @Auth
     @GetMapping("/info")
     public ResponseEntity<?> getMemberInfo(HttpServletRequest req) {
         String email = (String) req.getAttribute("memberEmail");
@@ -85,6 +87,7 @@ public class MemberController {
     }
 
     // 회원정보 수정
+    @Auth
     @PatchMapping("/update")
     public ResponseEntity<?> updateProfile(
             HttpServletRequest request,
@@ -97,12 +100,14 @@ public class MemberController {
     }
 
     // 로그아웃
+    @Auth
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
     // 회원 탈퇴 요청
+    @Auth
     @PostMapping("/withdrawal")
     public ResponseEntity<?> requestWithdrawal(
             HttpServletRequest request,
@@ -116,6 +121,7 @@ public class MemberController {
     }
 
     // 탈퇴 취소
+    @Auth
     @PostMapping("/cancel-withdrawal")
     public ResponseEntity<?> cancelWithdrawal(HttpServletRequest request) {
         String email = (String) request.getAttribute("memberEmail");
