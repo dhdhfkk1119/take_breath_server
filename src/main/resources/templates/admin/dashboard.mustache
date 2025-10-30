@@ -1,55 +1,100 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>관리자 대시보드</title>
-    <link rel="stylesheet" href="/css/admin-common.css">
-    <link rel="stylesheet" href="/css/admin-dashboard.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-</head>
-<body>
-<div class="header">
-    <h1>관리자 대시보드</h1>
-    <nav>
-        <a href="/api/admin/view/counselors">상담사 관리</a>
-        <a href="/api/admin/view/logout" class="btn btn-danger">로그아웃</a>
-    </nav>
+{{> layout/admin-layout-start}}
+
+<div class="page-header">
+    <h2>대시보드</h2>
+    <p>시스템 전체 통계를 확인하세요</p>
 </div>
 
-<div class="container">
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>전체 회원</h3>
-            <div class="number">{{stats.totalMembers}}</div>
-        </div>
-        <div class="stat-card">
-            <h3>전체 상담사</h3>
-            <div class="number">{{stats.totalCounselors}}</div>
-        </div>
-        <div class="stat-card">
-            <h3>활성 상담사</h3>
-            <div class="number">{{stats.activeCounselors}}</div>
-        </div>
-        <div class="stat-card">
-            <h3>승인 대기</h3>
-            <div class="number">{{stats.pendingCounselors}}</div>
-        </div>
+<!-- 회원 통계 -->
+<h3 style="margin-bottom: 1rem; color: #2c3e50;">👤 회원 통계</h3>
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <h3>전체 회원</h3>
+        <div class="number">{{stats.totalMembers}}</div>
     </div>
+    <div class="stat-card success">
+        <h3>활성 회원</h3>
+        <div class="number">{{stats.activeMembers}}</div>
+        <div class="label">정상 이용 중</div>
+    </div>
+    <div class="stat-card danger">
+        <h3>정지 회원</h3>
+        <div class="number">{{stats.suspendedMembers}}</div>
+        <div class="label">이용 정지</div>
+    </div>
+</div>
 
+<!-- 상담사 통계 -->
+<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">💼 상담사 통계</h3>
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <h3>전체 상담사</h3>
+        <div class="number">{{stats.totalCounselors}}</div>
+    </div>
+    <div class="stat-card success">
+        <h3>활성 상담사</h3>
+        <div class="number">{{stats.activeCounselors}}</div>
+        <div class="label">상담 가능</div>
+    </div>
+    <div class="stat-card warning">
+        <h3>승인 대기</h3>
+        <div class="number">{{stats.pendingCounselors}}</div>
+        <div class="label">검토 필요</div>
+    </div>
+</div>
+
+<!-- 역할별 통계 -->
+<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">🔑 역할별 통계</h3>
+<div class="stats-grid">
+    <div class="stat-card info">
+        <h3>일반 회원</h3>
+        <div class="number">{{stats.userCount}}</div>
+        <div class="label">USER</div>
+    </div>
+    <div class="stat-card info">
+        <h3>상담사</h3>
+        <div class="number">{{stats.counselorCount}}</div>
+        <div class="label">COUNSELOR</div>
+    </div>
+    <div class="stat-card info">
+        <h3>관리자</h3>
+        <div class="number">{{stats.adminCount}}</div>
+        <div class="label">ADMIN</div>
+    </div>
+</div>
+
+<!-- 차트 섹션 -->
+<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📈 통계 차트</h3>
+<div class="charts-section">
     <div class="chart-container">
+        <h3>회원 및 상담사 현황</h3>
         <canvas id="statsChart"></canvas>
     </div>
+    <div class="chart-container">
+        <h3>역할별 비율</h3>
+        <canvas id="roleChart"></canvas>
+    </div>
 </div>
 
-<script src="/js/admin-dashboard.js"></script>
+<!-- Chart.js 라이브러리 -->
 <script>
-    initChart({
+    const stats = {
         totalMembers: {{stats.totalMembers}},
-            totalCounselors: {{stats.totalCounselors}},
-            activeCounselors: {{stats.activeCounselors}},
-            pendingCounselors: {{stats.pendingCounselors}}
-    });
+        activeMembers: {{stats.activeMembers}},
+        suspendedMembers: {{stats.suspendedMembers}},
+        totalCounselors: {{stats.totalCounselors}},
+        activeCounselors: {{stats.activeCounselors}},
+        pendingCounselors: {{stats.pendingCounselors}},
+        userCount: {{stats.userCount}},
+        counselorCount: {{stats.counselorCount}},
+        adminCount: {{stats.adminCount}}
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => initCharts(stats));
+    } else {
+        initCharts(stats);
+    }
 </script>
-</body>
-</html>
+
+{{> layout/admin-layout-end}}

@@ -19,6 +19,16 @@ public class AdminDashboardController {
     public String dashboard(Model model) {
         DashboardStatsDTO stats = adminDashboardService.getDashboardStats();
         model.addAttribute("stats", stats);
+
+        // 레이아웃 설정
+        model.addAttribute("pageTitle", "관리자 대시보드");
+        model.addAttribute("isDashboard", true);
+        model.addAttribute("additionalCss", new String[]{"/css/admin-dashboard.css"});
+        model.addAttribute("additionalScript", new String[]{
+                "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"
+        });
+        model.addAttribute("scripts", new String[]{"/js/admin-dashboard.js"});
+
         return "admin/dashboard";
     }
 }

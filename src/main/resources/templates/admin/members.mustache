@@ -1,0 +1,54 @@
+{{> layout/admin-layout-start}}
+
+<div class="page-header">
+    <h2>회원 관리</h2>
+    <p>전체 회원 현황 및 통계</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <h3>전체 회원</h3>
+        <div class="number">{{stats.totalMembers}}</div>
+    </div>
+    <div class="stat-card success">
+        <h3>활성 회원</h3>
+        <div class="number">{{stats.activeMembers}}</div>
+        <div class="label">정상 이용 중</div>
+    </div>
+    <div class="stat-card danger">
+        <h3>정지 회원</h3>
+        <div class="number">{{stats.suspendedMembers}}</div>
+        <div class="label">이용 정지</div>
+    </div>
+    <div class="stat-card warning">
+        <h3>탈퇴 회원</h3>
+        <div class="number">{{stats.deletedMembers}}</div>
+        <div class="label">추적 불가 (Hard Delete)</div>
+    </div>
+    <div class="stat-card info">
+        <h3>도우미 버튼 클릭</h3>
+        <div class="number">{{stats.helpButtonClicks}}</div>
+        <div class="label">총 클릭 수</div>
+    </div>
+</div>
+
+<div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 2rem;">
+    <h3 style="margin-bottom: 1rem; color: #e74c3c;">📋 구현 필요 사항</h3>
+    <ul style="line-height: 2; color: #7f8c8d;">
+        <li>
+            <strong>탈퇴 회원 추적:</strong>
+            <code style="background: #ecf0f1; padding: 0.2rem 0.5rem; border-radius: 3px;">Member</code>
+            엔티티에 <code style="background: #ecf0f1; padding: 0.2rem 0.5rem; border-radius: 3px;">deletedAt</code> 필드 추가 필요 (Soft Delete)
+        </li>
+        <li>
+            <strong>도우미 버튼 클릭 수:</strong>
+            별도 이벤트 로그 테이블 또는 Redis 카운터 필요
+        </li>
+        <li>
+            <strong>회원 목록 테이블:</strong>
+            페이징, 검색, 상태 변경 기능 추가 예정
+        </li>
+    </ul>
+</div>
+
+{{> layout/admin-layout-end}}

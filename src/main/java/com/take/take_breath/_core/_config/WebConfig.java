@@ -51,5 +51,12 @@ public class WebConfig implements WebMvcConfigurer {
         // 업로드된 파일을 웹에서 접근 가능하게 설정
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:./uploads/");
+        // JS 파일 매핑
+        registry.addResourceHandler("/js/**")
+                .addResourceLocations("classpath:/static/js/");
+
+        // CSS 파일 매핑
+        registry.addResourceHandler("/css/**")
+                .addResourceLocations("classpath:/static/css/");
     }
 }
