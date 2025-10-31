@@ -1,6 +1,8 @@
 package com.take.take_breath.admin.view;
 
 import com.take.take_breath.admin.view.dto.CounselorListResponse;
+import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.members.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,21 +18,55 @@ public class AdminCounselorController {
 
     private final AdminCounselorService adminCounselorService;
 
-    // 상담사 목록 (승인 대기 중)
+    // 상담사 관리 메인
     @GetMapping
-    public String list(Model model) {
-        List<CounselorListResponse> counselorList = adminCounselorService.findPendingCounselors()
+    public String listRedirect() {
+        return "redirect:/api/admin/view/counselors/list";
+    }
+
+    // 전체 상담사 목록
+    @GetMapping("/list")
+    public String getAllCounselors(Model model) {
+        List<CounselorListResponse> counselors = adminCounselorService.getAllCounselors()
                 .stream()
-                .map(counselor -> new CounselorListResponse(counselor))
+                .map(c -> new CounselorListResponse(c))
                 .toList();
 
-        // 레이아웃 설정
-        model.addAttribute("counselors", counselorList);
-        model.addAttribute("pageTitle", "상담사 관리");
+        model.addAttribute("counselors", counselors);
+        model.addAttribute("pageTitle", "전체 상담사 목록");
+        model.addAttribute("isAllFilter", true);
         model.addAttribute("isCounselors", true);
-        model.addAttribute("additionalCss", new String[]{"/css/admin-counselors.css"});
-        model.addAttribute("scripts", new String[]{"/js/admin-counselors.js"});
-        return "admin/counselors";
+        return "admin/counselor-list";
+    }
+
+    // 활성 상담사 목록
+    @GetMapping("/active")
+    public String getActiveCounselors(Model model) {
+        List<CounselorListResponse> counselors = adminCounselorService.getCounselorsByStatus(Status.ACTIVE)
+                .stream()
+                .map(c -> new CounselorListResponse(c))
+                .toList();
+
+        model.addAttribute("counselors", counselors);
+        model.addAttribute("pageTitle", "활성 상담사 목록");
+        model.addAttribute("isActiveFilter", true);
+        model.addAttribute("isCounselors", true);
+        return "admin/counselor-list";
+    }
+
+    // 승인 대기 상담사 목록
+    @GetMapping("/pending")
+    public String getPendingCounselors(Model model) {
+        List<CounselorListResponse> counselors = adminCounselorService.getCounselorsByStatus(Status.PENDING)
+                .stream()
+                .map(c -> new CounselorListResponse(c))
+                .toList();
+
+        model.addAttribute("counselors", counselors);
+        model.addAttribute("pageTitle", "승인 대기 상담사 목록");
+        model.addAttribute("isPendingFilter", true);
+        model.addAttribute("isCounselors", true);
+        return "admin/counselor-list";
     }
 
     // 상담사 승인
@@ -48,7 +84,7 @@ public class AdminCounselorController {
         return "redirect:/api/admin/view/counselors";
     }
 
-    // 상담사 거절 (옵션)
+    // 상담사 거절
     @PostMapping("/{id}/reject")
     public String reject(
             @PathVariable Long id,

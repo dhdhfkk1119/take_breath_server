@@ -1,5 +1,6 @@
 package com.take.take_breath.admin.view;
 
+import com.take.take_breath.admin.view.dto.MemberListResponse;
 import com.take.take_breath.admin.view.dto.MemberStatsResponse;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
@@ -17,16 +18,32 @@ public class AdminMemberService {
 
     private final MemberRepository memberRepository;
 
-    /**
-     * 전체 회원 조회
-     */
-    public List<Member> getAllMembers() {
-        return memberRepository.findAllActiveMembers();
+    // 전체 회원 조회
+    public List<MemberListResponse> getAllMembers() {
+        return memberRepository.findAllActiveMembers()
+                .stream()
+                .map(m -> new MemberListResponse(m))
+                .toList();
     }
 
-    /**
-     * 회원 통계 조회
-     */
+
+    // 상태별 회원 조회
+    public List<MemberListResponse> getMembersByStatus(Status status) {
+        return memberRepository.findByStatus(status)
+                .stream()
+                .map(m -> new MemberListResponse(m))
+                .toList();
+    }
+
+    // 탈퇴 대기 회원 조회
+    public List<MemberListResponse> getWithdrawalMembers() {
+        return memberRepository.findByStatus(Status.WITHDRAWAL)
+                .stream()
+                .map(m -> new MemberListResponse(m))
+                .toList();
+    }
+
+    // 회원 통계
     public MemberStatsResponse getMemberStats() {
         long totalMembers = memberRepository.count();
         long activeMembers = memberRepository.countByStatus(Status.ACTIVE);
@@ -43,12 +60,5 @@ public class AdminMemberService {
                 withdrawalMembers,
                 helpButtonClicks
         );
-    }
-
-    /**
-     * 탈퇴 대기 회원 목록 조회 (관리자 모니터링용)
-     */
-    public List<Member> getWithdrawalMembers() {
-        return memberRepository.findByStatus(Status.WITHDRAWAL);
     }
 }
