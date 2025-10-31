@@ -1,10 +1,8 @@
 package com.take.take_breath.admin.view;
 
-import com.take.take_breath.admin.view.dto.DashboardStatsDTO;
+import com.take.take_breath.admin.view.dto.DashboardStatsResponse;
 import com.take.take_breath.counselor.CounselorRepository;
 import com.take.take_breath.members.MemberRepository;
-import com.take.take_breath.members.Role;
-import com.take.take_breath.members.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +13,7 @@ public class AdminDashboardService {
     private final MemberRepository memberRepository;
     private final CounselorRepository counselorRepository;
 
-    public DashboardStatsDTO getDashboardStats() {
-        return DashboardStatsDTO.from(memberRepository, counselorRepository);
+    public DashboardStatsResponse getDashboardStats() {
+        return DashboardStatsResponse.from(memberRepository, counselorRepository);
     }
 }

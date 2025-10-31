@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DashboardStatsDTO {
+public class DashboardStatsResponse {
     private long totalMembers;
     private long activeMembers;
     private long suspendedMembers;
@@ -32,8 +32,8 @@ public class DashboardStatsDTO {
     /**
      * 정적 팩토리 메서드 - Repository에서 통계 데이터 생성
      */
-    public static DashboardStatsDTO from(MemberRepository memberRepository,
-                                         CounselorRepository counselorRepository) {
+    public static DashboardStatsResponse from(MemberRepository memberRepository,
+                                              CounselorRepository counselorRepository) {
         // 회원 통계
         long totalMembers = memberRepository.count();
         long activeMembers = memberRepository.countByStatus(Status.ACTIVE);
@@ -53,7 +53,7 @@ public class DashboardStatsDTO {
         // 도우미 버튼 클릭 수 (추후 구현)
         long helpButtonClicks = 0L;
 
-        return DashboardStatsDTO.builder()
+        return DashboardStatsResponse.builder()
                 .totalMembers(totalMembers)
                 .activeMembers(activeMembers)
                 .suspendedMembers(suspendedMembers)
