@@ -1,4 +1,4 @@
-package com.take.take_breath.members.login.newlogin;
+package com.take.take_breath.members.dto;
 
 import lombok.Data;
 
@@ -10,4 +10,6 @@ public class MemberRequestTo {
         private String password;
         private boolean autoLogin; // 자동 로그인 여부
     }
+
+
 }

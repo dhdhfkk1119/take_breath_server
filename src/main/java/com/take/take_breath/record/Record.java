@@ -4,6 +4,7 @@ import com.take.take_breath._core._utils.DateUtil;
 import com.take.take_breath.members.Member;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
@@ -32,11 +33,12 @@ public class Record {
     @Column(columnDefinition = "TEXT")
     private String content;     // 본문 내용
 
-    @Column(name = "record_date", nullable = false)
+    @CreationTimestamp
+    @Column(name = "record_date", updatable = false)
     private Timestamp recordDate; // 기록 날짜
 
     @UpdateTimestamp
-    @Column(name = "update_date", nullable = false)
+    @Column(name = "update_date")
     private Timestamp updatedDate; // 수정 날짜
 
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)

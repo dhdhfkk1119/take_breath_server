@@ -5,6 +5,7 @@ import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.PageUtil;
 import com.take.take_breath.record.dto.RecordListResponse;
 import com.take.take_breath.record.dto.RecordSaveRequest;
+import com.take.take_breath.record.dto.RecordUpdateRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -52,26 +53,36 @@ public class RecordController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> saveRecord(
             HttpServletRequest request,
-            @ModelAttribute RecordSaveRequest recordRequest
-    ) {
-        try {
-            System.out.println("---------------------------------");
-            System.out.println(recordRequest.getTitle());
-            System.out.println(recordRequest.getContent());
-            System.out.println(recordRequest.getRecordDate());
-            System.out.println(recordRequest.getImageFiles());
-            System.out.println("---------------------------------");
-            String email = request.getAttribute("memberEmail").toString();
-            Long recordId = recordService.saveRecord(email, recordRequest);
-            return ResponseEntity.ok(ApiUtil.success(recordId));
-        } catch (IOException e) {
-            throw new Exception500("현재 파일 저장에 문제가 생겼습니다.");
-        }
+            @ModelAttribute RecordSaveRequest recordRequest) {
+        String email = request.getAttribute("memberEmail").toString();
+        Record record = recordService.saveRecord(email, recordRequest);
+        return ResponseEntity.ok(ApiUtil.success(record));
     }
 
     // 기록 수정 - put - 파일 데이터도 수정 필요
+    @PutMapping(path = "{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateRecord(
+            HttpServletRequest request,
+            @PathVariable(name = "id") Long id,
+            @ModelAttribute RecordUpdateRequest recordRequest) {
+        String email = request.getAttribute("memberEmail").toString();
+        Record updateRecord = recordService.updateRecord(email, id, recordRequest);
+        return ResponseEntity.ok(ApiUtil.success(updateRecord.getId()));
+    }
 
     // 기록 삭제 - delete - 로컬 데이터도 삭제
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deleteRecord(
+            HttpServletRequest request,
+            @PathVariable(name = "id") Long id) {
+        String email = request.getAttribute("memberEmail").toString();
+        recordService.deleteRecord(email, id);
+
+        // 일반적인 RESTAPI의 관례 - 삭제 시 not found
+        // return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(ApiUtil.success("기록이 성공적으로 삭제되었습니다."));
+    }
 
     // 키워드 검색 - 제목, 내용, 날짜 - queryDSL
 
