@@ -35,3 +35,150 @@
 .btn-danger:hover {
     background: #c82333;
 }
+
+/* 필터 버튼 */
+.filter-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.filter-btn {
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #666;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.filter-btn:hover {
+    border-color: #3498db;
+    color: #3498db;
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: #3498db;
+    border-color: #3498db;
+    color: white;
+}
+
+/* 테이블 컨테이너 */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.data-table thead {
+    background: #f8f9fa;
+}
+
+.data-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #2c3e50;
+    border-bottom: 2px solid #e0e0e0;
+    white-space: nowrap;
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: #555;
+}
+
+.data-table tbody tr {
+    transition: background 0.2s;
+}
+
+.data-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+/* 배지 */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* 역할 배지 */
+.badge-role-USER {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.badge-role-COUNSELOR {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.badge-role-ADMIN {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* 상태 배지 */
+.badge-status-ACTIVE {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-status-SUSPENDED {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.badge-status-PENDING {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.badge-status-WITHDRAWAL {
+    background: #fafafa;
+    color: #616161;
+}
+
+.badge-ACTIVE {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-SUSPENDED {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.badge-PENDING {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.badge-REJECTED {
+    background: #fafafa;
+    color: #616161;
+}
+
+/* 소개 셀 */
+.introduction-cell {
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

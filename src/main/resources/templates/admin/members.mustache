@@ -6,28 +6,27 @@
 </div>
 
 <div class="stats-grid">
-    <div class="stat-card primary">
+    <div class="stat-card primary" onclick="loadMembers('/api/admin/view/members/list')" style="cursor: pointer;">
         <h3>전체 회원</h3>
         <div class="number">{{stats.totalMembers}}</div>
     </div>
-    <div class="stat-card success">
+    <div class="stat-card success" onclick="loadMembers('/api/admin/view/members/active')" style="cursor: pointer;">
         <h3>활성 회원</h3>
         <div class="number">{{stats.activeMembers}}</div>
         <div class="label">정상 이용 중</div>
     </div>
-    <div class="stat-card danger">
+    <div class="stat-card danger" onclick="loadMembers('/api/admin/view/members/suspended')" style="cursor: pointer;">
         <h3>정지 회원</h3>
         <div class="number">{{stats.suspendedMembers}}</div>
         <div class="label">이용 정지</div>
     </div>
-    <div class="stat-card warning">
+    <div class="stat-card warning" onclick="loadMembers('/api/admin/view/members/withdrawal')" style="cursor: pointer;">
         <h3>탈퇴 대기</h3>
         <div class="number">{{stats.withdrawalMembers}}</div>
         <div class="label">3개월 내 자동 삭제</div>
     </div>
 </div>
 
-<!-- 복구 요청 목록 섹션 추가 -->
 {{#stats.recoveryPendingMembers}}
     <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 2rem;">
         <h3 style="margin-bottom: 1rem; color: #9b59b6;">🔄 복구 요청 대기 중인 회원</h3>
@@ -37,6 +36,9 @@
         </a>
     </div>
 {{/stats.recoveryPendingMembers}}
+
+<!-- ✅ 카드 클릭 시 테이블이 렌더링될 영역 -->
+<div id="memberTableContainer" style="margin-top: 2rem;"></div>
 
 <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 2rem;">
     <h3 style="margin-bottom: 1rem; color: #2c3e50;">📋 구현 예정 기능</h3>
