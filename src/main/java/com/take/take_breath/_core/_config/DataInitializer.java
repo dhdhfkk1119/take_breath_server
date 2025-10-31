@@ -29,6 +29,7 @@ public class DataInitializer implements CommandLineRunner {
     private final MemberTermsRepository memberTermsRepository;
     private final CommunityCategoryRepository communityCategoryRepository;
 
+    // 이니셜라이즈 회원가입 멤버 추가
     @Override
     public void run(String... args) throws Exception {
         // 약관 생성
@@ -120,4 +121,6 @@ public class DataInitializer implements CommandLineRunner {
         log.info("관리자: admin@test.com / 1234");
         log.info("================================");
     }
+    
+    
 }
