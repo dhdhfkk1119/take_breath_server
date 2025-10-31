@@ -1,7 +1,17 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('stats-data');
+    if (!el) return;
+
+    const stats = JSON.parse(el.textContent);
+    console.log('받은 stats 데이터:', stats);
+
+    initCharts(stats);
+});
+
 function initCharts(stats) {
     console.log('initCharts 함수 실행됨', stats);
 
-    // 1. 막대 그래프 - 회원 및 상담사 현황
+    // 막대 그래프 - 회원 및 상담사 현황
     const ctx1 = document.getElementById('statsChart');
     if (ctx1) {
         new Chart(ctx1, {
@@ -54,7 +64,7 @@ function initCharts(stats) {
         });
     }
 
-    // 2. 원형 차트 - 역할별 비율
+    // 원형 차트 - 역할별 비율
     const ctx2 = document.getElementById('roleChart');
     if (ctx2) {
         new Chart(ctx2, {
