@@ -19,6 +19,17 @@ public class WebConfig implements WebMvcConfigurer {
     private final AdminAuthInterceptor adminAuthInterceptor;
 
     @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns("*", "null")  // 모든 origin 허용
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedHeaders("*")
+                .exposedHeaders("Authorization")  // JWT 헤더 노출
+                .allowCredentials(true)
+                .maxAge(3600);  // preflight 캐싱
+    }
+
+    @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/api/**")
