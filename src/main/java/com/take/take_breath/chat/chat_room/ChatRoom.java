@@ -2,15 +2,16 @@ package com.take.take_breath.chat.chat_room;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chat_room_tb")
-@Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor @Builder
 public class ChatRoom {
 
     @Id
@@ -21,13 +22,10 @@ public class ChatRoom {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RoomType roomType = RoomType.PRIVATE;   // 채팅방 유형 (1:1 or 그룹)
+    @Builder.Default
+    private RoomType roomType = RoomType.COUNSELING;
 
+    @CreationTimestamp
     @Column(updatable = false, nullable = false)
-    private LocalDateTime createdAt;    // 채팅방 생성 시간
-
-    @PrePersist
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    private Timestamp createdAt;    // 채팅방 생성 시간
 }

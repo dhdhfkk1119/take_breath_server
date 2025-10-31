@@ -15,7 +15,15 @@ upload:
   root-dir: ./uploads/
   counselor-dir: counselor-images/
   member-dir: member-images/
+  chat-dir: chat-images/
+  record-image-dir: records/images/
+  record-audio-dir: records/audio/
+  record-video-dir: records/videos/
 
+# 페이징 기본값
+pagination:
+  default-page-size: 10
+  
 # ?? ??? ??
 # ERROR > WARN > INFO > DEBUG > TRACE
 logging:
@@ -76,6 +84,7 @@ spring:
         default_batch_fetch_size: 10
     # data.sql ??? Hibernate ??? ??? ??
     defer-datasource-initialization: true
+
 # jwt
 jwt:
   secret: 'VGhpc0lzQVNlY3JldEtleUZvckpXVFNhZmUhIT8xMjM0NTY='

@@ -1,31 +1,21 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>상담사 관리</title>
-    <link rel="stylesheet" href="/css/admin-common.css">
-    <link rel="stylesheet" href="/css/admin-counselors.css">
-</head>
-<body>
-<div class="header">
-    <h1>상담사 승인 관리</h1>
-    <nav>
-        <a href="/api/admin/view/dashboard">대시보드</a>
-        <a href="/api/admin/view/logout" class="btn btn-danger">로그아웃</a>
-    </nav>
+{{> layout/admin-layout-start}}
+
+<div class="page-header">
+    <h2>상담사 승인 관리</h2>
+    <p>승인 대기 중인 상담사를 확인하고 처리하세요</p>
 </div>
 
-<div class="container">
-    {{#message}}
-        <div class="alert alert-success">{{message}}</div>
-    {{/message}}
+{{#message}}
+    <div class="alert alert-success">{{message}}</div>
+{{/message}}
 
-    {{#error}}
-        <div class="alert alert-error">{{error}}</div>
-    {{/error}}
+{{#error}}
+    <div class="alert alert-error">{{error}}</div>
+{{/error}}
 
-    {{#counselors}}
+<!-- 상담사 목록이 있을 때만 테이블 표시 -->
+{{#counselors}}
+    {{^counselors.isEmpty}}
         <table>
             <thead>
             <tr>
@@ -64,18 +54,19 @@
             {{/counselors}}
             </tbody>
         </table>
-    {{/counselors}}
+    {{/counselors.isEmpty}}
+{{/counselors}}
 
-    {{^counselors}}
-        <div class="empty-state">
-            <h2>승인 대기 중인 상담사가 없습니다</h2>
-            <p>모든 신청이 처리되었습니다.</p>
-        </div>
-    {{/counselors}}
-</div>
+<!-- 상담사 목록이 없을 때 -->
+{{^counselors}}
+    <div class="empty-state">
+        <h2>승인 대기 중인 상담사가 없습니다</h2>
+        <p>모든 신청이 처리되었습니다.</p>
+    </div>
+{{/counselors}}
 
 <!-- 거절 사유 입력 모달 -->
-<div id="rejectModal" class="modal">
+<div id="rejectModal" class="modal" style="display: none;">
     <div class="modal-content">
         <h3>거절 사유 입력</h3>
         <form id="rejectForm" method="post">
@@ -89,13 +80,13 @@
 </div>
 
 <!-- 자격증 이미지 모달 -->
-<div id="imageModal" class="modal">
+<div id="imageModal" class="modal" style="display: none;">
     <div class="image-modal-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h3 id="licenseTitle">자격증 정보</h3>
             <button class="btn btn-danger" onclick="closeImageModal()">닫기</button>
         </div>
-        <img id="licenseImageDisplay" src="" alt="자격증 이미지">
+        <img id="licenseImageDisplay" src="" alt="자격증 이미지" style="max-width: 100%; height: auto;">
         <div class="license-info">
             <p><strong>자격증명:</strong> <span id="licenseNameDisplay"></span></p>
             <p><strong>자격증 번호:</strong> <span id="licenseNumberDisplay"></span></p>
@@ -104,6 +95,52 @@
     </div>
 </div>
 
-<script src="/js/admin-counselors.js"></script>
-</body>
-</html>
+<!-- 상담사 관리 스크립트 -->
+<script>
+    console.log('상담사 페이지 로드됨');
+
+    // 거절 모달 열기
+    function openRejectModal(counselorId) {
+        console.log('거절 모달 열기:', counselorId);
+        const modal = document.getElementById('rejectModal');
+        const form = document.getElementById('rejectForm');
+        form.action = '/api/admin/view/counselors/' + counselorId + '/reject';
+        modal.style.display = 'flex';
+    }
+
+    // 거절 모달 닫기
+    function closeRejectModal() {
+        const modal = document.getElementById('rejectModal');
+        modal.style.display = 'none';
+    }
+
+    // 자격증 이미지 모달 열기
+    function openImageModal(licenseName, licenseNumber, licenseRegiNumber, licenseImage) {
+        console.log('자격증 모달 열기:', licenseName);
+        document.getElementById('licenseNameDisplay').textContent = licenseName;
+        document.getElementById('licenseNumberDisplay').textContent = licenseNumber;
+        document.getElementById('licenseRegiNumberDisplay').textContent = licenseRegiNumber;
+        document.getElementById('licenseImageDisplay').src = licenseImage;
+        document.getElementById('imageModal').style.display = 'flex';
+    }
+
+    // 자격증 이미지 모달 닫기
+    function closeImageModal() {
+        document.getElementById('imageModal').style.display = 'none';
+    }
+
+    // 모달 외부 클릭 시 닫기
+    window.onclick = function(event) {
+        const rejectModal = document.getElementById('rejectModal');
+        const imageModal = document.getElementById('imageModal');
+
+        if (event.target === rejectModal) {
+            closeRejectModal();
+        }
+        if (event.target === imageModal) {
+            closeImageModal();
+        }
+    }
+</script>
+
+{{> layout/admin-layout-end}}

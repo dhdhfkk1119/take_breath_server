@@ -1,5 +1,7 @@
 package com.take.take_breath._core._utils;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -24,6 +26,21 @@ public class FileUtil {
     public static String generateFilename(String originalFilename) {
         String extension = getExtension(originalFilename);
         return UUID.randomUUID().toString() + extension;
+    }
+
+    /**
+     * 날짜_UUID 파일명 생성
+     */
+    public static String generateSavedFilename(String originalFilename) {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        return timestamp + "_" + uuid + extension;
     }
 
     /**

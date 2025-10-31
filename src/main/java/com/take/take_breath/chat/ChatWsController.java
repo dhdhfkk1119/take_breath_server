@@ -2,7 +2,6 @@ package com.take.take_breath.chat;
 
 import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.ApiUtil.ApiResult;
-import com.take.take_breath.chat.chat_message.ChatMessage;
 import com.take.take_breath.chat.dto.ChatMessageRequest;
 import com.take.take_breath.chat.dto.ChatMessageResponse;
 import com.take.take_breath.chat.dto.MarkAsReadRequest;
@@ -35,26 +34,7 @@ public class ChatWsController {
     public ApiResult<ChatMessageResponse> sendMessage(
             @DestinationVariable Long roomId,
             ChatMessageRequest request) {
-
-        System.out.println("[방ID: " + roomId +
-                ", 발신자ID: " + request.getSenderId() +
-                "] 메시지: " + request.getContent());
-
-        // 1. 메시지 저장 (자동으로 발신자는 읽음 처리됨)
-        ChatMessage savedMessage = chatService.sendMessage(request);
-
-        // 2. Entity -> DTO 변환
-        ChatMessageResponse response = ChatMessageResponse.builder()
-                .messageId(savedMessage.getId())
-                .senderId(savedMessage.getSender().getId())
-                .senderName(savedMessage.getSender().getName())
-                .content(savedMessage.getContent())
-                .messageType(savedMessage.getType().name())
-                .createdAt(savedMessage.getTime())
-                .isRead(true)  // 발신자는 항상 읽음
-                .build();
-
-        // 3. 구독자들에게 브로드캐스트
+        ChatMessageResponse response = chatService.sendMessage(request);
         return ApiUtil.success(response);
     }
 
@@ -68,7 +48,6 @@ public class ChatWsController {
     public ApiResult<String> markAsRead(
             @DestinationVariable Long roomId,
             MarkAsReadRequest request) {
-
         chatService.markAsRead(
                 request.getChatRoomId(),
                 request.getMemberId(),
@@ -81,24 +60,3 @@ public class ChatWsController {
         );
     }
 }
-
-/*
-
-서버 전달 메세지
-{
-  "id": 10,
-  "content": "안녕하세요!",
-  "chatRoom": {
-    "id": 1,
-    "name": "room1"
-  },
-  "sender": {
-    "id": 5,
-    "email": "user1@test.com",
-    "name": "홍길동",
-    "role": "USER",
-    "status": "ACTIVE"
-  }
-}
-
-*/

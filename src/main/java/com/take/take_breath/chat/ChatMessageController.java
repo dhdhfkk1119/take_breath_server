@@ -172,24 +172,15 @@ public class ChatMessageController {
             @RequestParam Long chatRoomId,
             @RequestParam Long senderId,
             @RequestParam("image") MultipartFile image) {
-        try {
-            // 1. 이미지 메시지 저장
-            ImageUploadRequest request = ImageUploadRequest.builder()
-                    .chatRoomId(chatRoomId)
-                    .senderId(senderId)
-                    .image(image)
-                    .build();
+        // 이미지 메시지 저장
+        ImageUploadRequest request = ImageUploadRequest.builder()
+                .chatRoomId(chatRoomId)
+                .senderId(senderId)
+                .image(image)
+                .build();
 
-            ImageMessageResponse response = chatService.sendImageMessage(request);
-
-            return ResponseEntity.ok(ApiUtil.success(response));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiUtil.fail("이미지 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiUtil.fail(e.getMessage(), HttpStatus.BAD_REQUEST));
-        }
+        ImageMessageResponse response = chatService.sendImageMessage(request);
+        return ResponseEntity.ok(ApiUtil.success(response));
     }
 
 
