@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 
 @RestController
@@ -66,11 +67,19 @@ public class RecordController {
             @RequestParam(required = false) Boolean hasImage,
             @RequestParam(required = false) Boolean hasAudio,
             @RequestParam(required = false) Boolean hasVideo,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Timestamp startDate,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Timestamp endDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         String memberEmail = request.getAttribute("memberEmail").toString();
+
+        // LocalDate -> Timestamp 변환
+        Timestamp startTimestamp = startDate != null
+                ? Timestamp.valueOf(startDate.atStartOfDay())
+                : null;
+        Timestamp endTimestamp = endDate != null
+                ? Timestamp.valueOf(endDate.atTime(23, 59, 59))
+                : null;
 
         RecordSearchCondition condition = RecordSearchCondition.builder()
                 .keyword(keyword)
@@ -78,8 +87,8 @@ public class RecordController {
                 .hasImage(hasImage)
                 .hasAudio(hasAudio)
                 .hasVideo(hasVideo)
-                .startDate(startDate)
-                .endDate(endDate)
+                .startDate(startTimestamp)
+                .endDate(endTimestamp)
                 .build();
 
         Page<RecordListResponse> records = recordService.searchWithCondition(memberEmail, condition, page, size);
