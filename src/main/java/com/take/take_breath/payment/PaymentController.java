@@ -3,6 +3,7 @@ package com.take.take_breath.payment;
 import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.PageUtil;
 import com.take.take_breath._core.auth.Auth;
+import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -62,7 +63,7 @@ public class PaymentController {
      * 내 결제 내역 조회 (페이징)
      */
     @Auth(statuses = {Status.ACTIVE})
-    @GetMapping("/my")
+    @GetMapping("/mine")
     public ResponseEntity<ApiUtil.ApiResult<PageUtil.PageResponse<PaymentResponse.ListDTO>>> getMyPayments(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -78,5 +79,19 @@ public class PaymentController {
                 memberId, page, size, response.getTotalElements());
 
         return ResponseEntity.ok(ApiUtil.success(response));
+    }
+
+    /**
+     * 관리자용 수수료 통계 조회
+     */
+    @Auth(roles = {Role.ADMIN}, statuses = {Status.ACTIVE})
+    @GetMapping("/admin/fee-stats")
+    public ResponseEntity<ApiUtil.ApiResult<PaymentResponse.AdminFeeStatsDTO>> getFeeStats() {
+        PaymentResponse.AdminFeeStatsDTO stats = paymentService.getAdminFeeStats();
+
+        log.info("[관리자 수수료 통계 조회] totalFee={}, count={}",
+                stats.getTotalFeeAmount(), stats.getTotalPaymentCount());
+
+        return ResponseEntity.ok(ApiUtil.success(stats));
     }
 }
