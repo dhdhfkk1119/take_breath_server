@@ -23,4 +23,14 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query("SELECT p FROM Payment p " + "WHERE p.member.id = :memberId " +
             "AND p.status = :status " + "ORDER BY p.paidAt ASC")
     List<Payment> findAvailablePayments(@Param("memberId") Long memberId, @Param("status") PaymentStatus status);
+
+    // 수수료 관련 통계
+    @Query("SELECT SUM(p.feeAmount) FROM Payment p WHERE p.status = 'PAID'")
+    Long getTotalFeeAmount();
+
+    @Query("SELECT COUNT(p) FROM Payment p WHERE p.status = 'PAID'")
+    Long countPaidPayments();
+
+    @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.status = 'PAID'")
+    Long getTotalPaymentAmount();
 }
