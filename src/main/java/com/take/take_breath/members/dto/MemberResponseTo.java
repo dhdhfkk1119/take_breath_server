@@ -1,9 +1,8 @@
-package com.take.take_breath.members.login.newlogin;
+package com.take.take_breath.members.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 public class MemberResponseTo {
 
@@ -29,7 +28,7 @@ public class MemberResponseTo {
             this.accessToken = accessToken;
             this.refreshToken = refreshToken;
             this.id = id;
-            this.name = name;
+            this.nickName = name;
             this.email = email;
             this.profileImageUrl = profileImageUrl;
             this.role = role;
@@ -43,7 +42,7 @@ public class MemberResponseTo {
             this.accessToken = accessToken;
             this.refreshToken = null;
             this.id = null;
-            this.name = null;
+            this.nickName = null;
             this.email = null;
             this.profileImageUrl = null;
             this.role = null;

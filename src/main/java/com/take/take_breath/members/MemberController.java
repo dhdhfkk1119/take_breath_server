@@ -5,8 +5,8 @@ import com.take.take_breath._core.auth.Auth;
 import com.take.take_breath.email.EmailService;
 import com.take.take_breath.email.dto.EmailRequest;
 import com.take.take_breath.members.dto.*;
-import com.take.take_breath.members.login.newlogin.MemberRequestTo;
-import com.take.take_breath.members.login.newlogin.MemberResponseTo;
+import com.take.take_breath.members.dto.MemberRequestTo;
+import com.take.take_breath.members.dto.MemberResponseTo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +55,12 @@ public class MemberController {
         return builder.body(response);
     }
 
+
+    @GetMapping("/check-email/{email}")
+    public ResponseEntity<?> checkEmail(@PathVariable("email")String email){
+        log.info("아이디 체크 인증 : {}" , memberService.checkEmail(email));
+        return ResponseEntity.ok(memberService.checkEmail(email));
+    }
 
     // 이메일 찾기
     @PostMapping("/find-email")

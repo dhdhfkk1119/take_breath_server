@@ -1,4 +1,4 @@
-package com.take.take_breath.members.login.newlogin;
+package com.take.take_breath.members.dto;
 
 import lombok.Data;
 
