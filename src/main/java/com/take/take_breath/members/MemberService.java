@@ -5,18 +5,13 @@ import com.take.take_breath._core._exception.Exception401;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
 import com.take.take_breath._core._utils.UploadProperties;
-import com.take.take_breath.counselor.Counselor;
-import com.take.take_breath.counselor.CounselorApproval;
-import com.take.take_breath.counselor.CounselorApprovalRepository;
-import com.take.take_breath.counselor.CounselorRepository;
-import com.take.take_breath.counselor.dto.CounselorRequest;
 import com.take.take_breath.email.EmailCodeStore;
 import com.take.take_breath.email.EmailService;
 import com.take.take_breath.email.dto.EmailRequest;
 import com.take.take_breath.email.dto.EmailResponse;
 import com.take.take_breath.members.dto.*;
-import com.take.take_breath.members.login.newlogin.MemberRequestTo;
-import com.take.take_breath.members.login.newlogin.MemberResponseTo;
+import com.take.take_breath.members.dto.MemberRequestTo;
+import com.take.take_breath.members.dto.MemberResponseTo;
 import com.take.take_breath.terms.dto.MemberTermsRequest;
 import com.take.take_breath.terms.MemberTerms;
 import com.take.take_breath.terms.Terms;
@@ -31,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.take.take_breath._core._utils.UploadFile;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -145,7 +139,7 @@ public class MemberService {
                 accessToken,
                 refreshToken, // autoLogin=false면 null일 수 있음
                 member.getId(),
-                member.getName(),
+                member.getNickname(),
                 member.getEmail(),
                 member.getProfileImage(),
                 member.getRole().name(),
@@ -153,6 +147,23 @@ public class MemberService {
                 // daysLeft는 DTO 생성자에서 null로 처리됨
         );
     }
+
+    public MemberResponseTo.isCheckEmailDTO checkEmail(String email) {
+        boolean isExist = memberRepository.existsByEmail(email);
+
+        MemberResponseTo.isCheckEmailDTO responseDTO = new MemberResponseTo.isCheckEmailDTO();
+
+        if (isExist) {
+            responseDTO.setMessage("이미 존재하는 이메일입니다.");
+            responseDTO.setCheck(true); // 존재함 (true)
+        } else {
+            responseDTO.setMessage("사용 가능한 이메일입니다.");
+            responseDTO.setCheck(false); // 존재하지 않음 (false)
+        }
+
+        return responseDTO;
+    }
+
 
 
     // 상담사 승인
@@ -179,6 +190,8 @@ public class MemberService {
                 .orElseThrow(() -> new Exception400("일치하는 회원이 없습니다."));
         return new MemberEmailResponse(member.getEmail());
     }
+
+
 
     // 비밀번호 재설정
     @Transactional
