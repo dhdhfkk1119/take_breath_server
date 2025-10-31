@@ -10,4 +10,6 @@ public class MemberRequestTo {
         private String password;
         private boolean autoLogin; // 자동 로그인 여부
     }
+
+
 }

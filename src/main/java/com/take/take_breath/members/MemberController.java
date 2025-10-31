@@ -60,6 +60,7 @@ public class MemberController {
         return ResponseEntity.ok(response);
     }
 
+
     // 비밀번호 인증 코드 전송
     @PostMapping("/password/reset-request")
     public ResponseEntity<String> sendResetCode(@RequestBody EmailRequest req) {

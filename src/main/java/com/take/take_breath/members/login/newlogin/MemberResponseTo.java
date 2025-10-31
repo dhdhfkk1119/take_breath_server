@@ -15,10 +15,16 @@ public class MemberResponseTo {
         private String accessToken;
         private String refreshToken;
         private Long id;
-        private String name;
+        private String nickName;
         private String email;
         private String profileImageUrl;
         private String role;
         private String status;
+    }
+
+    @Data
+    public static  class isCheckEmailDTO{
+        private String message;
+        private boolean isCheck;
     }
 }

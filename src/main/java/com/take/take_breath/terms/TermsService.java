@@ -1,7 +1,9 @@
 package com.take.take_breath.terms;
 
+import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
+import com.take.take_breath.terms.dto.MemberTermResponse;
 import com.take.take_breath.terms.dto.MemberTermsRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,4 +41,18 @@ public class TermsService {
             memberTermsRepository.save(memberTerms);
         }
     }
+
+    public List<MemberTermResponse> termList() {
+        List<Terms> termsList = termsRepository.findAll();
+        return termsList.stream()
+                .map(MemberTermResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    public MemberTermResponse getTerm(Long id) {
+        Terms term = termsRepository.findById(id)
+                .orElseThrow(() -> new Exception404("존재하지 않는 약관입니다."));
+        return new MemberTermResponse(term);
+    }
+
 }

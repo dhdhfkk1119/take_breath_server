@@ -139,7 +139,7 @@ public class MemberService {
                 accessToken,
                 refreshToken, // autoLogin=false면 null일 수 있음
                 member.getId(),
-                member.getName(),
+                member.getNickname(),
                 member.getEmail(),
                 member.getProfileImage(),
                 member.getRole().name(),
@@ -172,6 +172,8 @@ public class MemberService {
                 .orElseThrow(() -> new Exception400("일치하는 회원이 없습니다."));
         return new MemberEmailResponse(member.getEmail());
     }
+
+
 
     // 비밀번호 재설정
     @Transactional

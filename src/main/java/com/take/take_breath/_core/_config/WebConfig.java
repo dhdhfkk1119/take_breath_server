@@ -5,6 +5,7 @@ import com.take.take_breath._core.auth.AuthInterceptor;
 import com.take.take_breath.admin.AdminAuthInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -35,7 +36,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/error",                        // 스프링 기본 에러
                         "/api/test/**",                   // 테스트용
                         "/css/**", "/js/**", "/images/**", "/favicon.ico",
-                        "/uploads/**"
+                        "/uploads/**",
+                        "/api/terms/**"
                 );
 
         registry.addInterceptor(authInterceptor)
@@ -52,5 +54,20 @@ public class WebConfig implements WebMvcConfigurer {
         // 업로드된 파일을 웹에서 접근 가능하게 설정
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:./uploads/");
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins(
+                        "http://localhost:5173",
+                        "http://10.0.2.2:8080",
+                        "http://127.0.0.1:5173",
+                        "http://localhost",
+                        "http://192.168.0.*"
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 }
