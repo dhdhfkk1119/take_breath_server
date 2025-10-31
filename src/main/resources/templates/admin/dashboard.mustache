@@ -81,6 +81,32 @@
     </div>
 </div>
 
+<!-- 신고 통계 -->
+<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">🚨 신고 통계</h3>
+<div class="stats-grid">
+    <div class="stat-card primary" onclick="location.href='/api/admin/view/reports'" style="cursor: pointer;">
+        <h3>전체 신고</h3>
+        <div class="number">{{stats.totalReports}}</div>
+        <div class="label">게시글 {{stats.postReports}} / 댓글 {{stats.commentReports}}</div>
+    </div>
+    <div class="stat-card warning" onclick="location.href='/api/admin/view/reports/pending'" style="cursor: pointer;">
+        <h3>대기 중</h3>
+        <div class="number">{{stats.pendingReports}}</div>
+        <div class="label">처리 필요</div>
+    </div>
+    <div class="stat-card success" onclick="location.href='/api/admin/view/reports/approved'" style="cursor: pointer;">
+        <h3>승인됨</h3>
+        <div class="number">{{stats.approvedReports}}</div>
+        <div class="label">제재 완료</div>
+    </div>
+    <div class="stat-card danger" onclick="location.href='/api/admin/view/reports/rejected'" style="cursor: pointer;">
+        <h3>반려됨</h3>
+        <div class="number">{{stats.rejectedReports}}</div>
+        <div class="label">신고 기각</div>
+    </div>
+</div>
+
+
 <!-- Chart.js 라이브러리 -->
 <script>
     const stats = {
