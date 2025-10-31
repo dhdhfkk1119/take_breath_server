@@ -48,6 +48,15 @@ public class RecordService {
         return recordRepository.findByMemberEmail(email, pageable).map(RecordListResponse::fromEntity);
     }
 
+    // 특정 조건을 통한 목록 조회(페이징 + 동적 쿼리)
+    @Transactional(readOnly = true)
+    public Page<RecordListResponse> searchWithCondition(
+            String email, RecordSearchCondition condition, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return recordRepository.searchWithCondition(email, condition, pageable)
+                .map(RecordListResponse::fromEntity);
+    }
+
     /**
      * 특정 기록 상세 조회
      *

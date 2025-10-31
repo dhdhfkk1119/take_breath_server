@@ -1,21 +1,20 @@
 package com.take.take_breath.record;
 
-import com.take.take_breath._core._exception.Exception500;
 import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.PageUtil;
-import com.take.take_breath.record.dto.RecordListResponse;
-import com.take.take_breath.record.dto.RecordResponse;
-import com.take.take_breath.record.dto.RecordSaveRequest;
-import com.take.take_breath.record.dto.RecordUpdateRequest;
+import com.take.take_breath.record.dto.*;
+import com.take.take_breath.record.dto.RecordSearchCondition.SearchType;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
+import java.sql.Timestamp;
+
 
 @RestController
 @RequestMapping("/api/records")
@@ -26,6 +25,7 @@ public class RecordController {
     /**
      * 기록 목록 조회(페이징) - get
      * 정렬 - 날짜 - 최신순
+     *
      * @param request
      * @param page
      * @param size
@@ -44,7 +44,55 @@ public class RecordController {
     }
 
     /**
+     * 키워드 목록 조회(패이징) - get
+     * http://localhost:8080/api/records/search?keyword=테&searchType=TITLE&hasImage=false
+     * @param request
+     * @param keyword
+     * @param searchType
+     * @param hasImage
+     * @param hasAudio
+     * @param hasVideo
+     * @param startDate
+     * @param endDate
+     * @param page
+     * @param size
+     * @return
+     */
+    @GetMapping("/search")
+    public ResponseEntity<?> searchWithCondition(
+            HttpServletRequest request,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) SearchType searchType,
+            @RequestParam(required = false) Boolean hasImage,
+            @RequestParam(required = false) Boolean hasAudio,
+            @RequestParam(required = false) Boolean hasVideo,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Timestamp startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Timestamp endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        String memberEmail = request.getAttribute("memberEmail").toString();
+
+        RecordSearchCondition condition = RecordSearchCondition.builder()
+                .keyword(keyword)
+                .searchTarget(searchType)
+                .hasImage(hasImage)
+                .hasAudio(hasAudio)
+                .hasVideo(hasVideo)
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+
+        Page<RecordListResponse> records = recordService.searchWithCondition(memberEmail, condition, page, size);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiUtil.success(PageUtil.PageResponse.of(records)));
+    }
+
+
+    /**
      * 기록 상세 조회
+     *
      * @param id
      * @return
      */
@@ -59,6 +107,7 @@ public class RecordController {
 
     /**
      * 기록 저장
+     *
      * @param request
      * @param recordRequest
      * @return
@@ -77,6 +126,7 @@ public class RecordController {
 
     /**
      * 기록 수정
+     *
      * @param request
      * @param id
      * @param recordRequest
@@ -94,7 +144,13 @@ public class RecordController {
                 .body(ApiUtil.success(updateRecord.getId()));
     }
 
-    // 기록 삭제 - delete - 로컬 데이터도 삭제
+    /**
+     * 기록 삭제 - delete
+     *
+     * @param request
+     * @param id
+     * @return
+     */
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteRecord(
             HttpServletRequest request,
@@ -108,9 +164,9 @@ public class RecordController {
         return ResponseEntity.ok(ApiUtil.success("기록이 성공적으로 삭제되었습니다."));
     }
 
-    // 키워드 검색 - 제목, 내용, 날짜 - queryDSL
+    // 키워드 검색1 - 제목, 내용, 날짜 - queryDSL
 
-    // 자료가 있는것만 조회 - 사진, 오디오
+    // 키워드 검색1 - 자료가 있는것만 조회 - 사진, 오디오
 
     // 기록 다운로드 기능 - pdf
 }
