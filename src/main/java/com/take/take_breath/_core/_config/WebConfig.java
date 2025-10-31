@@ -4,6 +4,7 @@ import com.take.take_breath._core._jwt.JwtInterceptor;
 import com.take.take_breath._core.auth.AuthInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -13,6 +14,17 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final JwtInterceptor jwtInterceptor;
     private final AuthInterceptor authInterceptor;
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns("*", "null")  // 모든 origin 허용
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedHeaders("*")
+                .exposedHeaders("Authorization")  // JWT 헤더 노출
+                .allowCredentials(true)
+                .maxAge(3600);  // preflight 캐싱
+    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

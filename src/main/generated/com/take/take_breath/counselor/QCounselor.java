@@ -30,15 +30,19 @@ public class QCounselor extends EntityPathBase<Counselor> {
 
     public final StringPath introduction = createString("introduction");
 
-    public final StringPath license = createString("license");
+    public final ListPath<CounselorLicense, QCounselorLicense> licenses = this.<CounselorLicense, QCounselorLicense>createList("licenses", CounselorLicense.class, QCounselorLicense.class, PathInits.DIRECT2);
 
     public final com.take.take_breath.members.QMember member;
+
+    public final NumberPath<Integer> point = createNumber("point", Integer.class);
 
     public final NumberPath<Integer> price = createNumber("price", Integer.class);
 
     public final StringPath profileImage = createString("profileImage");
 
     public final StringPath specialty = createString("specialty");
+
+    public final EnumPath<com.take.take_breath.members.Status> status = createEnum("status", com.take.take_breath.members.Status.class);
 
     public QCounselor(String variable) {
         this(Counselor.class, forVariable(variable), INITS);

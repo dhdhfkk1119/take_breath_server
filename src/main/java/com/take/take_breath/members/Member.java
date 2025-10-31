@@ -67,8 +67,9 @@ public class Member {
     @Column(length = 512)
     private String refreshToken;
 
+    @Builder.Default
     @Column(nullable = false)
-    private int point = 0;
+    private Long point = 0L;
 
     // 상담사 프로필 연결
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)

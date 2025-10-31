@@ -4,8 +4,8 @@ import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.PrepareData;
 import com.siot.IamportRestClient.response.IamportResponse;
-import com.take.take_breath._core._errors.exception.Exception400;
-import com.take.take_breath._core._errors.exception.Exception500;
+import com.take.take_breath._core._exception.Exception400;
+import com.take.take_breath._core._exception.Exception500;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.point.PointHistory;
@@ -32,62 +32,86 @@ public class PaymentService {
     private final MemberRepository memberRepository;
     private final PointHistoryRepository pointHistoryRepository;
     private final IamportClient iamportClient;
-    
+
+    // 기본 수수료율 (10%)
+    private static final double DEFAULT_FEE_RATE = 0.1;
+
+    // 수수료 포함 실제 결제 금액 계산
+    private Long calculateTotalAmount(Long pointAmount) {
+        long feeAmount = Math.round(pointAmount * DEFAULT_FEE_RATE);
+        return pointAmount + feeAmount;
+    }
+
+    // 수수료 금액 계산
+    private Long calculateFeeAmount(Long pointAmount) {
+        return Math.round(pointAmount * DEFAULT_FEE_RATE);
+    }
+
     // 허용된 충전 금액 목록
     private static final List<Long> ALLOWED_AMOUNTS = List.of(
-            10000L, 30000L, 50000L, 100000L
+            5000L, 10000L, 30000L, 50000L, 100000L
     );
     
     /**
-     * 결제 준비 - merchantUid 생성 및 포트원 사전 검증
+     * 결제 준비 - 주문번호 생성 및 포트원 사전 검증
      */
     @Transactional
     public PaymentResponse.PrepareDTO prepare(Long memberId, PaymentRequest.PrepareDTO request) {
-        // 1. 회원 조회
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new Exception400("존재하지 않는 회원입니다."));
-        
-        // 2. 금액 검증 (허용된 금액인지 확인)
-        if (!ALLOWED_AMOUNTS.contains(request.getAmount())) {
-            throw new Exception400("유효하지 않은 결제 금액입니다. 허용된 금액: " + ALLOWED_AMOUNTS);
+
+        // 1. 포인트 금액 검증 (허용된 금액인지 확인)
+        Long pointAmount = request.getAmount();
+        if (!ALLOWED_AMOUNTS.contains(pointAmount)) {
+            throw new Exception400("유효하지 않은 포인트 금액입니다. 허용된 금액: " + ALLOWED_AMOUNTS);
         }
-        
-        // 3. merchantUid 생성
+
+        // 2. 수수료 계산
+        Long feeAmount = calculateFeeAmount(pointAmount);
+        Long totalAmount = calculateTotalAmount(pointAmount);
+
+        // 3. 주문번호 생성
         String merchantUid = generateMerchantUid();
-        
-        // 4. 포트원 사전 검증 등록
+
+        // 4. 포트원 사전 검증 등록 (실제 결제될 금액으로)
         try {
             PrepareData prepareData = new PrepareData(
-                    merchantUid, 
-                    BigDecimal.valueOf(request.getAmount())
+                    merchantUid,
+                    BigDecimal.valueOf(totalAmount)  // 수수료 포함 금액
             );
             iamportClient.postPrepare(prepareData);
-            log.info("포트원 사전 검증 등록 완료 - merchantUid: {}, amount: {}", 
-                    merchantUid, request.getAmount());
+            log.info("포트원 사전 검증 등록 완료 - merchantUid: {}, pointAmount: {}P, feeAmount: {}원, totalAmount: {}원",
+                    merchantUid, pointAmount, feeAmount, totalAmount);
         } catch (IamportResponseException | IOException e) {
             log.error("포트원 사전 검증 등록 실패: {}", e.getMessage());
             throw new Exception500("결제 준비에 실패했습니다.");
         }
-        
+
         // 5. Payment 엔티티 생성 (PENDING 상태)
         Payment payment = Payment.builder()
                 .member(member)
                 .merchantUid(merchantUid)
-                .amount(request.getAmount())
+                .pointAmount(pointAmount)      // 실제 적립될 포인트
+                .feeAmount(feeAmount)          // 수수료
+                .feeRate(DEFAULT_FEE_RATE)     // 수수료율
+                .amount(totalAmount)           // 총 결제 금액
                 .status(PaymentStatus.PENDING)
                 .orderName(request.getOrderName())
                 .buyerName(request.getBuyerName())
                 .buyerEmail(request.getBuyerEmail())
                 .buyerTel(request.getBuyerTel())
                 .build();
-        
+
         paymentRepository.save(payment);
-        
-        log.info("결제 준비 완료 - merchantUid: {}, amount: {}", merchantUid, request.getAmount());
-        
+
+        log.info("결제 준비 완료 - merchantUid: {}, pointAmount: {}P, totalAmount: {}원",
+                merchantUid, pointAmount, totalAmount);
+
         return PaymentResponse.PrepareDTO.builder()
                 .merchantUid(merchantUid)
-                .amount(request.getAmount())
+                .amount(totalAmount)           // 실제 결제 금액
+                .pointAmount(pointAmount)      // 적립될 포인트
+                .feeAmount(feeAmount)          // 수수료
                 .orderName(request.getOrderName())
                 .buyerName(request.getBuyerName())
                 .buyerEmail(request.getBuyerEmail())
@@ -139,26 +163,27 @@ public class PaymentService {
             
             // 결제 완료 처리
             payment.completePay(request.getImpUid(), iamportPayment.getPayMethod());
-            
-            // 포인트 적립
+
+            // 포인트 적립 (수수료 제외한 금액만 적립)
             Member member = payment.getMember();
             Long beforePoint = member.getPoint();
-            member.setPoint(beforePoint + payment.getAmount());
-            
+            member.setPoint(beforePoint + payment.getPointAmount());
+
             // 포인트 히스토리 저장
             PointHistory history = PointHistory.builder()
                     .member(member)
+                    .payment(payment)
                     .type(PointTransactionType.CHARGE)
-                    .amount(payment.getAmount())
+                    .amount(payment.getPointAmount())  // 수수료 제외한 포인트만 기록
                     .balanceAfter(member.getPoint())
                     .description("포인트 충전 - " + payment.getOrderName())
                     .build();
-            
+
             pointHistoryRepository.save(history);
-            
-            log.info("결제 검증 완료 - impUid: {}, amount: {}, 포인트 적립: {}P", 
-                    request.getImpUid(), payment.getAmount(), payment.getAmount());
-            
+
+            log.info("결제 검증 완료 - impUid: {}, totalAmount: {}원, pointAmount: {}P, feeAmount: {}원",
+                    request.getImpUid(), payment.getAmount(), payment.getPointAmount(), payment.getFeeAmount());
+
             return new PaymentResponse.ResponseDTO(payment);
             
         } catch (IamportResponseException | IOException e) {
@@ -170,20 +195,19 @@ public class PaymentService {
     }
     
     /**
-     * 내 결제 내역 조회 (페이징)
+     * 내 결제 내역 조회
      */
     public Page<PaymentResponse.ListDTO> getMyPayments(Long memberId, Pageable pageable) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new Exception400("존재하지 않는 회원입니다."));
         
         Page<Payment> payments = paymentRepository.findByMemberIdOrderByCreatedAtDesc(memberId, pageable);
-        
-        // 메서드 참조 제거 - 람다 표현식 사용
+
         return payments.map(payment -> new PaymentResponse.ListDTO(payment));
     }
     
     /**
-     * merchantUid 생성 (주문번호)
+     * merchantUid 주문번호 생성
      */
     private String generateMerchantUid() {
         return "order_" + System.currentTimeMillis();

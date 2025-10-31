@@ -23,14 +23,23 @@ public class Payment {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String impUid;          // 포트원 결제 고유번호 (포트원에서 생성)
 
     @Column(nullable = false, unique = true)
     private String merchantUid;     // 가맹점 주문번호 (우리가 생성)
 
     @Column(nullable = false)
-    private Long amount;    // 결제 금액
+    private Long pointAmount;    // 실제 적립되는 포인트 금액
+
+    @Column(nullable = false)
+    private Long feeAmount;      // 수수료 금액
+
+    @Column(nullable = false)
+    private Double feeRate;     // 수수료 비율 (0.1 = 10%)
+
+    @Column(nullable = false)
+    private Long amount;    // 총 결제 금액
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

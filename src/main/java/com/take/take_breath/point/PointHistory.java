@@ -1,6 +1,7 @@
 package com.take.take_breath.point;
 
 import com.take.take_breath.members.Member;
+import com.take.take_breath.payment.Payment;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -39,7 +40,11 @@ public class PointHistory {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "related_member_id")
     private Member relatedMember;  // 연관된 상대방 (USER 또는 COUNSELOR)
-    
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
+    private Payment payment;  // 어느 충전건에서 사용/환불되었는지 추적 (CHARGE, USE, REFUND에서 사용)
+
     @CreationTimestamp
     private Timestamp createdAt;  // 거래 시간
 }
