@@ -6,8 +6,10 @@ import com.siot.IamportRestClient.request.PrepareData;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception500;
+import com.take.take_breath._core.auth.Auth;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
+import com.take.take_breath.members.Role;
 import com.take.take_breath.point.PointHistory;
 import com.take.take_breath.point.PointHistoryRepository;
 import com.take.take_breath.point.PointTransactionType;
@@ -205,7 +207,22 @@ public class PaymentService {
 
         return payments.map(payment -> new PaymentResponse.ListDTO(payment));
     }
-    
+
+    /**
+     * 관리자용 수수료 통계 조회
+     */
+    public PaymentResponse.AdminFeeStatsDTO getAdminFeeStats() {
+        Long totalFee = paymentRepository.getTotalFeeAmount();
+        Long count = paymentRepository.countPaidPayments();
+        Long totalAmount = paymentRepository.getTotalPaymentAmount();
+
+        return PaymentResponse.AdminFeeStatsDTO.builder()
+                .totalFeeAmount(totalFee != null ? totalFee : 0L)
+                .totalPaymentCount(count != null ? count : 0L)
+                .totalPaymentAmount(totalAmount != null ? totalAmount : 0L)
+                .build();
+    }
+
     /**
      * merchantUid 주문번호 생성
      */

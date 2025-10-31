@@ -85,4 +85,13 @@ public class PaymentResponse {
                     ? DateUtil.timestampFormat(payment.getPaidAt()) : null;
         }
     }
+
+    // 수수료 수익 조회
+    @Data
+    @Builder
+    public static class AdminFeeStatsDTO {
+        private Long totalFeeAmount;      // 총 수수료 수익
+        private Long totalPaymentCount;   // 결제 건수
+        private Long totalPaymentAmount;  // 총 결제 금액
+    }
 }
