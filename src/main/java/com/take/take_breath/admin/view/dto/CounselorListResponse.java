@@ -10,14 +10,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Getter
-public class CounselorListDTO {
+public class CounselorListResponse {
     private final Long id;
     private final String name;
     private final String email;
     private final String specialty;
     private final List<LicenseDTO> licenses;
 
-    public CounselorListDTO(Counselor counselor) {
+    public CounselorListResponse(Counselor counselor) {
         this.id = counselor.getId();
         this.name = counselor.getMember() != null ? counselor.getMember().getName() : "N/A";
         this.email = counselor.getMember() != null ? counselor.getMember().getEmail() : "N/A";

@@ -1,6 +1,6 @@
 package com.take.take_breath.admin.view;
 
-import com.take.take_breath.admin.view.dto.MemberStatsDTO;
+import com.take.take_breath.admin.view.dto.MemberStatsResponse;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Status;
@@ -27,7 +27,7 @@ public class AdminMemberService {
     /**
      * 회원 통계 조회
      */
-    public MemberStatsDTO getMemberStats() {
+    public MemberStatsResponse getMemberStats() {
         long totalMembers = memberRepository.count();
         long activeMembers = memberRepository.countByStatus(Status.ACTIVE);
         long suspendedMembers = memberRepository.countByStatus(Status.SUSPENDED);
@@ -36,7 +36,7 @@ public class AdminMemberService {
         // TODO: 도우미 버튼 클릭 수는 별도 테이블 필요
         long helpButtonClicks = 0;
 
-        return new MemberStatsDTO(
+        return new MemberStatsResponse(
                 totalMembers,
                 activeMembers,
                 suspendedMembers,

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberStatsDTO {
+public class MemberStatsResponse {
     private long totalMembers;       // 전체 회원
     private long activeMembers;      // 활성 회원
     private long suspendedMembers;   // 정지 회원

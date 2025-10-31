@@ -1,7 +1,7 @@
 package com.take.take_breath.admin.view;
 
 
-import com.take.take_breath.admin.view.dto.DashboardStatsDTO;
+import com.take.take_breath.admin.view.dto.DashboardStatsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +17,7 @@ public class AdminDashboardController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        DashboardStatsDTO stats = adminDashboardService.getDashboardStats();
+        DashboardStatsResponse stats = adminDashboardService.getDashboardStats();
         model.addAttribute("stats", stats);
 
         // 레이아웃 설정

@@ -1,7 +1,6 @@
 package com.take.take_breath.admin.view;
 
-import com.take.take_breath.admin.view.dto.CounselorListDTO;
-import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.admin.view.dto.CounselorListResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,9 +19,9 @@ public class AdminCounselorController {
     // 상담사 목록 (승인 대기 중)
     @GetMapping
     public String list(Model model) {
-        List<CounselorListDTO> counselorList = adminCounselorService.findPendingCounselors()
+        List<CounselorListResponse> counselorList = adminCounselorService.findPendingCounselors()
                 .stream()
-                .map(counselor -> new CounselorListDTO(counselor))
+                .map(counselor -> new CounselorListResponse(counselor))
                 .toList();
 
         // 레이아웃 설정
