@@ -1,6 +1,6 @@
 package com.take.take_breath.admin.view;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.take.take_breath.admin.view.dto.DashboardStatsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -14,11 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminDashboardController {
 
     private final AdminDashboardService adminDashboardService;
+    private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 변환용
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Model model) throws Exception {
         DashboardStatsResponse stats = adminDashboardService.getDashboardStats();
+
+        // JSON 문자열로 변환 ({{{ }}}로 raw 출력)
+        String statsJson = objectMapper.writeValueAsString(stats);
+
         model.addAttribute("stats", stats);
+        model.addAttribute("statsJson", statsJson);
 
         // 레이아웃 설정
         model.addAttribute("pageTitle", "관리자 대시보드");

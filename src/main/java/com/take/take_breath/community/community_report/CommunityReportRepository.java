@@ -21,6 +21,8 @@ public interface CommunityReportRepository extends JpaRepository<CommunityReport
             "LEFT JOIN FETCH r.adminComments c " +
             "WHERE r.id = :reportId")
     Optional<CommunityReport> findByIdWithAdminComments(@Param("reportId") Long reportId);
+
+    long countByStatus(CommunityReportStatus status);
 }
 
 
