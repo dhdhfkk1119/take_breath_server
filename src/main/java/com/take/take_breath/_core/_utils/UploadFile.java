@@ -50,6 +50,34 @@ public class UploadFile {
     }
 
     /**
+     * 프로필 이미지 삭제
+     * @param imagePath DB에 저장된 상대경로 (ex. member-images/xxx.png)
+     * @param dirType "member" 또는 "counselor"
+     */
+    public void deleteProfileImage(String imagePath, String dirType) {
+        if (imagePath == null || imagePath.isBlank()) return;
+
+        try {
+            if (imagePath.contains("default_profile.png")) return; // 기본 이미지 삭제 방지
+
+            // URL이면 접두사 제거
+            if (imagePath.startsWith("http")) {
+                int idx = imagePath.indexOf("/static/uploads/");
+                if (idx != -1) {
+                    imagePath = imagePath.substring(idx + "/static/uploads/".length());
+                }
+            }
+
+            Path filePath = Paths.get(uploadProperties.getRootDir(), imagePath);
+            Files.deleteIfExists(filePath);
+
+        } catch (IOException e) {
+            throw new RuntimeException("프로필 이미지를 삭제하지 못했습니다", e);
+        }
+    }
+
+
+    /**
      * Record 이미지 파일들 업로드 (다중 파일)
      * @param files 업로드할 이미지 파일 리스트
      * @return 저장된 파일 정보 리스트 (UploadedFileInfo)
@@ -133,33 +161,53 @@ public class UploadFile {
         return uploadedFiles;
     }
 
-
     /**
-     * 프로필 이미지 삭제
-     * @param imagePath DB에 저장된 상대경로 (ex. member-images/xxx.png)
-     * @param dirType "member" 또는 "counselor"
+     * 파일 경로 리스트로 파일 삭제
+     *
+     * @param filePaths 삭제할 파일 경로 리스트
      */
-    public void deleteProfileImage(String imagePath, String dirType) {
-        if (imagePath == null || imagePath.isBlank()) return;
+    public void deleteFiles(List<String> filePaths) {
+        if (filePaths == null || filePaths.isEmpty()) {
+            return;
+        }
 
-        try {
-            if (imagePath.contains("default_profile.png")) return; // 기본 이미지 삭제 방지
+        int successCount = 0;
+        int failCount = 0;
 
-            // URL이면 접두사 제거
-            if (imagePath.startsWith("http")) {
-                int idx = imagePath.indexOf("/static/uploads/");
-                if (idx != -1) {
-                    imagePath = imagePath.substring(idx + "/static/uploads/".length());
-                }
+        for (String filePath : filePaths) {
+            if (deleteFile(filePath)) {
+                successCount++;
+            } else {
+                failCount++;
             }
-
-            Path filePath = Paths.get(uploadProperties.getRootDir(), imagePath);
-            Files.deleteIfExists(filePath);
-
-        } catch (IOException e) {
-            throw new RuntimeException("프로필 이미지를 삭제하지 못했습니다", e);
         }
     }
+
+    /**
+     * 단일 파일 삭제 (파일시스템)
+     * @param relativePath DB에 저장된 상대 경로 (예: records/images/xxx.png)
+     * @return 삭제 성공 여부
+     */
+    public boolean deleteFile(String relativePath) {
+        if (relativePath == null || relativePath.isEmpty()) {
+            return false;
+        }
+
+        try {
+            Path filePath = Paths.get(uploadProperties.getRootDir(), relativePath);
+
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
 
     /**
      * 채팅 이미지 읽기

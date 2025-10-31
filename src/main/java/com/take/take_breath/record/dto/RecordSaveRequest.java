@@ -14,7 +14,6 @@ import java.util.List;
 public class RecordSaveRequest {
     private String title;
     private String content;
-    // private Timestamp recordDate;
     private List<MultipartFile> imageFiles;
     private List<MultipartFile> audioFiles;
     private List<MultipartFile> videoFiles;

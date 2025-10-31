@@ -45,8 +45,13 @@ public class Record {
     @Builder.Default
     private List<RecordFile> recordFiles  = new ArrayList<>();
 
-    public String getTime() {
-        return DateUtil.chatFormat(recordDate);
+
+    public String getRecordDateTime() {
+        return DateUtil.timestampFormat(recordDate);
+    }
+
+    public String getUpdateDateTime() {
+        return DateUtil.timestampFormat(updatedDate);
     }
 
     public List<RecordFile> getImageFiles() {
