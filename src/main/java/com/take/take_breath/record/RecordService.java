@@ -1,5 +1,11 @@
 package com.take.take_breath.record;
 
+import com.itextpdf.io.source.ByteArrayOutputStream;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath._core._exception.Exception500;
@@ -48,7 +54,14 @@ public class RecordService {
         return recordRepository.findByMemberEmail(email, pageable).map(RecordListResponse::fromEntity);
     }
 
-    // 특정 조건을 통한 목록 조회(페이징 + 동적 쿼리)
+    /**
+     * 특정 조건을 통한 목록 조회(페이징 + 동적 쿼리)
+     * @param email
+     * @param condition
+     * @param page
+     * @param size
+     * @return
+     */
     @Transactional(readOnly = true)
     public Page<RecordListResponse> searchWithCondition(
             String email, RecordSearchCondition condition, int page, int size) {
@@ -160,6 +173,29 @@ public class RecordService {
         recordRepository.delete(record);
     }
 
+    public byte[] generatePdf(String email, Long recordId) {
+        // 예외 처리 & 권한 체크
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception404("해당 유저가 존재하지 않습니다."));
+        Record record = recordRepository.findById(recordId)
+                .orElseThrow(() -> new Exception404("해당 기록이 존재하지 않습니다"));
+        if (!record.getMember().getId().equals(member.getId())) {
+            throw new Exception403("해당 기록을 수정할 권한이 없습니다");
+        }
+
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
+        Document document = new Document(pdf);
+
+        document.add(new Paragraph("Hello from Spring + iText!"));
+        document.add(new Paragraph("PDF가 정상적으로 생성되었습니다."));
+        document.close();
+
+        byte[] pdfBytes = baos.toByteArray();
+        return pdfBytes;
+    }
 
 
 

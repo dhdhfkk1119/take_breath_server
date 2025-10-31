@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -141,7 +142,7 @@ public class RecordController {
      * @param recordRequest
      * @return
      */
-    @PutMapping(path = "{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateRecord(
             HttpServletRequest request,
             @PathVariable(name = "id") Long id,
@@ -160,7 +161,7 @@ public class RecordController {
      * @param id
      * @return
      */
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRecord(
             HttpServletRequest request,
             @PathVariable(name = "id") Long id) {
@@ -173,11 +174,22 @@ public class RecordController {
         return ResponseEntity.ok(ApiUtil.success("기록이 성공적으로 삭제되었습니다."));
     }
 
-    // 키워드 검색1 - 제목, 내용, 날짜 - queryDSL
-
-    // 키워드 검색1 - 자료가 있는것만 조회 - 사진, 오디오
 
     // 기록 다운로드 기능 - pdf
+    @GetMapping("/pdf/{id}")
+    public ResponseEntity<?> getPdf(
+            HttpServletRequest request,
+            @PathVariable(name = "id") Long id) {
+        String memberEmail = request.getAttribute("memberEmail").toString();
+
+        byte[] pdf = recordService.generatePdf(memberEmail, id);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "sample.pdf");
+
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+    }
 }
 
 

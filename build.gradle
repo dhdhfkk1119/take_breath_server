@@ -61,6 +61,12 @@ dependencies {
 
     // 웹소켓
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    
+    // pdf 생성 의존성
+    implementation 'com.itextpdf:itext7-core:7.2.5'
+
+
+
 
     // Q클래스 생성 경로 설정
     def generated = 'src/main/generated'
