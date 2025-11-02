@@ -182,13 +182,35 @@ public class RecordController {
             @PathVariable(name = "id") Long id) {
         String memberEmail = request.getAttribute("memberEmail").toString();
 
+
+
         byte[] pdf = recordService.generatePdf(memberEmail, id);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("attachment", "sample.pdf");
+        headers.setContentDispositionFormData("attachment", "record.pdf");
 
         return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+
+        /**
+         * axios.get('http://localhost:8080/api/record/pdf/5', {
+         *   responseType: 'blob', // ✅ 이게 중요! (binary로 받기)
+         *   headers: {
+         *     Authorization: `Bearer ${token}`,
+         *   },
+         * })
+         * .then(response => {
+         *   // Blob으로 변환
+         *   const blob = new Blob([response.data], { type: 'application/pdf' });
+         *   const url = window.URL.createObjectURL(blob);
+         *
+         *   // 다운로드 링크 생성
+         *   const link = document.createElement('a');
+         *   link.href = url;
+         *   link.download = 'record.pdf';
+         *   link.click();
+         * });
+         */
     }
 }
 

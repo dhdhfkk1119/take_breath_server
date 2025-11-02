@@ -144,7 +144,9 @@ public class UploadFile {
             file.transferTo(savePath);
 
             // DB 저장용 상대 경로 (예: records/images/20251027_120000_abc123.png)
-            String relativePath = Paths.get(subDir, savedFileName).toString().replace("\\", "/");
+            // String relativePath = Paths.get(subDir, savedFileName).toString().replace("\\", "/");
+            // String relativePath = Paths.get(fullUploadPath, savedFileName).toString().replace("\\", "/");
+            String relativePath = savePath.toString().replace("\\", "/");
 
             // 파일 정보 객체 생성
             UploadedFileInfo fileInfo = UploadedFileInfo.builder()

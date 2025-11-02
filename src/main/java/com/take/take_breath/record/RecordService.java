@@ -1,15 +1,8 @@
 package com.take.take_breath.record;
 
-import com.itextpdf.io.source.ByteArrayOutputStream;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
-import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath._core._exception.Exception500;
-import com.take.take_breath._core._utils.FileUtil;
 import com.take.take_breath._core._utils.UploadFile;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
@@ -22,13 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +26,7 @@ public class RecordService {
     private final RecordRepository recordRepository;
     private final RecordFileRepository recordFileRepository;
     private final MemberRepository memberRepository;
+    private final RecordPdfService recordPdfService;
     private final UploadFile uploadFile;
 
     private final String commonSavedPath = "/uploads/record/";
@@ -174,16 +163,26 @@ public class RecordService {
     }
 
     public byte[] generatePdf(String email, Long recordId) {
-        // 예외 처리 & 권한 체크
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new Exception404("해당 유저가 존재하지 않습니다."));
-        Record record = recordRepository.findById(recordId)
-                .orElseThrow(() -> new Exception404("해당 기록이 존재하지 않습니다"));
-        if (!record.getMember().getId().equals(member.getId())) {
-            throw new Exception403("해당 기록을 수정할 권한이 없습니다");
+        try {
+            // 예외 처리 & 권한 체크
+            Member member = memberRepository.findByEmail(email)
+                    .orElseThrow(() -> new Exception404("해당 유저가 존재하지 않습니다."));
+            Record record = recordRepository.findById(recordId)
+                    .orElseThrow(() -> new Exception404("해당 기록이 존재하지 않습니다"));
+            if (!record.getMember().getId().equals(member.getId())) {
+                throw new Exception403("해당 기록을 수정할 권한이 없습니다");
+            }
+
+            // 2. 첨부 파일 조회
+            List<RecordFile> recordFiles = recordFileRepository.findByRecordId(recordId);
+
+            // 3. PDF 생성
+            return recordPdfService.generatePdf(record, recordFiles);
+        } catch (Exception e) {
+            throw new Exception500("pdf 파일 생성에 실패했습니다");
         }
 
-
+        /*
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(baos);
         PdfDocument pdf = new PdfDocument(writer);
@@ -195,6 +194,7 @@ public class RecordService {
 
         byte[] pdfBytes = baos.toByteArray();
         return pdfBytes;
+        */
     }
 
 
