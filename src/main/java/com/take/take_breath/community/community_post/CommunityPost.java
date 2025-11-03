@@ -58,7 +58,6 @@ public class CommunityPost {
     @Column(nullable = false, updatable = false)
     private Timestamp createdAt;
 
-    @UpdateTimestamp
     @Column(nullable = false)
     private Timestamp updatedAt;
 
@@ -106,6 +105,12 @@ public class CommunityPost {
 
     public void softDelete() {
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+        this.updatedAt = new Timestamp(System.currentTimeMillis());
     }
 
     public boolean isDeleted() {
