@@ -22,4 +22,6 @@ public interface CommentReportRepository extends JpaRepository<CommentReport, Lo
             "LEFT JOIN FETCH r.adminComments c " +
             "WHERE r.id = :reportId")
     Optional<CommentReport> findByIdWithAdminComments(@Param("reportId") Long reportId);
+
+    long countByStatus(CommunityReportStatus status);
 }

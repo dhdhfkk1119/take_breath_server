@@ -1,0 +1,56 @@
+{{> layout/admin-layout-start}}
+
+<div class="page-header">
+    <h2>{{pageTitle}}</h2>
+    <p>회원 정보를 관리하세요</p>
+</div>
+
+<div class="filter-buttons">
+    <a href="/api/admin/view/members/list" class="filter-btn {{#isAllFilter}}active{{/isAllFilter}}">전체 회원</a>
+    <a href="/api/admin/view/members/active" class="filter-btn {{#isActiveFilter}}active{{/isActiveFilter}}">활성 회원</a>
+    <a href="/api/admin/view/members/suspended" class="filter-btn {{#isSuspendedFilter}}active{{/isSuspendedFilter}}">정지 회원</a>
+    <a href="/api/admin/view/members/withdrawal" class="filter-btn {{#isWithdrawalFilter}}active{{/isWithdrawalFilter}}">탈퇴 대기</a>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>이메일</th>
+            <th>이름</th>
+            <th>닉네임</th>
+            <th>역할</th>
+            <th>상태</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#members}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{email}}</td>
+                <td>{{name}}</td>
+                <td>{{nickname}}</td>
+                <td>
+                    {{#isUserRole}}<span class="badge badge-role-USER">일반</span>{{/isUserRole}}
+                    {{#isCounselorRole}}<span class="badge badge-role-COUNSELOR">상담사</span>{{/isCounselorRole}}
+                    {{#isAdminRole}}<span class="badge badge-role-ADMIN">관리자</span>{{/isAdminRole}}
+                </td>
+                <td>
+                    {{#isActive}}<span class="badge badge-status-ACTIVE">활성</span>{{/isActive}}
+                    {{#isSuspended}}<span class="badge badge-status-SUSPENDED">정지</span>{{/isSuspended}}
+                    {{#isPending}}<span class="badge badge-status-PENDING">대기</span>{{/isPending}}
+                    {{#isWithdrawal}}<span class="badge badge-status-WITHDRAWAL">탈퇴대기</span>{{/isWithdrawal}}
+                </td>
+            </tr>
+        {{/members}}
+        {{^members}}
+            <tr>
+                <td colspan="6" style="text-align:center; padding:2rem; color:#999;">회원이 없습니다.</td>
+            </tr>
+        {{/members}}
+        </tbody>
+    </table>
+</div>
+
+{{> layout/admin-layout-end}}

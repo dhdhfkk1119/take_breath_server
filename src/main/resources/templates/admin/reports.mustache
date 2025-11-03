@@ -1,0 +1,98 @@
+{{> layout/admin-layout-start}}
+
+<div class="page-header">
+    <h2>{{pageTitle}}</h2>
+    <p>게시글 및 댓글 신고 내역을 확인하고 처리할 수 있습니다.</p>
+</div>
+
+<!-- 필터 버튼 -->
+<div class="filter-buttons">
+    <a href="/api/admin/view/reports" class="filter-btn {{#isAllFilter}}active{{/isAllFilter}}">
+        전체 신고
+    </a>
+    <a href="/api/admin/view/reports/pending" class="filter-btn {{#isPendingFilter}}active{{/isPendingFilter}}">
+        대기 중
+    </a>
+    <a href="/api/admin/view/reports/approved" class="filter-btn {{#isApprovedFilter}}active{{/isApprovedFilter}}">
+        승인됨
+    </a>
+    <a href="/api/admin/view/reports/rejected" class="filter-btn {{#isRejectedFilter}}active{{/isRejectedFilter}}">
+        반려됨
+    </a>
+</div>
+
+<!-- 신고 목록 테이블 -->
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>신고 유형</th>
+            <th>신고 대상</th>
+            <th>신고자</th>
+            <th>사유</th>
+            <th>상태</th>
+            <th>신고일</th>
+            <th>처리</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#reports}}
+            <tr>
+                <td>{{id}}</td>
+                <td>
+                    <span class="badge badge-type-{{reportType}}">
+                        {{#isPostReport}}게시글{{/isPostReport}}
+                        {{#isCommentReport}}댓글{{/isCommentReport}}
+                    </span>
+                </td>
+                <td class="target-cell">
+                    {{targetContent}}
+                </td>
+                <td>{{reporterEmail}}</td>
+                <td class="reason-cell">{{reason}}</td>
+                <td>
+                    <span class="badge badge-status-{{status}}">
+                        {{#isPending}}대기 중{{/isPending}}
+                        {{#isApproved}}승인됨{{/isApproved}}
+                        {{#isRejected}}반려됨{{/isRejected}}
+                    </span>
+                </td>
+                <td>{{createdAt}}</td>
+                <td>
+                    {{#isPending}}
+                        <button class="btn btn-sm btn-success" onclick="openProcessModal({{id}}, '{{reportType}}', 'approve')">승인</button>
+                        <button class="btn btn-sm btn-danger" onclick="openProcessModal({{id}}, '{{reportType}}', 'reject')">반려</button>
+                    {{/isPending}}
+                    {{^isPending}}
+                        <span style="color: #999;">처리완료</span>
+                    {{/isPending}}
+                </td>
+            </tr>
+        {{/reports}}
+        {{^reports}}
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem; color: #999;">
+                    신고 내역이 없습니다.
+                </td>
+            </tr>
+        {{/reports}}
+        </tbody>
+    </table>
+</div>
+
+<!-- 신고 처리 모달 -->
+<div id="processModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">신고 처리</h3>
+        <p id="modalDescription">처리 사유를 입력하세요:</p>
+        <textarea id="reasonInput" placeholder="제재 또는 반려 사유를 입력하세요"></textarea>
+
+        <div class="modal-buttons">
+            <button id="confirmBtn" class="btn btn-primary">확인</button>
+            <button id="cancelBtn" class="btn btn-secondary">취소</button>
+        </div>
+    </div>
+</div>
+
+{{> layout/admin-layout-end}}
