@@ -16,15 +16,12 @@ public class CommunityPostRequest {
         @NotBlank(message = "내용은 필수입니다.")
         private String content;
         private Long categoryId;
-        private List<String> imageUrls;
 
         public SaveDTO(CommunityPost post) {
             this.title = post.getTitle();
             this.content = post.getContent();
             this.categoryId = post.getCategory() != null ? post.getCategory().getId() : null;
-            this.imageUrls = post.getImages().stream()
-                    .map(img -> img.getImageUrl())
-                    .toList();
+
         }
     }
 
@@ -36,7 +33,6 @@ public class CommunityPostRequest {
         @NotBlank(message = "내용은 필수입니다.")
         private String content;
         private Long categoryId;
-        private List<String> addImageUrls;
         private List<Long> deleteImageIds;
 
         public UpdateDTO(CommunityPost post) {

@@ -3,6 +3,8 @@ package com.take.take_breath.community.community_post;
 import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._exception.Exception404;
+import com.take.take_breath._core._utils.UploadFile;
+import com.take.take_breath._core._utils.UploadProperties;
 import com.take.take_breath.community.community_category.CommunityCategory;
 import com.take.take_breath.community.community_category.CommunityCategoryRepository;
 import com.take.take_breath.community.community_post_image.CommunityPostImage;
@@ -23,7 +25,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +48,8 @@ public class CommunityPostService {
     private final CommunityReportProcessRepository communityReportProcessRepository;
     private final CommunityReportRepository communityReportRepository;
     private final MemberRepository memberRepository;
+    private final UploadFile uploadFile;
+    private final UploadProperties uploadProperties;
 
     /**
      * 게시글 목록 조회/검색 (키워드, 카테고리, 정렬, 좋아요 여부 포함)
@@ -123,7 +130,7 @@ public class CommunityPostService {
      * 게시글 작성
      */
     @Transactional
-    public CommunityPostResponse.ResponseDTO savePost(CommunityPostRequest.SaveDTO saveDTO, Long memberId) {
+    public CommunityPostResponse.ResponseDTO savePost(CommunityPostRequest.SaveDTO saveDTO, Long memberId, MultipartFile[] files) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new Exception404("회원을 찾을 수 없습니다."));
@@ -145,18 +152,27 @@ public class CommunityPostService {
 
         CommunityPost savedPost = communityPostRepository.save(post);
 
-        // 이미지 저장 및 썸네일 설정
-        if (saveDTO.getImageUrls() != null && !saveDTO.getImageUrls().isEmpty()) {
-            savedPost.setThumbnailImageUrl(saveDTO.getImageUrls().get(0));
+        List<String> uploadedImageUrls = new ArrayList<>();
+        if (files != null && files.length > 0) {
+            try {
+                uploadedImageUrls = uploadFile.uploadImages(files, uploadProperties.getCommunityDir());
 
-            for (String imageUrl : saveDTO.getImageUrls()) {
-                CommunityPostImage image = CommunityPostImage.builder()
-                        .imageUrl(imageUrl)
-                        .post(savedPost)
-                        .build();
-                savedPost.addImage(image);
+                if (!uploadedImageUrls.isEmpty()) {
+                    savedPost.setThumbnailImageUrl(uploadedImageUrls.get(0));
+
+                    for (String imageUrl : uploadedImageUrls) {
+                        CommunityPostImage image = CommunityPostImage.builder()
+                                .imageUrl(imageUrl)
+                                .post(savedPost)
+                                .build();
+                        savedPost.addImage(image);
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
+
 
         return CommunityPostResponse.ResponseDTO.builder()
                 .post(savedPost)
@@ -167,44 +183,61 @@ public class CommunityPostService {
      * 게시글 수정
      */
     @Transactional
-    public CommunityPostResponse.ResponseDTO updatePost(Long postId, CommunityPostRequest.UpdateDTO updateDTO, Long memberId) {
+    public CommunityPostResponse.ResponseDTO updatePost(Long postId, CommunityPostRequest.UpdateDTO updateDTO, Long memberId,MultipartFile[] addFiles) {
         // 게시글과 이미지, 카테고리를 함께 조회
         CommunityPost post = communityPostRepository.findById(postId)
                 .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
+        try {
 
-        if (!post.isOwner(memberId)) {
-            throw new Exception403("본인이 작성한 게시글만 수정할 수 있습니다.");
-        }
-
-        if (post.isDeleted()) {
-            throw new Exception400("삭제된 게시글은 수정할 수 없습니다.");
-        }
-
-        post.update(updateDTO.getTitle(), updateDTO.getContent());
-
-        // 카테고리 수정
-        if (updateDTO.getCategoryId() != null) {
-            CommunityCategory category = communityCategoryRepository.findById(updateDTO.getCategoryId())
-                    .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
-            post.setCategory(category);
-        }
-
-        // 이미지 삭제
-        if (updateDTO.getDeleteImageIds() != null && !updateDTO.getDeleteImageIds().isEmpty()) {
-
-            post.getImages().removeIf(image -> updateDTO.getDeleteImageIds().contains(image.getId()));
-        }
-
-        // 이미지 추가
-        if (updateDTO.getAddImageUrls() != null && !updateDTO.getAddImageUrls().isEmpty()) {
-            for (String imageUrl : updateDTO.getAddImageUrls()) {
-                CommunityPostImage image = CommunityPostImage.builder()
-                        .imageUrl(imageUrl)
-                        .post(post)
-                        .build();
-                post.addImage(image);
+            if (!post.isOwner(memberId)) {
+                throw new Exception403("본인이 작성한 게시글만 수정할 수 있습니다.");
             }
-        }
+
+            if (post.isDeleted()) {
+                throw new Exception400("삭제된 게시글은 수정할 수 없습니다.");
+            }
+
+            post.update(updateDTO.getTitle(), updateDTO.getContent());
+
+            // 카테고리 수정
+            if (updateDTO.getCategoryId() != null) {
+                CommunityCategory category = communityCategoryRepository.findById(updateDTO.getCategoryId())
+                        .orElseThrow(() -> new Exception404("카테고리를 찾을 수 없습니다."));
+                post.setCategory(category);
+            }
+
+            // 1. 기존 이미지 삭제
+            if (updateDTO.getDeleteImageIds() != null && !updateDTO.getDeleteImageIds().isEmpty()) {
+
+                // *주의: 실제 파일 저장소(서버 디렉토리/S3 등)에서도 삭제 로직을 추가해야 하지만,
+                // 현재 코드에서는 DB 연관관계 제거만 수행합니다.
+
+                // 게시글의 이미지 목록에서 ID가 일치하는 이미지를 제거합니다.
+                post.getImages().removeIf(image -> {
+                    boolean shouldRemove = updateDTO.getDeleteImageIds().contains(image.getId());
+
+                    // 만약 서버 파일도 삭제해야 한다면 여기에 로직 추가
+                    // if (shouldRemove) { uploadFile.deleteFile(image.getImageUrl()); }
+
+                    return shouldRemove;
+                });
+            }
+
+            // 2. 새로운 이미지 추가
+            if (addFiles != null && addFiles.length > 0) {
+                // 새로 받은 파일들을 업로드하고 URL 리스트를 얻습니다.
+                List<String> newImageUrls = null;
+                newImageUrls = uploadFile.uploadImages(addFiles, uploadProperties.getCommunityDir());
+
+                for (String imageUrl : newImageUrls) {
+                    CommunityPostImage image = CommunityPostImage.builder()
+                            .imageUrl(imageUrl)
+                            .post(post)
+                            .build();
+                    post.addImage(image);
+                }
+            }
+
 
         // 모든 이미지 변경 후 썸네일 재설정
         String newThumbnailUrl = post.getImages().stream()
@@ -212,7 +245,9 @@ public class CommunityPostService {
                 .map(image -> image.getImageUrl())
                 .orElse(null);
         post.setThumbnailImageUrl(newThumbnailUrl);
-
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return CommunityPostResponse.ResponseDTO.builder()
                 .post(post)
                 .build();
