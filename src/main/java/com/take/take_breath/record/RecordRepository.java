@@ -4,9 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
-
-public interface RecordRepository extends JpaRepository<Record, Long> {
+public interface RecordRepository extends JpaRepository<Record, Long>, RecordRepositoryCustom {
     Page<Record> findAll(Pageable pageable);
     Page<Record> findByMemberId(Long memberId, Pageable pageable);
     Page<Record> findByMemberEmail(String email, Pageable pageable);

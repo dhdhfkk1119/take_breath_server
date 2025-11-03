@@ -1,0 +1,75 @@
+{{> layout/admin-layout-start}}
+
+<div class="page-header">
+    <h2>{{pageTitle}}</h2>
+    <p>상담사 정보를 관리하세요</p>
+</div>
+
+<!-- 필터 버튼 -->
+<div class="filter-buttons">
+    <a href="/api/admin/view/counselors/list" class="filter-btn {{#isAllFilter}}active{{/isAllFilter}}">
+        전체 상담사
+    </a>
+    <a href="/api/admin/view/counselors/active" class="filter-btn {{#isActiveFilter}}active{{/isActiveFilter}}">
+        활성 상담사
+    </a>
+    <a href="/api/admin/view/counselors/pending" class="filter-btn {{#isPendingFilter}}active{{/isPendingFilter}}">
+        승인 대기
+    </a>
+</div>
+
+<!-- 상담사 목록 테이블 -->
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>회원 이메일</th>
+            <th>회원 이름</th>
+            <th>전문 분야</th>
+            <th>가격</th>
+            <th>포인트</th>
+            <th>상태</th>
+            <th>소개</th>
+            <th>해시태그</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#counselors}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{member.email}}</td>
+                <td>{{member.name}}</td>
+                <td>{{specialty}}</td>
+                <td>{{price}}원</td>
+                <td>{{point}}</td>
+                <td>
+                    {{#isActive}}
+                        <span class="badge badge-ACTIVE">활성</span>
+                    {{/isActive}}
+                    {{#isPending}}
+                        <span class="badge badge-PENDING">대기</span>
+                    {{/isPending}}
+                    {{#isSuspended}}
+                        <span class="badge badge-SUSPENDED">정지</span>
+                    {{/isSuspended}}
+                    {{#isRejected}}
+                        <span class="badge badge-REJECTED">거절</span>
+                    {{/isRejected}}
+                </td>
+                <td class="introduction-cell">{{introduction}}</td>
+                <td>{{hashtags}}</td>
+            </tr>
+        {{/counselors}}
+        {{^counselors}}
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 2rem; color: #999;">
+                    상담사가 없습니다.
+                </td>
+            </tr>
+        {{/counselors}}
+        </tbody>
+    </table>
+</div>
+
+{{> layout/admin-layout-end}}
