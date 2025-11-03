@@ -180,8 +180,8 @@ public class CommunityPostService {
             throw new Exception400("삭제된 게시글은 수정할 수 없습니다.");
         }
 
-        post.setTitle(updateDTO.getTitle());
-        post.setContent(updateDTO.getContent());
+        post.update(updateDTO.getTitle(), updateDTO.getContent());
+
         // 카테고리 수정
         if (updateDTO.getCategoryId() != null) {
             CommunityCategory category = communityCategoryRepository.findById(updateDTO.getCategoryId())
