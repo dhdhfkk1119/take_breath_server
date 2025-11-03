@@ -79,6 +79,10 @@ public class Member {
     @Column(name = "withdrawal_reason", length = 500)
     private String withdrawalReason;
 
+    @Column(name = "suspended_until")
+    private LocalDateTime suspendedUntil;
+
+
     // 상담사 프로필 연결
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     private Counselor counselor;
