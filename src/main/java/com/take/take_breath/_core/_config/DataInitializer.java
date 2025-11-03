@@ -6,6 +6,8 @@ import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
+import com.take.take_breath.record.*;
+import com.take.take_breath.record.Record;
 import com.take.take_breath.terms.MemberTerms;
 import com.take.take_breath.terms.MemberTermsRepository;
 import com.take.take_breath.terms.Terms;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -28,6 +31,8 @@ public class DataInitializer implements CommandLineRunner {
     private final TermsRepository termsRepository;
     private final MemberTermsRepository memberTermsRepository;
     private final CommunityCategoryRepository communityCategoryRepository;
+    private final RecordRepository recordRepository;
+    private final RecordFileRepository recordFileRepository;
 
     // 이니셜라이즈 회원가입 멤버 추가
     @Override
@@ -115,6 +120,29 @@ public class DataInitializer implements CommandLineRunner {
         communityCategoryRepository.save(CommunityCategory.builder()
                 .name("질문답변")
                 .build());
+
+        // 기록에 대한 더미 데이터 생성
+        Record record = Record.builder()
+                .member(user)
+                .title("첫 번째 테스트 기록")
+                .content("이것은 서버 시작 시 자동으로 생성된 테스트 기록입니다.")
+                .build();
+        Record savedRecord = recordRepository.save(record);
+
+        // RecordFile (첨부파일) 생성 예시
+        RecordFile imageFile = RecordFile.builder()
+                .record(savedRecord)
+                .fileType(FileType.IMAGE)
+                .fileName("sample_001.png")
+                .originalFileName("sample_001.png")
+                .filePath("/uploads/record/images/sample_001.png")
+                .fileSize(204800L)
+                .contentType("image/png")
+                .build();
+        recordFileRepository.save(imageFile);
+
+        savedRecord.addRecordFile(imageFile);
+        recordRepository.save(savedRecord);
 
         log.info("===== 더미 데이터 생성 완료 =====");
         log.info("일반 유저: user@test.com / 1234");
