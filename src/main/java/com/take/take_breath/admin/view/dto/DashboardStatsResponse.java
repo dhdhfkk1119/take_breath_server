@@ -7,12 +7,10 @@ import com.take.take_breath.counselor.CounselorRepository;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -36,6 +34,7 @@ public class DashboardStatsResponse {
     private long rejectedReports;
     private long postReports;
     private long commentReports;
+    private MemberGrowthData memberGrowthData;
 
     private long helpButtonClicks;
 
@@ -93,7 +92,13 @@ public class DashboardStatsResponse {
                 .userCount(userCount)
                 .counselorCount(counselorCount)
                 .adminCount(adminCount)
-                .helpButtonClicks(helpButtonClicks)
+                .totalReports(totalReports)
+                .pendingReports(pendingReports)
+                .approvedReports(approvedReports)
+                .rejectedReports(rejectedReports)
+                .postReports(postReports)
+                .commentReports(commentReports)
+                .helpButtonClicks(0L)
                 .build();
     }
 }
