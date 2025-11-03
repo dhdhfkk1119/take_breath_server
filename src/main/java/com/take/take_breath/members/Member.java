@@ -5,6 +5,7 @@ import com.take.take_breath.terms.MemberTerms;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -81,6 +82,12 @@ public class Member {
 
     @Column(name = "suspended_until")
     private LocalDateTime suspendedUntil;
+
+    // 생성일 추가 (회원 가입일)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
 
 
     // 상담사 프로필 연결
