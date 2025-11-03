@@ -60,6 +60,7 @@ function processReport() {
         headers: {
             'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             status: status,
             adminComment: adminComment

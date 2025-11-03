@@ -29,7 +29,16 @@ public class CommunityReportProcessService {
     private final MemberRepository memberRepository;
 
     /**
-     * 신고 처리 상태 업데이트 (관리자 전용)
+     * 관리자 이메일로 ID 조회 (세션 기반 환경용)
+     */
+    public Long findAdminIdByEmail(String email) {
+        Member admin = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception404("관리자 계정을 찾을 수 없습니다."));
+        return admin.getId();
+    }
+
+    /**
+     * 신고 처리 상태 업데이트 (관리자 전용 - 세션 기반)
      */
     @Transactional
     public CommunityReportProcessResponse.ProcessDTO updateStatus(Long reportId, Long adminId,
@@ -44,6 +53,7 @@ public class CommunityReportProcessService {
         Member admin = memberRepository.findById(adminId)
                 .orElseThrow(() -> new Exception404("관리자를 찾을 수 없습니다."));
 
+        // 상태 변경
         report.setStatus(updateStatusDTO.getStatus());
 
         CommunityReportProcess process = CommunityReportProcess.builder()
@@ -55,14 +65,13 @@ public class CommunityReportProcessService {
 
         CommunityReportProcess savedProcess = processRepository.save(process);
 
-        // 신고 승인 시 게시글 처리
+        // 신고 승인 시 게시글 삭제 및 관련 신고 자동 처리
         if (updateStatusDTO.getStatus() == CommunityReportStatus.APPROVED) {
             CommunityPost post = report.getPost();
             post.softDelete();
 
-            // 같은 게시글의 다른 PENDING 신고도 모두 APPROVED로 변경
-            List<CommunityReport> otherPendingReports = reportRepository
-                    .findByPostIdAndStatus(post.getId(), CommunityReportStatus.PENDING);
+            List<CommunityReport> otherPendingReports =
+                    reportRepository.findByPostIdAndStatus(post.getId(), CommunityReportStatus.PENDING);
 
             otherPendingReports.stream()
                     .filter(r -> !r.getId().equals(reportId))
@@ -82,7 +91,7 @@ public class CommunityReportProcessService {
                     post.getId(), reportId, otherPendingReports.size() - 1);
         }
 
-        log.info("[신고 처리] processId={}, reportId={}, status={}, adminId={}",
+        log.info("[신고 처리 완료] processId={}, reportId={}, status={}, adminId={}",
                 savedProcess.getId(), reportId, updateStatusDTO.getStatus(), adminId);
 
         return CommunityReportProcessResponse.ProcessDTO.builder()

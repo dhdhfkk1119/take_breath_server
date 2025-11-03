@@ -28,11 +28,22 @@ public class CommentReportProcessService {
     private final MemberRepository memberRepository;
 
     /**
-     * 신고 처리 상태 업데이트 (관리자 전용)
+     * 관리자 이메일로 관리자 ID 조회
+     * (세션 기반 환경용 추가 메서드)
+     */
+    public Long findAdminIdByEmail(String email) {
+        Member admin = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception404("관리자 계정을 찾을 수 없습니다."));
+        return admin.getId();
+    }
+
+    /**
+     * 신고 처리 상태 업데이트 (관리자 전용 - 세션 기반)
      */
     @Transactional
     public CommentReportProcessResponse.ProcessDTO updateStatus(Long reportId, Long adminId,
                                                                 CommentReportProcessRequest.UpdateStatusDTO updateStatusDTO) {
+
         CommentReport report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new IllegalArgumentException("신고 내역을 찾을 수 없습니다. ID: " + reportId));
 
@@ -43,6 +54,7 @@ public class CommentReportProcessService {
         Member admin = memberRepository.findById(adminId)
                 .orElseThrow(() -> new Exception404("관리자를 찾을 수 없습니다."));
 
+        // 상태 변경
         report.setStatus(updateStatusDTO.getStatus());
 
         CommentReportProcess process = CommentReportProcess.builder()
@@ -54,17 +66,16 @@ public class CommentReportProcessService {
 
         CommentReportProcess savedProcess = processRepository.save(process);
 
-        // 신고 승인 시 댓글 처리
+        // 신고 승인 시 댓글 삭제 및 관련 신고 자동 처리
         if (updateStatusDTO.getStatus() == CommunityReportStatus.APPROVED) {
             CommunityComment comment = report.getComment();
             comment.softDelete();
 
-            // 같은 댓글의 다른 PENDING 신고도 모두 APPROVED로 변경
-            List<CommentReport> otherPendingReports = reportRepository
-                    .findByCommentIdAndStatus(comment.getId(), CommunityReportStatus.PENDING);
+            List<CommentReport> otherPendingReports =
+                    reportRepository.findByCommentIdAndStatus(comment.getId(), CommunityReportStatus.PENDING);
 
             otherPendingReports.stream()
-                    .filter(r -> !r.getId().equals(reportId))  // 현재 처리중인 신고 제외
+                    .filter(r -> !r.getId().equals(reportId))
                     .forEach(r -> {
                         r.setStatus(CommunityReportStatus.APPROVED);
 
@@ -81,7 +92,7 @@ public class CommentReportProcessService {
                     comment.getId(), reportId, otherPendingReports.size() - 1);
         }
 
-        log.info("[신고 처리] processId={}, reportId={}, status={}, adminId={}",
+        log.info("[신고 처리 완료] processId={}, reportId={}, status={}, adminId={}",
                 savedProcess.getId(), reportId, updateStatusDTO.getStatus(), adminId);
 
         return CommentReportProcessResponse.ProcessDTO.builder()
