@@ -1,5 +1,6 @@
 package com.take.take_breath.record;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.take.take_breath._core._utils.DateUtil;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,7 +20,8 @@ public class RecordFile {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "record_id", nullable = false)
+    @JoinColumn(name = "record_id")
+    @JsonIgnore
     private Record record;
 
     @Enumerated(EnumType.STRING)
@@ -50,13 +52,15 @@ public class RecordFile {
     private Timestamp updatedAt;
 
     public String getCreateTime() {
-        return DateUtil.chatFormat(createdAt);
+        return DateUtil.timestampFormat(createdAt);
     }
 
     public String getUpdateTime() {
-        return DateUtil.chatFormat(updatedAt);
+        return DateUtil.timestampFormat(updatedAt);
     }
 }
+
+
 /**
  * RecordFile imageFile = RecordFile.builder()
  *     .id(1L)

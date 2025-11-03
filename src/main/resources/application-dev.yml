@@ -20,9 +20,6 @@ upload:
   record-audio-dir: records/audio/
   record-video-dir: records/videos/
 
-# 페이징 기본값
-pagination:
-  default-page-size: 10
   
 # ?? ??? ??
 # ERROR > WARN > INFO > DEBUG > TRACE
@@ -63,10 +60,9 @@ spring:
   # ??? ??? ?? ?? (H2 ???? ??????)
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/take_breath?useSSl=false&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/take_breath?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
     username: root
     password: asd1234
-
 
   # JPA ??
   jpa:
@@ -85,8 +81,15 @@ spring:
     # data.sql ??? Hibernate ??? ??? ??
     defer-datasource-initialization: true
 
+
 # jwt
 jwt:
   secret: 'VGhpc0lzQVNlY3JldEtleUZvckpXVFNhZmUhIT8xMjM0NTY='
   validityInMilliseconds: 3600000        # 1시간
   refresh-expiration-ms: 604800000     # 7일
+
+# 포트원 설정
+iamport:
+  imp-code: ${IAMPORT_IMP_CODE}
+  api-key: ${IAMPORT_API_KEY}
+  api-secret: ${IAMPORT_API_SECRET}

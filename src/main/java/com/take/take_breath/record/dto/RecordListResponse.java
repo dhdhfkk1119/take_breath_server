@@ -14,7 +14,8 @@ public class RecordListResponse {
     private Long id;
     private String title;
     private String content;
-    private Timestamp recordDate;
+    private String recordDate;
+    private String updatedDate;
     private Integer imageFileCount;
     private Integer audioFileCount;
     private Integer videoFileCount;
@@ -24,11 +25,12 @@ public class RecordListResponse {
                 .id(record.getId())
                 .title(record.getTitle())
                 .content(record.getContent())
-                .recordDate(record.getRecordDate())
+                .recordDate(record.getRecordDateTime())
+                .updatedDate(record.getUpdatedDate() != null ?
+                        record.getUpdateDateTime() : null)
                 .imageFileCount(record.getImageFiles().size())
                 .audioFileCount(record.getAudioFiles().size())
                 .videoFileCount(record.getVideoFiles().size())
                 .build();
-
     }
 }

@@ -257,6 +257,9 @@ $RECYCLE.BIN/
 
 .gradle/
 
+# build 디렉토리 libs 파일 무시
+/build/libs/
+
 # Windows shortcuts
 *.lnk
 
