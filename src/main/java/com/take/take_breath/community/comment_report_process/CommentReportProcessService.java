@@ -7,6 +7,7 @@ import com.take.take_breath.community.community_comment.CommunityComment;
 import com.take.take_breath.community.community_report.CommunityReportStatus;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
+import com.take.take_breath.members.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,9 +43,11 @@ public class CommentReportProcessService {
      * 신고 처리 상태 업데이트 (관리자 전용 - 세션 기반)
      */
     @Transactional
-    public CommentReportProcessResponse.ProcessDTO updateStatus(Long reportId, Long adminId,
-                                                                CommentReportProcessRequest.UpdateStatusDTO updateStatusDTO) {
-
+    public CommentReportProcessResponse.ProcessDTO updateStatus(
+            Long reportId,
+            Long adminId,
+            CommentReportProcessRequest.UpdateStatusDTO updateStatusDTO
+    ) {
         CommentReport report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new IllegalArgumentException("신고 내역을 찾을 수 없습니다. ID: " + reportId));
 
@@ -90,6 +94,22 @@ public class CommentReportProcessService {
 
             log.warn("[신고 승인 - 댓글 삭제] commentId={}, reportId={}, 자동 처리된 추가 신고 수={}",
                     comment.getId(), reportId, otherPendingReports.size() - 1);
+
+            // [신고 승인 시 제재 체크 로직 추가]
+            Member targetMember = comment.getMember(); // 댓글 작성자
+            long approvedCount = reportRepository.countDistinctByCommentMemberAndStatus(
+                    targetMember,
+                    CommunityReportStatus.APPROVED
+            );
+
+            if (approvedCount >= 3) {
+                targetMember.setStatus(Status.SUSPENDED);
+                targetMember.setSuspendedUntil(LocalDateTime.now().plusMinutes(1)); // 테스트용 1분 정지
+                memberRepository.save(targetMember);
+
+                log.warn("[자동 정지] memberId={} - 댓글 신고 승인 누적 {}건 → 1분 정지 적용",
+                        targetMember.getId(), approvedCount);
+            }
         }
 
         log.info("[신고 처리 완료] processId={}, reportId={}, status={}, adminId={}",

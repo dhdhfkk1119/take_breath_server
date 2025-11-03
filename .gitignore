@@ -271,3 +271,4 @@ $RECYCLE.BIN/
 /src/main/resources/application-dev*.yaml
 /src/main/resources/application.properties
 /src/main/generated/
+/build/

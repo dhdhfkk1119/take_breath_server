@@ -8,6 +8,7 @@ import com.take.take_breath.community.community_report.CommunityReportRepository
 import com.take.take_breath.community.community_report.CommunityReportStatus;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
+import com.take.take_breath.members.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,7 +67,6 @@ public class CommunityReportProcessService {
 
         CommunityReportProcess savedProcess = processRepository.save(process);
 
-        // 신고 승인 시 게시글 삭제 및 관련 신고 자동 처리
         if (updateStatusDTO.getStatus() == CommunityReportStatus.APPROVED) {
             CommunityPost post = report.getPost();
             post.softDelete();
@@ -89,6 +90,24 @@ public class CommunityReportProcessService {
 
             log.warn("[신고 승인 - 게시글 삭제] postId={}, reportId={}, 자동 처리된 추가 신고 수={}",
                     post.getId(), reportId, otherPendingReports.size() - 1);
+
+            // [신고 승인 시 제재 체크 로직 추가]
+            Member targetMember = post.getMember(); // 게시글 작성자
+            long approvedCount = reportRepository.countDistinctByPostMemberAndStatus(targetMember, CommunityReportStatus.APPROVED);
+
+            if (approvedCount >= 3) {
+                targetMember.setStatus(Status.SUSPENDED);
+                targetMember.setSuspendedUntil(LocalDateTime.now().plusDays(3));
+                memberRepository.save(targetMember);
+
+                log.warn("[자동 정지] memberId={}, email={}, 정지 종료일={}",
+                        targetMember.getId(),
+                        targetMember.getEmail(),
+                        targetMember.getSuspendedUntil());
+
+                log.warn("[자동 정지] memberId={} - 신고 승인 누적 {}건 → 3일 정지 적용",
+                        targetMember.getId(), approvedCount);
+            }
         }
 
         log.info("[신고 처리 완료] processId={}, reportId={}, status={}, adminId={}",
