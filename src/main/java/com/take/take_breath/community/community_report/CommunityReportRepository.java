@@ -1,5 +1,6 @@
 package com.take.take_breath.community.community_report;
 
+import com.take.take_breath.members.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,6 +24,12 @@ public interface CommunityReportRepository extends JpaRepository<CommunityReport
     Optional<CommunityReport> findByIdWithAdminComments(@Param("reportId") Long reportId);
 
     long countByStatus(CommunityReportStatus status);
+
+
+    @Query("SELECT COUNT(DISTINCT r.post.id) FROM CommunityReport r " +
+            "WHERE r.post.member = :member AND r.status = 'APPROVED'")
+    long countDistinctByPostMemberAndStatus(@Param("member") Member member,
+                                            @Param("status") CommunityReportStatus status);
 }
 
 
