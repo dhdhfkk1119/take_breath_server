@@ -20,9 +20,6 @@ upload:
   record-audio-dir: records/audio/
   record-video-dir: records/videos/
 
-# 페이징 기본값
-pagination:
-  default-page-size: 10
   
 # ?? ??? ??
 # ERROR > WARN > INFO > DEBUG > TRACE
@@ -67,7 +64,6 @@ spring:
     username: root
     password: asd1234
 
-
   # JPA ??
   jpa:
     hibernate:
@@ -84,6 +80,7 @@ spring:
         default_batch_fetch_size: 10
     # data.sql ??? Hibernate ??? ??? ??
     defer-datasource-initialization: true
+
 
 # jwt
 jwt:
