@@ -12,14 +12,31 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h3>월별 회원 증가 추이</h3>
             <div class="chart-controls">
-                <button class="chart-btn active" data-period="6">최근 6개월</button>
-                <button class="chart-btn" data-period="12">최근 12개월</button>
-                <button class="chart-btn" data-period="24">최근 24개월</button>
+                <button class="member-chart-btn active" data-period="6">최근 6개월</button>
+                <button class="member-chart-btn" data-period="12">최근 12개월</button>
+                <button class="member-chart-btn" data-period="24">최근 24개월</button>
             </div>
         </div>
         <canvas id="memberGrowthChart"></canvas>
     </div>
 </div>
+
+<!-- 신고 처리 추이 차트 -->
+<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📊 신고 처리 추이</h3>
+<div class="charts-section">
+    <div class="chart-container" style="grid-column: 1 / -1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3>월별 신고 처리 건수</h3>
+            <div class="chart-controls">
+                <button class="report-chart-btn active" data-period="6">최근 6개월</button>
+                <button class="report-chart-btn" data-period="12">최근 12개월</button>
+                <button class="report-chart-btn" data-period="24">최근 24개월</button>
+            </div>
+        </div>
+        <canvas id="reportProcessChart"></canvas>
+    </div>
+</div>
+
 
 <!-- 차트 섹션 -->
 <h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📈 통계 차트</h3>
@@ -125,9 +142,10 @@
 
 <!-- Chart.js 라이브러리 및 데이터 전달 -->
 <script>
-    window.stats = {{{statsJson}}};   // 전역 등록
+    window.stats = {{{statsJson}}};
     console.log('📦 실제 window.stats 구조:', window.stats);
     console.log('📊 memberGrowthData:', window.stats.memberGrowthData);
+    console.log('📊 reportProcessData:', window.stats.reportProcessData);
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => initCharts(window.stats));
