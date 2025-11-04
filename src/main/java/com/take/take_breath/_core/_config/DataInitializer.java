@@ -179,11 +179,11 @@ public class DataInitializer implements CommandLineRunner {
                 .build());
 
         log.info("✅ 상담사 더미 + 신고 누적 테스트용 데이터 생성 완료");
-        log.info("👤 일반 유저(user@test.com) → 게시글 3개 + 댓글 1개 작성 (정지 대상)");
-        log.info("👨‍💼 관리자(admin@test.com)");
-        log.info("🧑‍⚕️ 상담사: counselor1@test.com, counselor2@test.com");
-        log.info("📢 신고자: reporterA~D@test.com (총 4명)");
-        log.info("🚨 신고 승인 시 user 자동 정지 로직 테스트 가능");
+        log.info("일반 유저(user@test.com) → 게시글 3개 + 댓글 1개 작성 (정지 대상)");
+        log.info("관리자(admin@test.com)");
+        log.info("상담사: counselor1@test.com, counselor2@test.com");
+        log.info("신고자: reporterA~D@test.com (총 4명)");
+        log.info("신고 승인 시 user 자동 정지 로직 테스트 가능");
         log.info("============================================");
     }
 
