@@ -5,6 +5,7 @@ import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath.chat.dto.ChatRoomListResponse;
 import com.take.take_breath.chat.dto.CreateChatRoomRequest;
 import com.take.take_breath.chat.dto.CreateChatRoomResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,23 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatRoomController {
     private final ChatService chatService;
-
-    /**
-     * 에러 반환
-     */
-    /*
-        응답
-        {
-          "success": false,
-          "response": null,
-          "error": {
-            "message": "회원을 찾을 수 없습니다.",
-            "status": 404,
-            "code": "MEMBER_NOT_FOUND"
-          }
-        }
-     */
-
 
     /**
      * 내가 속한 채팅방 목록 조회
@@ -66,9 +50,11 @@ public class ChatRoomController {
         }
     */
     @GetMapping
-    public ResponseEntity<?> getRooms(@RequestParam Long memberId) {
-        System.out.println("채팅방 목록 조회 요청");
-        List<ChatRoomListResponse> rooms = chatService.getMyChatRooms(memberId);
+    public ResponseEntity<?> getRooms(HttpServletRequest request) {
+        String memberEmail = request.getAttribute("memberEmail").toString();
+        List<ChatRoomListResponse> rooms = chatService.getMyChatRoomsByEmail(memberEmail);
+
+        // List<ChatRoomListResponse> rooms = chatService.getMyChatRooms(memberId);
         return ResponseEntity.ok(ApiUtil.success(rooms));
     }
 

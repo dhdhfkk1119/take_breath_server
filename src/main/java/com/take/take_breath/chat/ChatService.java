@@ -348,6 +348,52 @@ public class ChatService {
     }
 
     /**
+     * 내가 속한 채팅방 목록 조회 (이메일로 조회)
+     * @param email
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public List<ChatRoomListResponse> getMyChatRoomsByEmail(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+
+        List<ChatRoomMember> myRoomMembers = chatRoomMemberRepository.findByMemberId(member.getId());
+
+        // Entity -> DTO 변환
+        return myRoomMembers.stream()
+                .map(myRoomMember -> {
+                    Long roomId = myRoomMember.getChatRoom().getId();
+
+                    // 읽지 않은 메시지 개수 계산
+                    Long unreadCount = chatMessageRepository.countUnreadMessages(
+                            roomId,
+                            myRoomMember.getLastReadMessageId(), // 내가 마지막으로 읽은 메시지 ID
+                            member.getId()  // 내 ID (내가 보낸 메시지는 제외)
+                    );
+
+                    // 마지막 메시지 조회
+                    ChatMessage lastMessage = chatMessageRepository
+                            .findLastMessageByChatRoomId(roomId);
+
+                    // 1:1 채팅이므로 상대방 정보 조회
+                    ChatRoomMember otherMember = chatRoomMemberRepository
+                            .findOtherMemberInRoom(roomId, member.getId());
+
+                    return ChatRoomListResponse.builder()
+                            .roomId(roomId)
+                            .roomName(myRoomMember.getChatRoom().getName())
+                            .unreadCount(unreadCount)
+                            .lastMessage(lastMessage != null ? lastMessage.getContent() : null)
+                            .lastMessageTime(lastMessage != null ? lastMessage.getTime() : null)
+                            .otherMemberId(otherMember != null ? otherMember.getMember().getId() : null)
+                            .otherMemberName(otherMember != null ? otherMember.getMember().getName() : null)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+    }
+
+    /**
      * 채팅방 생성 및 멤버 추가
      */
     public CreateChatRoomResponse createChatRoom(CreateChatRoomRequest request) {
