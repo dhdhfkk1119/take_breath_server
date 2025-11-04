@@ -48,7 +48,6 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // ─────────────────── 약관 생성 ───────────────────
         Terms terms1 = Terms.builder()
                 .title("서비스 이용약관")
                 .content("서비스 이용약관 내용")
@@ -63,7 +62,6 @@ public class DataInitializer implements CommandLineRunner {
 
         termsRepository.saveAll(List.of(terms1, terms2));
 
-        // ─────────────────── 일반 회원 (신고 대상) ───────────────────
         Member user = Member.builder()
                 .email("user@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -74,10 +72,10 @@ public class DataInitializer implements CommandLineRunner {
                 .status(Status.ACTIVE)
                 .emailVerified(true)
                 .build();
+
         memberRepository.save(user);
         saveMemberTerms(user, List.of(terms1, terms2));
 
-        // ─────────────────── 관리자 ───────────────────
         Member admin = Member.builder()
                 .email("admin@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -91,7 +89,6 @@ public class DataInitializer implements CommandLineRunner {
         memberRepository.save(admin);
         saveMemberTerms(admin, List.of(terms1, terms2));
 
-        // ─────────────────── 상담사 (2명) ───────────────────
         Member counselorMember1 = Member.builder()
                 .email("counselor1@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -144,14 +141,12 @@ public class DataInitializer implements CommandLineRunner {
 
         counselorRepository.saveAll(List.of(counselor1, counselor2));
 
-        // ─────────────────── 신고자 4명 생성 ───────────────────
         Member reporterA = createReporter("reporterA@test.com", "신고자A");
         Member reporterB = createReporter("reporterB@test.com", "신고자B");
         Member reporterC = createReporter("reporterC@test.com", "신고자C");
         Member reporterD = createReporter("reporterD@test.com", "신고자D");
         memberRepository.saveAll(List.of(reporterA, reporterB, reporterC, reporterD));
 
-        // ─────────────────── 카테고리 및 게시글 ───────────────────
         CommunityCategory category = communityCategoryRepository.save(
                 CommunityCategory.builder().name("신고 테스트 게시판").build()
         );
@@ -161,7 +156,6 @@ public class DataInitializer implements CommandLineRunner {
         CommunityPost post3 = createPost("신고 테스트용 게시글 C", category, user);
         communityPostRepository.saveAll(List.of(post1, post2, post3));
 
-        // ─────────────────── 댓글 (user 작성) ───────────────────
         CommunityComment comment1 = communityCommentRepository.save(
                 CommunityComment.builder()
                         .content("신고 테스트용 댓글입니다.")
@@ -171,7 +165,6 @@ public class DataInitializer implements CommandLineRunner {
                         .build()
         );
 
-        // ─────────────────── 게시글 신고 3건 + 댓글 신고 1건 ───────────────────
         communityReportRepository.saveAll(List.of(
                 createPostReport(post1, reporterA, "스팸 게시글 의심"),
                 createPostReport(post2, reporterB, "부적절한 표현 포함"),
@@ -185,7 +178,6 @@ public class DataInitializer implements CommandLineRunner {
                 .status(CommunityReportStatus.PENDING)
                 .build());
 
-        // ─────────────────── 로그 출력 ───────────────────
         log.info("✅ 상담사 더미 + 신고 누적 테스트용 데이터 생성 완료");
         log.info("👤 일반 유저(user@test.com) → 게시글 3개 + 댓글 1개 작성 (정지 대상)");
         log.info("👨‍💼 관리자(admin@test.com)");
@@ -195,7 +187,7 @@ public class DataInitializer implements CommandLineRunner {
         log.info("============================================");
     }
 
-    // ────────────── 헬퍼 메서드 ──────────────
+    // 메서드
     private void saveMemberTerms(Member member, List<Terms> termsList) {
         for (Terms t : termsList) {
             memberTermsRepository.save(MemberTerms.builder()
