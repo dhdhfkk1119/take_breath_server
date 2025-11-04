@@ -102,6 +102,12 @@
     height: 350px !important;
 }
 
+/* 신고 처리 추이 차트도 크게 */
+#reportProcessChart {
+    max-height: 350px !important;
+    height: 350px !important;
+}
+
 /* 차트 컨트롤 버튼 스타일 */
 .chart-controls {
     display: flex;
@@ -109,7 +115,10 @@
     flex-wrap: wrap;
 }
 
-.chart-btn {
+/* 모든 차트 버튼에 공통 스타일 적용 */
+.chart-btn,
+.member-chart-btn,
+.report-chart-btn {
     padding: 0.5rem 1rem;
     border: 2px solid #3498db;
     background: white;
@@ -121,18 +130,24 @@
     transition: all 0.3s ease;
 }
 
-.chart-btn:hover {
+.chart-btn:hover,
+.member-chart-btn:hover,
+.report-chart-btn:hover {
     background: #ebf5fb;
     transform: translateY(-1px);
 }
 
-.chart-btn.active {
+.chart-btn.active,
+.member-chart-btn.active,
+.report-chart-btn.active {
     background: #3498db;
     color: white;
     box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
-.chart-btn:active {
+.chart-btn:active,
+.member-chart-btn:active,
+.report-chart-btn:active {
     transform: translateY(0);
 }
 
@@ -146,7 +161,9 @@
         justify-content: flex-start;
     }
 
-    .chart-btn {
+    .chart-btn,
+    .member-chart-btn,
+    .report-chart-btn {
         font-size: 0.75rem;
         padding: 0.4rem 0.8rem;
     }

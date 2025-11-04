@@ -3,11 +3,14 @@ package com.take.take_breath.admin.view;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.take.take_breath.admin.view.dto.DashboardStatsResponse;
 import com.take.take_breath.admin.view.dto.MemberGrowthData;
+import com.take.take_breath.admin.view.dto.ReportProcessData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,6 +26,14 @@ public class AdminDashboardController {
 
         // 회원 증가 데이터 포함
         stats.setMemberGrowthData(adminDashboardService.getMemberGrowthData(6));
+
+        // 신고처리
+        ReportProcessData reportProcessData = adminDashboardService.getReportProcessData(6);
+        stats.setReportProcessData(reportProcessData);
+
+        // 신고 상태별
+        Map<String, Integer> reportStatusData = adminDashboardService.getReportStatusStats();
+        stats.setReportStatusData(reportStatusData);
 
         // JSON으로 직렬화
         String statsJson = objectMapper.writeValueAsString(stats);
