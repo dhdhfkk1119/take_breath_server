@@ -2,6 +2,7 @@ package com.take.take_breath.admin.view;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.take.take_breath.admin.view.dto.DashboardStatsResponse;
+import com.take.take_breath.admin.view.dto.MemberGrowthData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,19 +15,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminDashboardController {
 
     private final AdminDashboardService adminDashboardService;
-    private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 변환용
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) throws Exception {
         DashboardStatsResponse stats = adminDashboardService.getDashboardStats();
 
-        // JSON 문자열로 변환 ({{{ }}}로 raw 출력)
+        // 회원 증가 데이터 포함
+        stats.setMemberGrowthData(adminDashboardService.getMemberGrowthData(6));
+
+        // JSON으로 직렬화
         String statsJson = objectMapper.writeValueAsString(stats);
 
         model.addAttribute("stats", stats);
         model.addAttribute("statsJson", statsJson);
 
-        // 레이아웃 설정
         model.addAttribute("pageTitle", "관리자 대시보드");
         model.addAttribute("isDashboard", true);
         model.addAttribute("additionalCss", new String[]{"/css/admin-dashboard.css"});
