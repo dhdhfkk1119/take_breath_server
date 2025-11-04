@@ -109,7 +109,8 @@ public class MemberService {
         }
 
         if (member.getStatus() == Status.SUSPENDED) {
-            throw new Exception403("이용 정지된 계정입니다.");
+            long daysLeft = memberWithdrawalService.getDaysUntilDeletion(member);
+            throw new Exception403("이용 정지된 계정입니다. 정지 해제까지 " + daysLeft + "일 남았습니다.");
         }
 
         // 항상 Access Token은 발급

@@ -27,27 +27,30 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 월별 회원 증가 추이
     @Query(value = """
-            WITH RECURSIVE months AS (
-                SELECT 0 as month_offset
-                UNION ALL
-                SELECT month_offset + 1 
-                FROM months 
-                WHERE month_offset < :months
-            ),
-            month_ends AS (
-                SELECT 
-                    LAST_DAY(DATE_SUB(CURDATE(), INTERVAL month_offset MONTH)) as month_date,
-                    month_offset
-                FROM months
-            )
+        WITH RECURSIVE months AS (
+            SELECT 0 AS month_offset
+            UNION ALL
+            SELECT month_offset + 1
+            FROM months
+            WHERE month_offset < :months
+        ),
+        month_ends AS (
             SELECT 
-                DATE_FORMAT(me.month_date, '%Y년 %c월') as label,
-                COUNT(m.id) as total_members
-            FROM month_ends me
-            LEFT JOIN member_tb m ON m.created_at <= me.month_date
-                AND m.status != 'WITHDRAWAL'
-            GROUP BY me.month_date, me.month_offset
-            ORDER BY me.month_offset DESC
-            """, nativeQuery = true)
+                LAST_DAY(DATE_SUB(CURDATE(), INTERVAL month_offset MONTH)) AS month_date,
+                month_offset
+            FROM months
+        )
+        SELECT 
+            DATE_FORMAT(me.month_date, '%Y년 %c월') AS label,
+            SUM(CASE WHEN m.role = 'USER' THEN 1 ELSE 0 END) AS member_count,
+            SUM(CASE WHEN m.role = 'COUNSELOR' THEN 1 ELSE 0 END) AS counselor_count
+        FROM month_ends me
+        LEFT JOIN member_tb m 
+            ON m.created_at <= me.month_date
+            AND m.status != 'WITHDRAWAL'
+        GROUP BY me.month_date, me.month_offset
+        ORDER BY me.month_offset DESC
+        """, nativeQuery = true)
     List<Map<String, Object>> findMemberGrowthByMonths(@Param("months") int months);
+
 }
