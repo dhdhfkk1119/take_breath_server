@@ -25,7 +25,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             "WHERE m.chatRoom.id = :chatRoomId " +
             "AND (:lastReadMessageId IS NULL OR m.id > :lastReadMessageId) " +
             "AND m.sender.id != :memberId")
-    Long countUnreadMessages(
+    int countUnreadMessages(
             @Param("chatRoomId") Long chatRoomId,
             @Param("lastReadMessageId") Long lastReadMessageId,
             @Param("memberId") Long memberId

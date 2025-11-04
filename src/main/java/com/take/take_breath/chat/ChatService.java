@@ -272,7 +272,7 @@ public class ChatService {
      * 안읽은 메시지 개수 조회
      */
     @Transactional(readOnly = true)
-    public Long getUnreadCount(Long chatRoomId, Long memberId) {
+    public int getUnreadCount(Long chatRoomId, Long memberId) {
         ChatRoomMember roomMember = chatRoomMemberRepository
                 .findByChatRoomIdAndMemberId(chatRoomId, memberId)
                 .orElseThrow(() -> new Exception400("채팅방에 속하지 않은 사용자입니다."));
@@ -320,7 +320,7 @@ public class ChatService {
                     Long roomId = myRoomMember.getChatRoom().getId();
 
                     // 읽지 않은 메시지 개수 계산
-                    Long unreadCount = chatMessageRepository.countUnreadMessages(
+                    int unreadCount = chatMessageRepository.countUnreadMessages(
                             roomId,
                             myRoomMember.getLastReadMessageId(), // 내가 마지막으로 읽은 메시지 ID
                             memberId  // 내 ID (내가 보낸 메시지는 제외)
@@ -365,7 +365,7 @@ public class ChatService {
                     Long roomId = myRoomMember.getChatRoom().getId();
 
                     // 읽지 않은 메시지 개수 계산
-                    Long unreadCount = chatMessageRepository.countUnreadMessages(
+                    int unreadCount = chatMessageRepository.countUnreadMessages(
                             roomId,
                             myRoomMember.getLastReadMessageId(), // 내가 마지막으로 읽은 메시지 ID
                             member.getId()  // 내 ID (내가 보낸 메시지는 제외)

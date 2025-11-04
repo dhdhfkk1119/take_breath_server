@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class ChatRoomListResponse {
     private Long roomId;
     private String roomName;
-    private Long unreadCount;           // 읽지 않은 메시지 개수
+    private int unreadCount;           // 읽지 않은 메시지 개수
     private String lastMessage;         // 마지막 메시지 내용
     private String lastMessageTime;  // 마지막 메시지 시간
 
