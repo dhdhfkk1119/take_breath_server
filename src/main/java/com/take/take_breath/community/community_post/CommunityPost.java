@@ -58,7 +58,7 @@ public class CommunityPost {
     @Column(nullable = false, updatable = false)
     private Timestamp createdAt;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Timestamp updatedAt;
 
     @Column(name = "deleted_at")
