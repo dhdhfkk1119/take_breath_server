@@ -1,7 +1,18 @@
 package com.take.take_breath._core._config;
 
+import com.take.take_breath.community.comment_report.CommentReport;
+import com.take.take_breath.community.comment_report.CommentReportRepository;
 import com.take.take_breath.community.community_category.CommunityCategory;
 import com.take.take_breath.community.community_category.CommunityCategoryRepository;
+import com.take.take_breath.community.community_comment.CommunityComment;
+import com.take.take_breath.community.community_comment.CommunityCommentRepository;
+import com.take.take_breath.community.community_post.CommunityPost;
+import com.take.take_breath.community.community_post.CommunityPostRepository;
+import com.take.take_breath.community.community_report.CommunityReport;
+import com.take.take_breath.community.community_report.CommunityReportRepository;
+import com.take.take_breath.community.community_report.CommunityReportStatus;
+import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.counselor.CounselorRepository;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
@@ -17,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -24,15 +36,19 @@ import java.time.LocalDateTime;
 public class DataInitializer implements CommandLineRunner {
 
     private final MemberRepository memberRepository;
+    private final CounselorRepository counselorRepository;
     private final PasswordEncoder passwordEncoder;
     private final TermsRepository termsRepository;
     private final MemberTermsRepository memberTermsRepository;
     private final CommunityCategoryRepository communityCategoryRepository;
+    private final CommunityPostRepository communityPostRepository;
+    private final CommunityCommentRepository communityCommentRepository;
+    private final CommunityReportRepository communityReportRepository;
+    private final CommentReportRepository commentReportRepository;
 
-    // 이니셜라이즈 회원가입 멤버 추가
     @Override
     public void run(String... args) throws Exception {
-        // 약관 생성
+        // ─────────────────── 약관 생성 ───────────────────
         Terms terms1 = Terms.builder()
                 .title("서비스 이용약관")
                 .content("서비스 이용약관 내용")
@@ -45,10 +61,9 @@ public class DataInitializer implements CommandLineRunner {
                 .required(true)
                 .build();
 
-        termsRepository.save(terms1);
-        termsRepository.save(terms2);
+        termsRepository.saveAll(List.of(terms1, terms2));
 
-        // 일반 사용자
+        // ─────────────────── 일반 회원 (신고 대상) ───────────────────
         Member user = Member.builder()
                 .email("user@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -60,23 +75,9 @@ public class DataInitializer implements CommandLineRunner {
                 .emailVerified(true)
                 .build();
         memberRepository.save(user);
+        saveMemberTerms(user, List.of(terms1, terms2));
 
-        // 약관 동의
-        memberTermsRepository.save(MemberTerms.builder()
-                .member(user)
-                .terms(terms1)
-                .agreed(true)
-                .agreedAt(LocalDateTime.now())
-                .build());
-
-        memberTermsRepository.save(MemberTerms.builder()
-                .member(user)
-                .terms(terms2)
-                .agreed(true)
-                .agreedAt(LocalDateTime.now())
-                .build());
-
-        // 관리자
+        // ─────────────────── 관리자 ───────────────────
         Member admin = Member.builder()
                 .email("admin@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -88,39 +89,155 @@ public class DataInitializer implements CommandLineRunner {
                 .emailVerified(true)
                 .build();
         memberRepository.save(admin);
+        saveMemberTerms(admin, List.of(terms1, terms2));
 
-        memberTermsRepository.save(MemberTerms.builder()
-                .member(admin)
-                .terms(terms1)
-                .agreed(true)
-                .agreedAt(LocalDateTime.now())
+        // ─────────────────── 상담사 (2명) ───────────────────
+        Member counselorMember1 = Member.builder()
+                .email("counselor1@test.com")
+                .password(passwordEncoder.encode("1234"))
+                .name("상담사 김하늘")
+                .phone("01099998888")
+                .address("서울시 송파구")
+                .role(Role.COUNSELOR)
+                .status(Status.ACTIVE)
+                .emailVerified(true)
+                .build();
+
+        Member counselorMember2 = Member.builder()
+                .email("counselor2@test.com")
+                .password(passwordEncoder.encode("1234"))
+                .name("상담사 이바다")
+                .phone("01099997777")
+                .address("서울시 종로구")
+                .role(Role.COUNSELOR)
+                .status(Status.ACTIVE)
+                .emailVerified(true)
+                .build();
+
+        memberRepository.saveAll(List.of(counselorMember1, counselorMember2));
+        saveMemberTerms(counselorMember1, List.of(terms1, terms2));
+        saveMemberTerms(counselorMember2, List.of(terms1, terms2));
+
+        Counselor counselor1 = Counselor.builder()
+                .member(counselorMember1)
+                .introduction("10년차 심리상담사입니다.")
+                .gender("여성")
+                .profileImage("default_profile1.png")
+                .specialty("직장 내 스트레스, 불안")
+                .price(50000)
+                .hashtags("#스트레스 #불안 #직장인")
+                .point(0)
+                .status(Status.ACTIVE)
+                .build();
+
+        Counselor counselor2 = Counselor.builder()
+                .member(counselorMember2)
+                .introduction("대인관계, 번아웃, 우울 관련 상담을 진행합니다.")
+                .gender("남성")
+                .profileImage("default_profile2.png")
+                .specialty("대인관계, 번아웃, 우울")
+                .price(60000)
+                .hashtags("#대인관계 #번아웃 #우울")
+                .point(0)
+                .status(Status.ACTIVE)
+                .build();
+
+        counselorRepository.saveAll(List.of(counselor1, counselor2));
+
+        // ─────────────────── 신고자 4명 생성 ───────────────────
+        Member reporterA = createReporter("reporterA@test.com", "신고자A");
+        Member reporterB = createReporter("reporterB@test.com", "신고자B");
+        Member reporterC = createReporter("reporterC@test.com", "신고자C");
+        Member reporterD = createReporter("reporterD@test.com", "신고자D");
+        memberRepository.saveAll(List.of(reporterA, reporterB, reporterC, reporterD));
+
+        // ─────────────────── 카테고리 및 게시글 ───────────────────
+        CommunityCategory category = communityCategoryRepository.save(
+                CommunityCategory.builder().name("신고 테스트 게시판").build()
+        );
+
+        CommunityPost post1 = createPost("신고 테스트용 게시글 A", category, user);
+        CommunityPost post2 = createPost("신고 테스트용 게시글 B", category, user);
+        CommunityPost post3 = createPost("신고 테스트용 게시글 C", category, user);
+        communityPostRepository.saveAll(List.of(post1, post2, post3));
+
+        // ─────────────────── 댓글 (user 작성) ───────────────────
+        CommunityComment comment1 = communityCommentRepository.save(
+                CommunityComment.builder()
+                        .content("신고 테스트용 댓글입니다.")
+                        .post(post1)
+                        .member(user)
+                        .reportCount(0)
+                        .build()
+        );
+
+        // ─────────────────── 게시글 신고 3건 + 댓글 신고 1건 ───────────────────
+        communityReportRepository.saveAll(List.of(
+                createPostReport(post1, reporterA, "스팸 게시글 의심"),
+                createPostReport(post2, reporterB, "부적절한 표현 포함"),
+                createPostReport(post3, reporterC, "욕설 포함")
+        ));
+
+        commentReportRepository.save(CommentReport.builder()
+                .reporter(reporterD)
+                .comment(comment1)
+                .reason("악의적인 댓글입니다.")
+                .status(CommunityReportStatus.PENDING)
                 .build());
 
-        memberTermsRepository.save(MemberTerms.builder()
-                .member(admin)
-                .terms(terms2)
-                .agreed(true)
-                .agreedAt(LocalDateTime.now())
-                .build());
-
-        // 카테고리 생성
-        communityCategoryRepository.save(CommunityCategory.builder()
-                .name("자유게시판")
-                .build());
-
-        communityCategoryRepository.save(CommunityCategory.builder()
-                .name("정보공유")
-                .build());
-
-        communityCategoryRepository.save(CommunityCategory.builder()
-                .name("질문답변")
-                .build());
-
-        log.info("===== 더미 데이터 생성 완료 =====");
-        log.info("일반 유저: user@test.com / 1234");
-        log.info("관리자: admin@test.com / 1234");
-        log.info("================================");
+        // ─────────────────── 로그 출력 ───────────────────
+        log.info("✅ 상담사 더미 + 신고 누적 테스트용 데이터 생성 완료");
+        log.info("👤 일반 유저(user@test.com) → 게시글 3개 + 댓글 1개 작성 (정지 대상)");
+        log.info("👨‍💼 관리자(admin@test.com)");
+        log.info("🧑‍⚕️ 상담사: counselor1@test.com, counselor2@test.com");
+        log.info("📢 신고자: reporterA~D@test.com (총 4명)");
+        log.info("🚨 신고 승인 시 user 자동 정지 로직 테스트 가능");
+        log.info("============================================");
     }
-    
-    
+
+    // ────────────── 헬퍼 메서드 ──────────────
+    private void saveMemberTerms(Member member, List<Terms> termsList) {
+        for (Terms t : termsList) {
+            memberTermsRepository.save(MemberTerms.builder()
+                    .member(member)
+                    .terms(t)
+                    .agreed(true)
+                    .agreedAt(LocalDateTime.now())
+                    .build());
+        }
+    }
+
+    private Member createReporter(String email, String name) {
+        return Member.builder()
+                .email(email)
+                .password(passwordEncoder.encode("1234"))
+                .name(name)
+                .phone("010" + (int) (Math.random() * 99999999))
+                .address("서울시 테스트구")
+                .role(Role.USER)
+                .status(Status.ACTIVE)
+                .emailVerified(true)
+                .build();
+    }
+
+    private CommunityPost createPost(String title, CommunityCategory category, Member member) {
+        return CommunityPost.builder()
+                .title(title)
+                .content("이 게시글은 신고 누적 테스트용입니다.")
+                .category(category)
+                .member(member)
+                .likeCount(0)
+                .viewCount(0)
+                .reportCount(0)
+                .build();
+    }
+
+    private CommunityReport createPostReport(CommunityPost post, Member reporter, String reason) {
+        return CommunityReport.builder()
+                .reporter(reporter)
+                .post(post)
+                .reason(reason)
+                .status(CommunityReportStatus.PENDING)
+                .build();
+    }
 }

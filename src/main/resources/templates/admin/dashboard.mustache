@@ -126,12 +126,13 @@
 <!-- Chart.js 라이브러리 및 데이터 전달 -->
 <script>
     window.stats = {{{statsJson}}};   // 전역 등록
-    console.log('실제 데이터:', stats);
+    console.log('📦 실제 window.stats 구조:', window.stats);
+    console.log('📊 memberGrowthData:', window.stats.memberGrowthData);
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => initCharts(stats));
+        document.addEventListener('DOMContentLoaded', () => initCharts(window.stats));
     } else {
-        initCharts(stats);
+        initCharts(window.stats);
     }
 </script>
 
