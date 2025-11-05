@@ -9,6 +9,8 @@ import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
 import lombok.*;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,7 +36,12 @@ public class DashboardStatsResponse {
     private long rejectedReports;
     private long postReports;
     private long commentReports;
+
     private MemberGrowthData memberGrowthData;
+
+    private ReportProcessData reportProcessData;
+
+    private Map<String, Integer> reportStatusData;
 
     private long helpButtonClicks;
 

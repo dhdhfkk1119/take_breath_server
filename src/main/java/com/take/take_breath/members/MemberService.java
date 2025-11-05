@@ -26,6 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.take.take_breath._core._utils.UploadFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Service
@@ -109,7 +112,19 @@ public class MemberService {
         }
 
         if (member.getStatus() == Status.SUSPENDED) {
-            throw new Exception403("이용 정지된 계정입니다.");
+            LocalDateTime suspendedUntil = member.getSuspendedUntil();
+            long daysLeft = 0;
+
+            if(suspendedUntil !=null) {
+                LocalDate today = LocalDate.now();
+                LocalDate endDate = suspendedUntil.toLocalDate();
+
+                if (today.isBefore(endDate)) {
+                    daysLeft = ChronoUnit.DAYS.between(today, endDate);
+                }
+            }
+
+            throw new Exception403("이용 정지된 계정입니다. 정지 해제까지 " + daysLeft + "일 남았습니다.");
         }
 
         // 항상 Access Token은 발급

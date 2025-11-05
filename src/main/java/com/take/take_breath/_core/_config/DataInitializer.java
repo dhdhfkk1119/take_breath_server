@@ -11,6 +11,8 @@ import com.take.take_breath.community.community_post.CommunityPostRepository;
 import com.take.take_breath.community.community_report.CommunityReport;
 import com.take.take_breath.community.community_report.CommunityReportRepository;
 import com.take.take_breath.community.community_report.CommunityReportStatus;
+import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.counselor.CounselorRepository;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
@@ -26,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -33,6 +36,7 @@ import java.time.LocalDateTime;
 public class DataInitializer implements CommandLineRunner {
 
     private final MemberRepository memberRepository;
+    private final CounselorRepository counselorRepository;
     private final PasswordEncoder passwordEncoder;
     private final TermsRepository termsRepository;
     private final MemberTermsRepository memberTermsRepository;
@@ -44,7 +48,6 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 약관 생성
         Terms terms1 = Terms.builder()
                 .title("서비스 이용약관")
                 .content("서비스 이용약관 내용")
@@ -57,10 +60,8 @@ public class DataInitializer implements CommandLineRunner {
                 .required(true)
                 .build();
 
-        termsRepository.save(terms1);
-        termsRepository.save(terms2);
+        termsRepository.saveAll(List.of(terms1, terms2));
 
-        // 일반 사용자
         Member user = Member.builder()
                 .email("user@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -71,24 +72,10 @@ public class DataInitializer implements CommandLineRunner {
                 .status(Status.ACTIVE)
                 .emailVerified(true)
                 .build();
+
         memberRepository.save(user);
+        saveMemberTerms(user, List.of(terms1, terms2));
 
-        // 약관 동의
-        memberTermsRepository.save(MemberTerms.builder()
-                .member(user)
-                .terms(terms1)
-                .agreed(true)
-                .agreedAt(LocalDateTime.now())
-                .build());
-
-        memberTermsRepository.save(MemberTerms.builder()
-                .member(user)
-                .terms(terms2)
-                .agreed(true)
-                .agreedAt(LocalDateTime.now())
-                .build());
-
-        // 관리자
         Member admin = Member.builder()
                 .email("admin@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -100,121 +87,149 @@ public class DataInitializer implements CommandLineRunner {
                 .emailVerified(true)
                 .build();
         memberRepository.save(admin);
+        saveMemberTerms(admin, List.of(terms1, terms2));
 
-        memberTermsRepository.save(MemberTerms.builder()
-                .member(admin)
-                .terms(terms1)
-                .agreed(true)
-                .agreedAt(LocalDateTime.now())
-                .build());
+        Member counselorMember1 = Member.builder()
+                .email("counselor1@test.com")
+                .password(passwordEncoder.encode("1234"))
+                .name("상담사 김하늘")
+                .phone("01099998888")
+                .address("서울시 송파구")
+                .role(Role.COUNSELOR)
+                .status(Status.ACTIVE)
+                .emailVerified(true)
+                .build();
 
-        memberTermsRepository.save(MemberTerms.builder()
-                .member(admin)
-                .terms(terms2)
-                .agreed(true)
-                .agreedAt(LocalDateTime.now())
-                .build());
+        Member counselorMember2 = Member.builder()
+                .email("counselor2@test.com")
+                .password(passwordEncoder.encode("1234"))
+                .name("상담사 이바다")
+                .phone("01099997777")
+                .address("서울시 종로구")
+                .role(Role.COUNSELOR)
+                .status(Status.ACTIVE)
+                .emailVerified(true)
+                .build();
 
-        // 카테고리 생성
-        CommunityCategory category1 = communityCategoryRepository.save(CommunityCategory.builder()
-                .name("자유게시판")
-                .build());
+        memberRepository.saveAll(List.of(counselorMember1, counselorMember2));
+        saveMemberTerms(counselorMember1, List.of(terms1, terms2));
+        saveMemberTerms(counselorMember2, List.of(terms1, terms2));
 
-        CommunityCategory category2 = communityCategoryRepository.save(CommunityCategory.builder()
-                .name("정보공유")
-                .build());
+        Counselor counselor1 = Counselor.builder()
+                .member(counselorMember1)
+                .introduction("10년차 심리상담사입니다.")
+                .gender("여성")
+                .profileImage("default_profile1.png")
+                .specialty("직장 내 스트레스, 불안")
+                .price(50000)
+                .hashtags("#스트레스 #불안 #직장인")
+                .point(0)
+                .status(Status.ACTIVE)
+                .build();
 
-        CommunityCategory category3 = communityCategoryRepository.save(CommunityCategory.builder()
-                .name("질문답변")
-                .build());
+        Counselor counselor2 = Counselor.builder()
+                .member(counselorMember2)
+                .introduction("대인관계, 번아웃, 우울 관련 상담을 진행합니다.")
+                .gender("남성")
+                .profileImage("default_profile2.png")
+                .specialty("대인관계, 번아웃, 우울")
+                .price(60000)
+                .hashtags("#대인관계 #번아웃 #우울")
+                .point(0)
+                .status(Status.ACTIVE)
+                .build();
 
-// ===== 게시글 더미 데이터 (모두 user가 작성한 글) =====
-        CommunityPost post1 = communityPostRepository.save(CommunityPost.builder()
-                .title("오늘 점심 뭐 드셨나요?")
-                .content("직장인 점심 추천 좀 해주세요!")
-                .likeCount(3)
-                .viewCount(15)
-                .reportCount(0)
-                .category(category1)
-                .member(user)
-                .build());
+        counselorRepository.saveAll(List.of(counselor1, counselor2));
 
-        CommunityPost post2 = communityPostRepository.save(CommunityPost.builder()
-                .title("회사 근처 맛집 공유합니다")
-                .content("강남역 근처 맛집 리스트 공유드려요.")
-                .likeCount(5)
-                .viewCount(40)
-                .reportCount(0)
-                .category(category2)
-                .member(user) // 👈 작성자 동일 (user)
-                .build());
+        Member reporterA = createReporter("reporterA@test.com", "신고자A");
+        Member reporterB = createReporter("reporterB@test.com", "신고자B");
+        Member reporterC = createReporter("reporterC@test.com", "신고자C");
+        Member reporterD = createReporter("reporterD@test.com", "신고자D");
+        memberRepository.saveAll(List.of(reporterA, reporterB, reporterC, reporterD));
 
-        CommunityPost post3 = communityPostRepository.save(CommunityPost.builder()
-                .title("업무 스트레스 줄이는 방법 있을까요?")
-                .content("요즘 너무 피곤해서 스트레스 관리가 힘들어요.")
-                .likeCount(2)
-                .viewCount(10)
-                .reportCount(0)
-                .category(category3)
-                .member(user) // 👈 작성자 동일 (user)
-                .build());
+        CommunityCategory category = communityCategoryRepository.save(
+                CommunityCategory.builder().name("신고 테스트 게시판").build()
+        );
 
-// ===== 댓글 더미 (그냥 참고용) =====
-        CommunityComment comment1 = communityCommentRepository.save(CommunityComment.builder()
-                .content("좋은 글이네요! 공감합니다.")
-                .post(post1)
-                .member(admin)
-                .reportCount(0)
-                .build());
+        CommunityPost post1 = createPost("신고 테스트용 게시글 A", category, user);
+        CommunityPost post2 = createPost("신고 테스트용 게시글 B", category, user);
+        CommunityPost post3 = createPost("신고 테스트용 게시글 C", category, user);
+        communityPostRepository.saveAll(List.of(post1, post2, post3));
 
-        CommunityComment comment2 = communityCommentRepository.save(CommunityComment.builder()
-                .content("저도 비슷한 고민을 하고 있었어요.")
-                .post(post2)
-                .member(admin)
-                .reportCount(0)
-                .build());
+        CommunityComment comment1 = communityCommentRepository.save(
+                CommunityComment.builder()
+                        .content("신고 테스트용 댓글입니다.")
+                        .post(post1)
+                        .member(user)
+                        .reportCount(0)
+                        .build()
+        );
 
-// ===== 게시글 신고 더미 데이터 (모두 user의 게시글을 admin이 신고) =====
-        communityReportRepository.save(CommunityReport.builder()
-                .reporter(admin)
-                .post(post1)
-                .reason("광고성 게시글 같습니다.")
-                .status(CommunityReportStatus.PENDING)
-                .build());
+        communityReportRepository.saveAll(List.of(
+                createPostReport(post1, reporterA, "스팸 게시글 의심"),
+                createPostReport(post2, reporterB, "부적절한 표현 포함"),
+                createPostReport(post3, reporterC, "욕설 포함")
+        ));
 
-        communityReportRepository.save(CommunityReport.builder()
-                .reporter(admin)
-                .post(post2)
-                .reason("부적절한 내용이 포함되어 있습니다.")
-                .status(CommunityReportStatus.PENDING)
-                .build());
-
-        communityReportRepository.save(CommunityReport.builder()
-                .reporter(admin)
-                .post(post3)
-                .reason("욕설이 포함되어 있습니다.")
-                .status(CommunityReportStatus.PENDING)
-                .build());
-
-// ===== 댓글 신고 더미 데이터 (테스트용) =====
         commentReportRepository.save(CommentReport.builder()
-                .reporter(admin)
+                .reporter(reporterD)
                 .comment(comment1)
-                .reason("부적절한 표현이 있습니다.")
+                .reason("악의적인 댓글입니다.")
                 .status(CommunityReportStatus.PENDING)
                 .build());
 
-        commentReportRepository.save(CommentReport.builder()
-                .reporter(admin)
-                .comment(comment2)
-                .reason("광고성 댓글 같습니다.")
+        log.info("✅ 상담사 더미 + 신고 누적 테스트용 데이터 생성 완료");
+        log.info("일반 유저(user@test.com) → 게시글 3개 + 댓글 1개 작성 (정지 대상)");
+        log.info("관리자(admin@test.com)");
+        log.info("상담사: counselor1@test.com, counselor2@test.com");
+        log.info("신고자: reporterA~D@test.com (총 4명)");
+        log.info("신고 승인 시 user 자동 정지 로직 테스트 가능");
+        log.info("============================================");
+    }
+
+    // 메서드
+    private void saveMemberTerms(Member member, List<Terms> termsList) {
+        for (Terms t : termsList) {
+            memberTermsRepository.save(MemberTerms.builder()
+                    .member(member)
+                    .terms(t)
+                    .agreed(true)
+                    .agreedAt(LocalDateTime.now())
+                    .build());
+        }
+    }
+
+    private Member createReporter(String email, String name) {
+        return Member.builder()
+                .email(email)
+                .password(passwordEncoder.encode("1234"))
+                .name(name)
+                .phone("010" + (int) (Math.random() * 99999999))
+                .address("서울시 테스트구")
+                .role(Role.USER)
+                .status(Status.ACTIVE)
+                .emailVerified(true)
+                .build();
+    }
+
+    private CommunityPost createPost(String title, CommunityCategory category, Member member) {
+        return CommunityPost.builder()
+                .title(title)
+                .content("이 게시글은 신고 누적 테스트용입니다.")
+                .category(category)
+                .member(member)
+                .likeCount(0)
+                .viewCount(0)
+                .reportCount(0)
+                .build();
+    }
+
+    private CommunityReport createPostReport(CommunityPost post, Member reporter, String reason) {
+        return CommunityReport.builder()
+                .reporter(reporter)
+                .post(post)
+                .reason(reason)
                 .status(CommunityReportStatus.PENDING)
-                .build());
-        log.info("===== 더미 데이터 생성 완료 =====");
-        log.info("일반 유저: user@test.com / 1234");
-        log.info("관리자: admin@test.com / 1234");
-        log.info("게시글: 3개, 댓글: 3개");
-        log.info("게시글 신고: 3개, 댓글 신고: 2개");
-        log.info("================================");
+                .build();
     }
 }
