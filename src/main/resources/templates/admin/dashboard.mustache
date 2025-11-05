@@ -21,19 +21,12 @@
     </div>
 </div>
 
-<!-- 신고 처리 추이 차트 -->
-<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📊 신고 처리 추이</h3>
+<!-- 신고 처리 현황 차트 -->
+<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📊 신고 처리 현황</h3>
 <div class="charts-section">
-    <div class="chart-container" style="grid-column: 1 / -1;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3>월별 신고 처리 건수</h3>
-            <div class="chart-controls">
-                <button class="report-chart-btn active" data-period="6">최근 6개월</button>
-                <button class="report-chart-btn" data-period="12">최근 12개월</button>
-                <button class="report-chart-btn" data-period="24">최근 24개월</button>
-            </div>
-        </div>
-        <canvas id="reportProcessChart"></canvas>
+    <div class="chart-container">
+        <h3>신고 상태별 처리 건수</h3>
+        <canvas id="reportStatusChart"></canvas>
     </div>
 </div>
 
