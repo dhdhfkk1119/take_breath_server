@@ -87,10 +87,10 @@ public class ChatService {
     /**
      * 텍스트 메시지 전송
      */
-    public ChatMessageResponse sendMessage(ChatMessageRequest request) {
-        ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
+    public ChatMessageResponse sendMessage(Long roomId, Long memberId, ChatMessageRequest request) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new Exception404("채팅방을 찾을 수 없습니다."));
-        Member sender = memberRepository.findById(request.getSenderId())
+        Member sender = memberRepository.findById(memberId)
                 .orElseThrow(() -> new Exception404("회원을 찾을 수 없습니다."));
 
         // 사용자가 메세지를 보낼 때만 포인트 검증
@@ -110,7 +110,7 @@ public class ChatService {
             memberRepository.save(sender);
 
             ChatRoomMember otherMember = chatRoomMemberRepository
-                    .findOtherMemberInRoom(request.getChatRoomId(), request.getSenderId());
+                    .findOtherMemberInRoom(roomId, memberId);
 
             if (otherMember != null && otherMember.getMember().getRole() == Role.COUNSELOR) {
                 Counselor counselor = otherMember.getMember().getCounselor();
@@ -120,23 +120,20 @@ public class ChatService {
             }
         }
 
-        // MessageType 기본값 처리
-        String messageTypeStr = request.getMessageType();
-        if (messageTypeStr == null || messageTypeStr.trim().isEmpty()) {
-            messageTypeStr = "TEXT";
-        }
+        // 메시지 타입 처리
+        MessageType messageType = request.getMessageType() != null ? request.getMessageType() : MessageType.TEXT;
 
         // 메시지 생성 및 저장
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(sender)
                 .content(request.getContent())
-                .type(MessageType.valueOf(messageTypeStr))
+                .type(messageType)
                 .build();
         chatMessageRepository.save(message);
 
         // 발신자는 읽음 처리
-        markAsRead(request.getChatRoomId(), request.getSenderId(), message.getId());
+        markAsRead(roomId, memberId, message.getId());
 
         // Entity -> DTO 변환
         return ChatMessageResponse.builder()

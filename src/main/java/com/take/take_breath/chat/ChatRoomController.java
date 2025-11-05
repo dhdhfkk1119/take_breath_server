@@ -20,7 +20,7 @@ public class ChatRoomController {
 
     /**
      * 내가 속한 채팅방 목록 조회
-     * GET /api/chat/rooms?memberId=1
+     * GET /api/chat/rooms
      */
     /*
         응답

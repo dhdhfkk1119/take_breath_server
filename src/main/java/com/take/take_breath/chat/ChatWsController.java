@@ -7,9 +7,12 @@ import com.take.take_breath.chat.dto.ChatMessageResponse;
 import com.take.take_breath.chat.dto.MarkAsReadRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
+
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,8 +26,6 @@ public class ChatWsController {
      */
     /*
         stompClient.send('/app/chat.sendMessage.1', {}, JSON.stringify({
-          chatRoomId: 1,
-          senderId: 1,
           content: '안녕하세요',
           messageType: 'TEXT'
         }));
@@ -33,8 +34,11 @@ public class ChatWsController {
     @SendTo("/topic/room.{roomId}")
     public ApiResult<ChatMessageResponse> sendMessage(
             @DestinationVariable Long roomId,
-            ChatMessageRequest request) {
-        ChatMessageResponse response = chatService.sendMessage(request);
+            ChatMessageRequest request,
+            @Header("simpSessionAttributes") Map<String, Object> sessionAttributes) {
+        Long memberId = (Long) sessionAttributes.get("memberId");
+
+        ChatMessageResponse response = chatService.sendMessage(roomId, memberId, request);
         return ApiUtil.success(response);
     }
 

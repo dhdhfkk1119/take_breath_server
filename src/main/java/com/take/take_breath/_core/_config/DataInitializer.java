@@ -1,5 +1,14 @@
 package com.take.take_breath._core._config;
 
+import com.take.take_breath.chat.chat_message.ChatMessage;
+import com.take.take_breath.chat.chat_message.ChatMessageRepository;
+import com.take.take_breath.chat.chat_message.MessageStatus;
+import com.take.take_breath.chat.chat_message.MessageType;
+import com.take.take_breath.chat.chat_room.ChatRoom;
+import com.take.take_breath.chat.chat_room.ChatRoomRepository;
+import com.take.take_breath.chat.chat_room.RoomType;
+import com.take.take_breath.chat.chat_room_member.ChatRoomMember;
+import com.take.take_breath.chat.chat_room_member.ChatRoomMemberRepository;
 import com.take.take_breath.community.comment_report.CommentReport;
 import com.take.take_breath.community.comment_report.CommentReportRepository;
 import com.take.take_breath.community.community_category.CommunityCategory;
@@ -45,6 +54,10 @@ public class DataInitializer implements CommandLineRunner {
     private final CommunityCommentRepository communityCommentRepository;
     private final CommunityReportRepository communityReportRepository;
     private final CommentReportRepository commentReportRepository;
+
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -178,6 +191,99 @@ public class DataInitializer implements CommandLineRunner {
                 .reason("악의적인 댓글입니다.")
                 .status(CommunityReportStatus.PENDING)
                 .build());
+
+        // ===
+        ChatRoom counselingRoom = ChatRoom.builder()
+                .name("test채팅방")
+                .roomType(RoomType.COUNSELING)
+                .build();
+        chatRoomRepository.save(counselingRoom);
+
+        // 2. 채팅방에 멤버 추가 (testUser)
+        ChatRoomMember userMember = ChatRoomMember.builder()
+                .chatRoom(counselingRoom)
+                .member(user)
+                .lastReadMessageId(null)
+                .build();
+        chatRoomMemberRepository.save(userMember);
+
+        // 3. 채팅방에 멤버 추가 (counselor1)
+        ChatRoomMember counselorMember = ChatRoomMember.builder()
+                .chatRoom(counselingRoom)
+                .member(counselorMember1)
+                .lastReadMessageId(null)
+                .build();
+        chatRoomMemberRepository.save(counselorMember);
+
+        ChatMessage message1 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(counselorMember1)
+                .content("안녕하세요! 상담사 김하늘입니다. 편하게 말씀해주세요 😊")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.READ)
+                .build();
+        chatMessageRepository.save(message1);
+
+        ChatMessage message2 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(user)
+                .content("안녕하세요. 요즘 직장에서 스트레스가 너무 심해서 상담 받고 싶어요.")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.READ)
+                .build();
+        chatMessageRepository.save(message2);
+
+        ChatMessage message3 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(counselorMember1)
+                .content("직장 스트레스로 힘드시군요. 구체적으로 어떤 상황이 가장 힘드신가요?")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.READ)
+                .build();
+        chatMessageRepository.save(message3);
+
+        ChatMessage message4 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(user)
+                .content("업무량이 너무 많고, 상사와의 관계도 좋지 않아요. 매일 퇴근하면 기진맥진합니다.")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.READ)
+                .build();
+        chatMessageRepository.save(message4);
+
+        ChatMessage message5 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(counselorMember1)
+                .content("많이 힘드셨겠어요. 업무 부담과 대인관계 문제가 함께 겹치면 더욱 지치실 수 있습니다.")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.READ)
+                .build();
+        chatMessageRepository.save(message5);
+
+        ChatMessage message6 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(counselorMember1)
+                .content("우선 하루 일과 중 본인만의 휴식 시간을 확보하는 것이 중요합니다. 점심시간이나 퇴근 후 짧은 산책도 도움이 될 수 있어요.")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.SENT)
+                .build();
+        chatMessageRepository.save(message6);
+
+        ChatMessage systemMessage = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(counselorMember1)
+                .content("상담 시간이 30분 남았습니다.")
+                .type(MessageType.SYSTEM)
+                .status(MessageStatus.SENT)
+                .build();
+        chatMessageRepository.save(systemMessage);
+
+        userMember.updateLastRead(message5.getId());
+        chatRoomMemberRepository.save(userMember);
+
+        counselorMember.updateLastRead(systemMessage.getId());
+        chatRoomMemberRepository.save(counselorMember);
+
 
         log.info("✅ 상담사 더미 + 신고 누적 테스트용 데이터 생성 완료");
         log.info("일반 유저(user@test.com) → 게시글 3개 + 댓글 1개 작성 (정지 대상)");
