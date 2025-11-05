@@ -104,7 +104,7 @@ public class RecordService {
     }
 
     /**
-     * 기록 수정 - 수정된 파일 처리 방법 필요
+     * 기록 수정
      * @param email
      * @param recordId
      * @param request
@@ -121,21 +121,29 @@ public class RecordService {
         }
 
         try {
-            // 기존 파일 전체 삭제
-            deleteAllRecordFiles(record);
-
             // 기본 필드 업데이트
             record.setTitle(request.getTitle());
             record.setContent(request.getContent());
 
-            // 새로운 파일 저장
-            processFiles(record, request.getImageFiles(), FileType.IMAGE);
-            processFiles(record, request.getAudioFiles(), FileType.AUDIO);
-            processFiles(record, request.getVideoFiles(), FileType.VIDEO);
+            // 새로운 이미지 파일 추가 (기존 이미지 유지)
+            if (request.getImageFiles() != null && !request.getImageFiles().isEmpty()) {
+                processFiles(record, request.getImageFiles(), FileType.IMAGE);
+            }
+
+            // 새로운 오디오 파일 추가 (기존 오디오 유지)
+            if (request.getAudioFiles() != null && !request.getAudioFiles().isEmpty()) {
+                processFiles(record, request.getAudioFiles(), FileType.AUDIO);
+            }
+
+            // 새로운 비디오 파일 추가 (기존 비디오 유지)
+            if (request.getVideoFiles() != null && !request.getVideoFiles().isEmpty()) {
+                processFiles(record, request.getVideoFiles(), FileType.VIDEO);
+            }
+
         } catch (IOException e) {
             throw new Exception500("파일 수정 중 에러 발생");
         }
-        
+
         return recordRepository.save(record);
     }
 
@@ -233,7 +241,7 @@ public class RecordService {
     }
 
     /**
-     * Record에 연결된 모든 파일 삭제
+     * Record에 연결된 모든 파일 삭제 (삭제 기능에서만 사용)
      * @param record
      */
     private void deleteAllRecordFiles(Record record) {
