@@ -158,7 +158,8 @@ public class MemberService {
                 member.getEmail(),
                 member.getProfileImage(),
                 member.getRole().name(),
-                member.getStatus().name()
+                member.getStatus().name(),
+                member.getPhone()
                 // daysLeft는 DTO 생성자에서 null로 처리됨
         );
     }

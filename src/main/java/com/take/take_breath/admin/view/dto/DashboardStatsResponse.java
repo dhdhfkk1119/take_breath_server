@@ -73,16 +73,16 @@ public class DashboardStatsResponse {
         long commentReports = commentReportRepository.count();
         long totalReports = postReports + commentReports;
 
-        long pendingPostReports = communityReportRepository.countByStatus(CommunityReportStatus.PENDING);
-        long pendingCommentReports = commentReportRepository.countByStatus(CommunityReportStatus.PENDING);
+        long pendingPostReports = communityReportRepository.countByStatus(CommunityReportStatus.PENDING.name());
+        long pendingCommentReports = commentReportRepository.countByStatus(CommunityReportStatus.PENDING.name());
         long pendingReports = pendingPostReports + pendingCommentReports;
 
-        long approvedPostReports = communityReportRepository.countByStatus(CommunityReportStatus.APPROVED);
-        long approvedCommentReports = commentReportRepository.countByStatus(CommunityReportStatus.APPROVED);
+        long approvedPostReports = communityReportRepository.countByStatus(CommunityReportStatus.APPROVED.name());
+        long approvedCommentReports = commentReportRepository.countByStatus(CommunityReportStatus.APPROVED.name());
         long approvedReports = approvedPostReports + approvedCommentReports;
 
-        long rejectedPostReports = communityReportRepository.countByStatus(CommunityReportStatus.REJECTED);
-        long rejectedCommentReports = commentReportRepository.countByStatus(CommunityReportStatus.REJECTED);
+        long rejectedPostReports = communityReportRepository.countByStatus(CommunityReportStatus.REJECTED.name());
+        long rejectedCommentReports = commentReportRepository.countByStatus(CommunityReportStatus.REJECTED.name());
         long rejectedReports = rejectedPostReports + rejectedCommentReports;
 
         // 도우미 버튼 클릭 수 (추후 구현)

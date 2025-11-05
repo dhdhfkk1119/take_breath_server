@@ -18,13 +18,14 @@ public class MemberResponseTo {
         private String profileImageUrl;
         private String role;
         private String status; // 현재 계정 상태 (ex: ACTIVE, WITHDRAWAL)
+        private String phone;
 
         // (선택 사항) 탈퇴 대기 중인 경우에만 사용.
         // 이 필드가 null이 아니면 daysLeft만 반환.
         private Long daysLeft;
 
         // 1. 일반 로그인 응답을 위한 생성자 (탈퇴 상태가 아닐 때)
-        public Login(String accessToken, String refreshToken, Long id, String name, String email, String profileImageUrl, String role, String status) {
+        public Login(String accessToken, String refreshToken, Long id, String name, String email, String profileImageUrl, String role, String status, String phone) {
             this.accessToken = accessToken;
             this.refreshToken = refreshToken;
             this.id = id;
@@ -33,6 +34,7 @@ public class MemberResponseTo {
             this.profileImageUrl = profileImageUrl;
             this.role = role;
             this.status = status;
+            this.phone = phone;
             this.daysLeft = null; // 일반 로그인 시에는 null
         }
 
@@ -47,6 +49,7 @@ public class MemberResponseTo {
             this.profileImageUrl = null;
             this.role = null;
             this.status = status; // "WITHDRAWAL"
+            this.phone = null;
             this.daysLeft = daysLeft;
         }
     }

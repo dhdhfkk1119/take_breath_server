@@ -23,8 +23,8 @@ public interface CommunityReportRepository extends JpaRepository<CommunityReport
             "WHERE r.id = :reportId")
     Optional<CommunityReport> findByIdWithAdminComments(@Param("reportId") Long reportId);
 
-    long countByStatus(CommunityReportStatus status);
-
+    @Query(value = "SELECT COUNT(*) FROM community_report_tb WHERE status = :status", nativeQuery = true)
+    long countByStatus(@Param("status") String status);
 
     @Query("SELECT COUNT(DISTINCT r.post.id) FROM CommunityReport r " +
             "WHERE r.post.member = :member AND r.status = 'APPROVED'")
