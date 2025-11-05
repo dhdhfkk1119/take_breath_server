@@ -52,7 +52,7 @@ async function loadComments(keyword = "") {
 async function deleteComment(id) {
     if (!confirm("정말 이 댓글을 강제 삭제하시겠습니까?")) return;
     try {
-        const res = await fetch(`/api/admin/community/comments/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/admin/view/community/comments/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("삭제 실패");
         await loadComments();
     } catch (err) {

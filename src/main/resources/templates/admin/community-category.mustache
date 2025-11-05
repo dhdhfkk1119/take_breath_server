@@ -2,16 +2,14 @@
 
 <div class="page-header">
     <h2>{{pageTitle}}</h2>
-    <p>커뮤니티 게시글의 분류를 관리하세요</p>
+    <p>커뮤니티 게시판의 카테고리를 관리하세요</p>
 </div>
 
-<!-- 상단 버튼 영역 -->
-<div class="filter-buttons">
-    <input type="text" id="newCategoryName" placeholder="새 카테고리 이름 입력" class="input-field">
-    <button id="addCategoryBtn" class="btn btn-primary">추가</button>
-</div>
+<form method="post" action="/api/admin/view/community/categories" style="margin-bottom: 1rem;">
+    <input type="text" name="name" placeholder="새 카테고리 이름" required>
+    <button type="submit" class="btn btn-primary">추가</button>
+</form>
 
-<!-- 카테고리 목록 테이블 -->
 <div class="table-container">
     <table class="data-table">
         <thead>
@@ -22,10 +20,21 @@
             <th>관리</th>
         </tr>
         </thead>
-        <tbody id="categoryList">
-        <tr>
-            <td colspan="4" style="text-align:center; color:#999;">로딩 중...</td>
-        </tr>
+        <tbody>
+        {{#categories}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{name}}</td>
+                <td>
+                    <form method="post" action="/api/admin/view/community/categories/{{id}}/delete">
+                        <button type="submit" class="btn btn-danger">삭제</button>
+                    </form>
+                </td>
+            </tr>
+        {{/categories}}
+        {{^categories}}
+            <tr><td colspan="4" style="text-align:center;color:#999;">등록된 카테고리가 없습니다.</td></tr>
+        {{/categories}}
         </tbody>
     </table>
 </div>

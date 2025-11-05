@@ -54,7 +54,7 @@ async function loadPosts(keyword = "") {
 async function deletePost(id) {
     if (!confirm("정말 이 게시글을 강제 삭제하시겠습니까?")) return;
     try {
-        const res = await fetch(`/api/admin/community/posts/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/admin/view/community/posts/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("삭제 실패");
         await loadPosts();
     } catch (err) {
