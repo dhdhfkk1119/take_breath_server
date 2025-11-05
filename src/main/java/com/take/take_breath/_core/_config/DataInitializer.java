@@ -71,6 +71,7 @@ public class DataInitializer implements CommandLineRunner {
                 .role(Role.USER)
                 .status(Status.ACTIVE)
                 .emailVerified(true)
+                .point(10000L)
                 .build();
 
         memberRepository.save(user);
