@@ -1,0 +1,39 @@
+{{> layout/admin-layout-start}}
+
+<div class="page-header">
+    <h2>{{pageTitle}}</h2>
+    <p>커뮤니티 게시글을 관리하세요</p>
+</div>
+
+<!-- 검색 또는 필터 버튼 -->
+<div class="filter-buttons">
+    <input type="text" id="searchKeyword" placeholder="제목 또는 작성자 검색" class="input-field">
+    <button id="searchBtn" class="btn btn-primary">검색</button>
+    <button id="refreshBtn" class="btn">새로고침</button>
+</div>
+
+<!-- 게시글 목록 테이블 -->
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>카테고리</th>
+            <th>조회수</th>
+            <th>좋아요</th>
+            <th>신고 수</th>
+            <th>작성일</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody id="postList">
+        <tr>
+            <td colspan="9" style="text-align:center; color:#999;">로딩 중...</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+{{> layout/admin-layout-end}}

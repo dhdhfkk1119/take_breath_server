@@ -1,0 +1,33 @@
+{{> layout/admin-layout-start}}
+
+<div class="page-header">
+    <h2>{{pageTitle}}</h2>
+    <p>커뮤니티 게시글의 분류를 관리하세요</p>
+</div>
+
+<!-- 상단 버튼 영역 -->
+<div class="filter-buttons">
+    <input type="text" id="newCategoryName" placeholder="새 카테고리 이름 입력" class="input-field">
+    <button id="addCategoryBtn" class="btn btn-primary">추가</button>
+</div>
+
+<!-- 카테고리 목록 테이블 -->
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>카테고리명</th>
+            <th>생성일</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody id="categoryList">
+        <tr>
+            <td colspan="4" style="text-align:center; color:#999;">로딩 중...</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+{{> layout/admin-layout-end}}

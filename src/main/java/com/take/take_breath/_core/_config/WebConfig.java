@@ -57,7 +57,8 @@ public class WebConfig implements WebMvcConfigurer {
         // 관리자 세션 인터셉터
         registry.addInterceptor(adminAuthInterceptor)
                 .addPathPatterns("/api/admin/view/**")
-                .excludePathPatterns("/api/admin/view/login");
+                .excludePathPatterns("/api/admin/view/login",
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico");
     }
 
     @Override
