@@ -1,5 +1,5 @@
 let memberGrowthChart = null;
-let reportProcessChart = null;
+let reportStatusChart = null;
 
 function initCharts(stats) {
     console.log('initCharts 함수 실행됨', stats);
@@ -99,19 +99,8 @@ function initCharts(stats) {
         });
     });
 
-    // ─────────────── 신고 처리 추이 차트 초기화 ───────────────
-    initReportProcessChart(6);
-
-    // 신고 처리 추이 기간 선택 버튼 이벤트
-    const reportChartButtons = document.querySelectorAll('.report-chart-btn');
-    reportChartButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            reportChartButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            const period = parseInt(this.dataset.period);
-            initReportProcessChart(period);
-        });
-    });
+    // ─────────────── 신고 처리 현황 차트 초기화 ───────────────
+    initReportStatusChart();
 }
 
 /**
@@ -126,12 +115,12 @@ function initMemberGrowthChart(months) {
 
     const chartData = window.stats?.memberGrowthData;
     if (!chartData || !Array.isArray(chartData.labels) || !Array.isArray(chartData.memberData)) {
-        console.warn("⚠️ 회원 증가 데이터가 없습니다.");
+        console.warn("회원 증가 데이터가 없습니다.");
         return;
     }
 
     if (chartData.labels.length === 0) {
-        console.warn("⚠️ 회원 증가 데이터가 비어있습니다.");
+        console.warn("회원 증가 데이터가 비어있습니다.");
     }
 
     // 데이터셋 구성
@@ -232,97 +221,85 @@ function initMemberGrowthChart(months) {
 }
 
 /**
- * 신고 처리 추이 차트 초기화 (커뮤니티 + 댓글 합산)
- * @param {number} months - 표시할 개월 수 (6, 12, 24)
+ * 신고 처리 현황 차트 (막대 그래프)
+ * x축: 상태 (대기 / 승인 / 반려)
+ * y축: 건수
  */
-function initReportProcessChart(months) {
-    console.log('🔍 initReportProcessChart 호출됨, months:', months);
+function initReportStatusChart() {
+    console.log('initReportStatusChart 호출됨');
 
-    const ctx = document.getElementById('reportProcessChart');
+    const ctx = document.getElementById('reportStatusChart');
     if (!ctx) {
-        console.error('❌ reportProcessChart 캔버스를 찾을 수 없습니다!');
+        console.error('reportStatusChart 캔버스를 찾을 수 없습니다!');
         return;
     }
 
-    console.log('✅ reportProcessChart 캔버스 찾음');
+    console.log('reportStatusChart 캔버스 찾음');
 
-    if (reportProcessChart) {
+    if (reportStatusChart) {
         console.log('🗑️ 기존 차트 삭제');
-        reportProcessChart.destroy();
+        reportStatusChart.destroy();
     }
 
-    const chartData = window.stats?.reportProcessData;
-    console.log('📊 신고 처리 데이터:', chartData);
+    const statusData = window.stats?.reportStatusData;
+    console.log('신고 상태 데이터:', statusData);
 
-    if (!chartData) {
-        console.error("❌ reportProcessData가 없습니다!");
+    if (!statusData) {
+        console.error("❌ reportStatusData가 없습니다!");
         console.log('window.stats:', window.stats);
         return;
     }
 
-    if (!Array.isArray(chartData.labels) || !Array.isArray(chartData.data)) {
-        console.error("❌ reportProcessData 구조가 잘못되었습니다!", chartData);
-        return;
-    }
+    // 상태별 데이터 추출 (기본값 0)
+    const pending = statusData.PENDING || 0;
+    const approved = statusData.APPROVED || 0;  // COMPLETED를 승인으로 표시
+    const rejected = statusData.REJECTED || 0;
 
-    if (chartData.labels.length === 0) {
-        console.warn("⚠️ 신고 처리 데이터가 비어있습니다. (빈 차트 표시)");
-    }
+    console.log('📈 차트 데이터:', { pending, approved, rejected });
 
-    console.log('📈 차트 생성 시작...');
-    console.log('Labels:', chartData.labels);
-    console.log('Data:', chartData.data);
-
-    // 차트 생성
-    reportProcessChart = new Chart(ctx, {
-        type: 'line',
+    // 막대 그래프 생성
+    reportStatusChart = new Chart(ctx, {
+        type: 'bar',
         data: {
-            labels: chartData.labels,
+            labels: ['대기', '승인', '반려'],
             datasets: [{
-                label: '신고 처리 건수',
-                data: chartData.data,
-                borderColor: 'rgb(231, 76, 60)',
-                backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 5,
-                pointHoverRadius: 8,
-                pointBackgroundColor: 'rgb(231, 76, 60)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2
+                label: '신고 건수',
+                data: [pending, approved, rejected],
+                backgroundColor: [
+                    'rgba(243, 156, 18, 0.8)',
+                    'rgba(46, 204, 113, 0.8)',
+                    'rgba(231, 76, 60, 0.8)'
+                ],
+                borderColor: [
+                    'rgb(243, 156, 18)',
+                    'rgb(46, 204, 113)',
+                    'rgb(231, 76, 60)'
+                ],
+                borderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: { intersect: false, mode: 'index' },
             plugins: {
                 legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        font: { size: 13, weight: '500' },
-                        padding: 15,
-                        usePointStyle: true
-                    }
+                    display: false
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     padding: 12,
                     titleFont: { size: 14, weight: 'bold' },
                     bodyFont: { size: 13 },
-                    cornerRadius: 6,
-                    displayColors: true,
                     callbacks: {
                         label: function(context) {
-                            return `${context.dataset.label}: ${context.parsed.y}건`;
+                            return `${context.label}: ${context.parsed.y}건`;
                         }
                     }
                 },
                 title: {
                     display: true,
-                    text: '신고 처리 추이'
+                    text: '신고 상태별 처리 건수',
+                    font: { size: 14 }
                 }
             },
             scales: {
@@ -341,14 +318,18 @@ function initReportProcessChart(months) {
                     }
                 },
                 x: {
-                    ticks: { font: { size: 12 } },
-                    grid: { display: false, drawBorder: false }
+                    ticks: {
+                        font: { size: 12, weight: '600' }
+                    },
+                    grid: {
+                        display: false
+                    }
                 }
             }
         }
     });
 
-    console.log('✅ 신고 처리 차트 생성 완료!');
+    console.log('신고 처리 현황 차트 생성 완료!');
 }
 
 /**

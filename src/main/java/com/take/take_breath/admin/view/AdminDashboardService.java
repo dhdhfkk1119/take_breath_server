@@ -6,6 +6,7 @@ import com.take.take_breath.admin.view.dto.ReportProcessData;
 import com.take.take_breath.community.comment_report.CommentReportRepository;
 import com.take.take_breath.community.comment_report_process.CommentReportProcessRepository;
 import com.take.take_breath.community.community_report.CommunityReportRepository;
+import com.take.take_breath.community.community_report.CommunityReportStatus;
 import com.take.take_breath.community.community_report_process.CommunityReportProcessRepository;
 import com.take.take_breath.counselor.CounselorRepository;
 import com.take.take_breath.members.MemberRepository;
@@ -113,26 +114,40 @@ public class AdminDashboardService {
      * 신고 상태별 통계 (PENDING, IN_PROGRESS, COMPLETED, REJECTED)
      * @return 상태별 신고 건수
      */
+//    public Map<String, Integer> getReportStatusStats() {
+//        Map<String, Integer> statusStats = new LinkedHashMap<>();
+//
+//        // 커뮤니티 신고 상태별 카운트
+//        List<Object[]> communityStatus = communityReportProcessRepository.countLatestStatusByReport();
+//
+//        // 댓글 신고 상태별 카운트
+//        List<Object[]> commentStatus = commentReportProcessRepository.countLatestStatusByReport();
+//
+//        // 상태별 합산
+//        for (Object[] row : communityStatus) {
+//            String status = String.valueOf(row[0]);
+//            Integer count = ((Number) row[1]).intValue();
+//            statusStats.put(status, statusStats.getOrDefault(status, 0) + count);
+//        }
+//
+//        for (Object[] row : commentStatus) {
+//            String status = String.valueOf(row[0]);
+//            Integer count = ((Number) row[1]).intValue();
+//            statusStats.put(status, statusStats.getOrDefault(status, 0) + count);
+//        }
+//
+//        return statusStats;
+//    }
     public Map<String, Integer> getReportStatusStats() {
         Map<String, Integer> statusStats = new LinkedHashMap<>();
 
-        // 커뮤니티 신고 상태별 카운트
-        List<Object[]> communityStatus = communityReportProcessRepository.countLatestStatusByReport();
+        // CommunityReportStatus enum의 모든 값에 대해 조회
+        for (CommunityReportStatus status : CommunityReportStatus.values()) {
+            long communityCount = communityReportRepository.countByStatus(status.name());
+            long commentCount = commentReportRepository.countByStatus(status.name());
 
-        // 댓글 신고 상태별 카운트
-        List<Object[]> commentStatus = commentReportProcessRepository.countLatestStatusByReport();
-
-        // 상태별 합산
-        for (Object[] row : communityStatus) {
-            String status = (String) row[0];
-            Integer count = ((Number) row[1]).intValue();
-            statusStats.put(status, statusStats.getOrDefault(status, 0) + count);
-        }
-
-        for (Object[] row : commentStatus) {
-            String status = (String) row[0];
-            Integer count = ((Number) row[1]).intValue();
-            statusStats.put(status, statusStats.getOrDefault(status, 0) + count);
+            int totalCount = (int)(communityCount + commentCount);
+            statusStats.put(status.name(), totalCount);
         }
 
         return statusStats;
