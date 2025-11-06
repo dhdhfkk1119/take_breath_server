@@ -1,10 +1,7 @@
 package com.take.take_breath.chat;
 
 import com.take.take_breath._core._utils.ApiUtil;
-import com.take.take_breath.chat.dto.ChatMessageResponse;
-import com.take.take_breath.chat.dto.ImageMessageResponse;
-import com.take.take_breath.chat.dto.ImageUploadRequest;
-import com.take.take_breath.chat.dto.MarkAsReadRequest;
+import com.take.take_breath.chat.dto.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -28,9 +25,8 @@ public class ChatMessageController {
      */
     @GetMapping("/{roomId}")
     public ResponseEntity<?> getMessages(@PathVariable(name = "roomId") Long roomId, HttpServletRequest request) {
-        Long memberId = (Long) request.getAttribute("memberId");
-        System.out.println("받음 : " + memberId.toString());
-        List<ChatMessageResponse> messages = chatService.getChatMessages(memberId, roomId);
+        String memberEmail = request.getAttribute("memberEmail").toString();
+        List<ChatMessageResponse> messages = chatService.getChatMessages(memberEmail, roomId);
         return ResponseEntity.ok(ApiUtil.success(messages));
     }
 

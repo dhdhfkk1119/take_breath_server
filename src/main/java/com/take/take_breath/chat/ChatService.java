@@ -44,11 +44,11 @@ public class ChatService {
      * 채팅방의 메시지 목록 조회 (읽음 여부 포함)
      */
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> getChatMessages(Long memberId, Long roomId) {
+    public List<ChatMessageResponse> getChatMessages(String memberEmail, Long roomId) {
         // 예외 처리
-        memberRepository.findById(memberId)
+        Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다"));
-        chatRoomRepository.findById(roomId)
+        ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new Exception404("채팅방을 찾을 수 없습니다"));
 
         // 채팅방의 모든 메시지 조회 (시간순 정렬)
@@ -57,7 +57,7 @@ public class ChatService {
 
         // 현재 사용자의 마지막 읽은 메시지 ID 조회
         ChatRoomMember roomMember = chatRoomMemberRepository
-                .findByChatRoomIdAndMemberId(roomId, memberId)
+                .findByChatRoomIdAndMemberId(room.getId(), member.getId())
                 .orElseThrow(() -> new Exception400("채팅방에 속하지 않은 사용자입니다."));
 
         Long lastReadMessageId = roomMember.getLastReadMessageId();
@@ -68,7 +68,7 @@ public class ChatService {
                     // 읽음 여부 판단:
                     // 1. 본인이 보낸 메시지거나
                     // 2. lastReadMessageId보다 작거나 같으면 읽음 처리
-                    boolean isRead = message.getSender().getId().equals(memberId) ||
+                    boolean isRead = message.getSender().getId().equals(member.getId()) ||
                             (lastReadMessageId != null && message.getId() <= lastReadMessageId);
 
                     return ChatMessageResponse.builder()

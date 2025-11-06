@@ -17,7 +17,7 @@ public class ChatMessageResponse {
     private String content;
     private MessageType messageType;
     private Timestamp createdAt;
-    private boolean isRead;
+    private Boolean isRead;
     private String imageUrl;
     private Long currentPoint;
 }
