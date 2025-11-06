@@ -31,41 +31,41 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
 
+    be
+
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
+
+        // STOMP 헤더 접근
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if(accessor != null) {
+        if (accessor != null) {
             StompCommand command = accessor.getCommand();
 
+            // CONNECT, SUBSCRIBE, SEND 명령 시 토큰 검증
             if (StompCommand.CONNECT.equals(command)
                     || StompCommand.SUBSCRIBE.equals(command)
                     || StompCommand.SEND.equals(command)) {
 
+                // JWT 토큰 추출
                 String token = resolveToken(accessor);
-                if (token == null || !jwtTokenProvider.validateToken(token)) {
-                    log.error("WebSocket JWT 인증 실패: command={}, sessionId={}", command, accessor.getSessionId());
-                    throw new Exception401("유효하지 않은 토큰입니다");
+
+                if (token != null && jwtTokenProvider.validateToken(token)) {
+                    String email = jwtTokenProvider.getSubject(token);
+                    memberRepository.findByEmail(email).ifPresent(member -> {
+                        accessor.getSessionAttributes().put("memberId", member.getId());
+                        accessor.getSessionAttributes().put("memberEmail", member.getEmail());
+                    });
+
+                    log.info("✅ WebSocket 인증 성공: {}", email);
+                } else {
+                    log.warn("❌ WebSocket 인증 실패 - 잘못된 토큰 또는 누락됨");
+                    throw new IllegalArgumentException("Invalid JWT token in WebSocket message");
                 }
-
-                // JWT에서 사용자 정보 추출
-                String memberEmail = jwtTokenProvider.getSubject(token);
-                Role memberRole = jwtTokenProvider.getRole(token);
-
-                // DB 조회
-                Member member = memberRepository.findByEmail(memberEmail)
-                        .orElseThrow(() -> new Exception401("유효하지 않은 사용자입니다."));
-
-                // 세션에 저장
-                accessor.getSessionAttributes().put("memberEmail", memberEmail);
-                accessor.getSessionAttributes().put("memberRole", memberRole);
-                accessor.getSessionAttributes().put("memberId", member.getId());
-
-                log.info("WebSocket JWT 인증 성공: email={}, role={}, command={}, sessionId={}",
-                        memberEmail, memberRole, command, accessor.getSessionId());
             }
         }
-        return ChannelInterceptor.super.preSend(message, channel);
+
+        return message; // 메시지를 계속 흐르게 함
     }
 
     /**

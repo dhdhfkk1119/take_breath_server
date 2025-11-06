@@ -1,19 +1,23 @@
 package com.take.take_breath.chat.dto;
 
+import com.take.take_breath.chat.chat_message.MessageType;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ChatMessageResponse {
     private Long messageId;
     private Long senderId;
     private String senderName;
     private String content;
-    private String messageType;
-    private String createdAt;
+    private MessageType messageType;
+    private Timestamp createdAt;
     private boolean isRead;
     private String imageUrl;
-    private String currentPoint;
+    private Long currentPoint;
 }

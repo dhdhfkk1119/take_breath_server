@@ -44,25 +44,25 @@ public class ChatService {
      * 채팅방의 메시지 목록 조회 (읽음 여부 포함)
      */
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> getChatMessages(Long chatRoomId, Long memberId) {
+    public List<ChatMessageResponse> getChatMessages(Long memberId, Long roomId) {
         // 예외 처리
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다"));
-        chatRoomRepository.findById(chatRoomId)
+        chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new Exception404("채팅방을 찾을 수 없습니다"));
 
         // 채팅방의 모든 메시지 조회 (시간순 정렬)
         List<ChatMessage> messages = chatMessageRepository
-                .findByChatRoomIdOrderByCreatedAtAsc(chatRoomId);
+                .findByChatRoomIdOrderByCreatedAtAsc(roomId);
 
-        // 2. 현재 사용자의 마지막 읽은 메시지 ID 조회
+        // 현재 사용자의 마지막 읽은 메시지 ID 조회
         ChatRoomMember roomMember = chatRoomMemberRepository
-                .findByChatRoomIdAndMemberId(chatRoomId, memberId)
+                .findByChatRoomIdAndMemberId(roomId, memberId)
                 .orElseThrow(() -> new Exception400("채팅방에 속하지 않은 사용자입니다."));
 
         Long lastReadMessageId = roomMember.getLastReadMessageId();
 
-        // 3. Entity -> DTO 변환 (읽음 여부 계산)
+        // Entity -> DTO 변환 (읽음 여부 계산)
         return messages.stream()
                 .map(message -> {
                     // 읽음 여부 판단:
@@ -76,8 +76,8 @@ public class ChatService {
                             .senderId(message.getSender().getId())
                             .senderName(message.getSender().getName())
                             .content(message.getContent())
-                            .messageType(message.getType().name())
-                            .createdAt(message.getTime())
+                            .messageType(message.getType())
+                            .createdAt(message.getCreatedAt())
                             .isRead(isRead)
                             .build();
                 })
@@ -101,8 +101,8 @@ public class ChatService {
                         .senderId(sender.getId())
                         .senderName(sender.getName())
                         .content(request.getContent())
-                        .messageType("TEXT")
-                        .currentPoint(String.valueOf(sender.getPoint()))
+                        .messageType(MessageType.TEXT)
+                        .currentPoint(sender.getPoint())
                         .build();
             }
 
@@ -141,10 +141,10 @@ public class ChatService {
                 .senderId(sender.getId())
                 .senderName(sender.getName())
                 .content(message.getContent())
-                .messageType(message.getType().name())
-                .createdAt(message.getTime())
+                .messageType(message.getType())
+                .createdAt(message.getCreatedAt())
                 .isRead(true)
-                .currentPoint(String.valueOf(sender.getPoint()))
+                .currentPoint(sender.getPoint())
                 .build();
     }
 

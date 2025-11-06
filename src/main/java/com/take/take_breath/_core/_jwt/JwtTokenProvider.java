@@ -8,10 +8,12 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 
 // JJWT 0.12.x API 사용
 @Slf4j
@@ -142,6 +144,18 @@ public class JwtTokenProvider {
                 .expiration(validity)
                 .signWith(key)
                 .compact();
+    }
+
+
+    public String resolveToken(ServerHttpRequest request) {
+        List<String> headers = request.getHeaders().get("Authorization");
+        if (headers != null && !headers.isEmpty()) {
+            String bearerToken = headers.get(0);
+            if (bearerToken.startsWith("Bearer ")) {
+                return bearerToken.substring(7);
+            }
+        }
+        return null;
     }
 
 }

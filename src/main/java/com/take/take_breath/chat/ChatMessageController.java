@@ -5,6 +5,7 @@ import com.take.take_breath.chat.dto.ChatMessageResponse;
 import com.take.take_breath.chat.dto.ImageMessageResponse;
 import com.take.take_breath.chat.dto.ImageUploadRequest;
 import com.take.take_breath.chat.dto.MarkAsReadRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,26 +23,10 @@ import java.util.List;
 public class ChatMessageController {
     private final ChatService chatService;
 
-    /**
-     * 에러 반환
-     */
-    /*
-        응답
-        {
-          "success": false,
-          "response": null,
-          "error": {
-            "message": "회원을 찾을 수 없습니다.",
-            "status": 404,
-            "code": "MEMBER_NOT_FOUND"
-          }
-        }
-     */
-
 
     /**
      * 채팅방의 메시지 목록 조회 (읽음 여부 포함)
-     * GET /api/chat/messages?chatRoomId=1&memberId=1
+     * GET /api/chat/messages?roomId=1
      */
     /*
         응답
@@ -81,9 +66,10 @@ public class ChatMessageController {
     */
     @GetMapping
     public ResponseEntity<?> getMessages(
-            @RequestParam Long chatRoomId,
-            @RequestParam Long memberId) {
-        List<ChatMessageResponse> messages = chatService.getChatMessages(chatRoomId, memberId);
+            @RequestParam Long roomId,
+            HttpServletRequest request) {
+        Long memberId = (Long) request.getAttribute("memberId");
+        List<ChatMessageResponse> messages = chatService.getChatMessages(memberId, roomId);
         return ResponseEntity.ok(ApiUtil.success(messages));
     }
 
