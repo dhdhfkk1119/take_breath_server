@@ -17,6 +17,9 @@ import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
+import com.take.take_breath.payment.Payment;
+import com.take.take_breath.payment.PaymentRepository;
+import com.take.take_breath.payment.PaymentStatus;
 import com.take.take_breath.terms.MemberTerms;
 import com.take.take_breath.terms.MemberTermsRepository;
 import com.take.take_breath.terms.Terms;
@@ -27,6 +30,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -45,9 +49,11 @@ public class DataInitializer implements CommandLineRunner {
     private final CommunityCommentRepository communityCommentRepository;
     private final CommunityReportRepository communityReportRepository;
     private final CommentReportRepository commentReportRepository;
+    private final PaymentRepository paymentRepository; // ✅ 추가
 
     @Override
     public void run(String... args) throws Exception {
+        // 약관
         Terms terms1 = Terms.builder()
                 .title("서비스 이용약관")
                 .content("서비스 이용약관 내용")
@@ -62,6 +68,7 @@ public class DataInitializer implements CommandLineRunner {
 
         termsRepository.saveAll(List.of(terms1, terms2));
 
+        // 일반 회원
         Member user = Member.builder()
                 .email("user@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -72,10 +79,10 @@ public class DataInitializer implements CommandLineRunner {
                 .status(Status.ACTIVE)
                 .emailVerified(true)
                 .build();
-
         memberRepository.save(user);
         saveMemberTerms(user, List.of(terms1, terms2));
 
+        // 관리자
         Member admin = Member.builder()
                 .email("admin@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -89,6 +96,7 @@ public class DataInitializer implements CommandLineRunner {
         memberRepository.save(admin);
         saveMemberTerms(admin, List.of(terms1, terms2));
 
+        // 상담사
         Member counselorMember1 = Member.builder()
                 .email("counselor1@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -141,12 +149,14 @@ public class DataInitializer implements CommandLineRunner {
 
         counselorRepository.saveAll(List.of(counselor1, counselor2));
 
+        // 신고자 더미
         Member reporterA = createReporter("reporterA@test.com", "신고자A");
         Member reporterB = createReporter("reporterB@test.com", "신고자B");
         Member reporterC = createReporter("reporterC@test.com", "신고자C");
         Member reporterD = createReporter("reporterD@test.com", "신고자D");
         memberRepository.saveAll(List.of(reporterA, reporterB, reporterC, reporterD));
 
+        // 커뮤니티 카테고리/게시글
         CommunityCategory category = communityCategoryRepository.save(
                 CommunityCategory.builder().name("신고 테스트 게시판").build()
         );
@@ -178,16 +188,147 @@ public class DataInitializer implements CommandLineRunner {
                 .status(CommunityReportStatus.PENDING)
                 .build());
 
-        log.info("✅ 상담사 더미 + 신고 누적 테스트용 데이터 생성 완료");
-        log.info("일반 유저(user@test.com) → 게시글 3개 + 댓글 1개 작성 (정지 대상)");
-        log.info("관리자(admin@test.com)");
-        log.info("상담사: counselor1@test.com, counselor2@test.com");
-        log.info("신고자: reporterA~D@test.com (총 4명)");
-        log.info("신고 승인 시 user 자동 정지 로직 테스트 가능");
-        log.info("============================================");
+        // ✅ 결제 더미 데이터 추가
+        paymentRepository.saveAll(List.of(
+                // 5월
+                Payment.builder()
+                        .member(user)
+                        .impUid("imp_00501")
+                        .merchantUid("order_00501")
+                        .pointAmount(8000L)
+                        .feeAmount(800L)
+                        .feeRate(0.1)
+                        .amount(8800L)
+                        .status(PaymentStatus.PAID)
+                        .payMethod("card")
+                        .orderName("포인트 충전 0.8만P")
+                        .buyerName("테스트회원")
+                        .buyerEmail("user1@test.com")
+                        .buyerTel("010-1111-1111")
+                        .createdAt(Timestamp.valueOf("2025-05-12 10:00:00"))
+                        .paidAt(Timestamp.valueOf("2025-05-12 10:01:00"))
+                        .build(),
+
+                // 6월
+                Payment.builder()
+                        .member(user)
+                        .impUid("imp_00601")
+                        .merchantUid("order_00601")
+                        .pointAmount(12000L)
+                        .feeAmount(1200L)
+                        .feeRate(0.1)
+                        .amount(13200L)
+                        .status(PaymentStatus.PAID)
+                        .payMethod("card")
+                        .orderName("포인트 충전 1.2만P")
+                        .buyerName("테스트회원")
+                        .buyerEmail("user1@test.com")
+                        .buyerTel("010-1111-1111")
+                        .createdAt(Timestamp.valueOf("2025-06-08 14:20:00"))
+                        .paidAt(Timestamp.valueOf("2025-06-08 14:21:00"))
+                        .build(),
+
+                // 7월
+                Payment.builder()
+                        .member(user)
+                        .impUid("imp_00701")
+                        .merchantUid("order_00701")
+                        .pointAmount(15000L)
+                        .feeAmount(1500L)
+                        .feeRate(0.1)
+                        .amount(16500L)
+                        .status(PaymentStatus.PAID)
+                        .payMethod("kakaopay")
+                        .orderName("포인트 충전 1.5만P")
+                        .buyerName("테스트회원")
+                        .buyerEmail("user1@test.com")
+                        .buyerTel("010-1111-1111")
+                        .createdAt(Timestamp.valueOf("2025-07-19 16:00:00"))
+                        .paidAt(Timestamp.valueOf("2025-07-19 16:01:00"))
+                        .build(),
+
+                // 8월
+                Payment.builder()
+                        .member(user)
+                        .impUid("imp_00801")
+                        .merchantUid("order_00801")
+                        .pointAmount(20000L)
+                        .feeAmount(2000L)
+                        .feeRate(0.1)
+                        .amount(22000L)
+                        .status(PaymentStatus.PAID)
+                        .payMethod("card")
+                        .orderName("포인트 충전 2만P")
+                        .buyerName("테스트회원")
+                        .buyerEmail("user1@test.com")
+                        .buyerTel("010-1111-1111")
+                        .createdAt(Timestamp.valueOf("2025-08-04 11:00:00"))
+                        .paidAt(Timestamp.valueOf("2025-08-04 11:01:00"))
+                        .build(),
+
+                // 9월
+                Payment.builder()
+                        .member(user)
+                        .impUid("imp_00901")
+                        .merchantUid("order_00901")
+                        .pointAmount(25000L)
+                        .feeAmount(2500L)
+                        .feeRate(0.1)
+                        .amount(27500L)
+                        .status(PaymentStatus.PAID)
+                        .payMethod("card")
+                        .orderName("포인트 충전 2.5만P")
+                        .buyerName("테스트회원")
+                        .buyerEmail("user1@test.com")
+                        .buyerTel("010-1111-1111")
+                        .createdAt(Timestamp.valueOf("2025-09-10 09:30:00"))
+                        .paidAt(Timestamp.valueOf("2025-09-10 09:31:00"))
+                        .build(),
+
+                // 10월
+                Payment.builder()
+                        .member(user)
+                        .impUid("imp_01001")
+                        .merchantUid("order_01001")
+                        .pointAmount(30000L)
+                        .feeAmount(3000L)
+                        .feeRate(0.1)
+                        .amount(33000L)
+                        .status(PaymentStatus.PAID)
+                        .payMethod("card")
+                        .orderName("포인트 충전 3만P")
+                        .buyerName("테스트회원")
+                        .buyerEmail("user1@test.com")
+                        .buyerTel("010-1111-1111")
+                        .createdAt(Timestamp.valueOf("2025-10-17 18:00:00"))
+                        .paidAt(Timestamp.valueOf("2025-10-17 18:01:00"))
+                        .build(),
+
+                // 11월
+                Payment.builder()
+                        .member(user)
+                        .impUid("imp_01101")
+                        .merchantUid("order_01101")
+                        .pointAmount(35000L)
+                        .feeAmount(3500L)
+                        .feeRate(0.1)
+                        .amount(38500L)
+                        .status(PaymentStatus.PAID)
+                        .payMethod("kakaopay")
+                        .orderName("포인트 충전 3.5만P")
+                        .buyerName("테스트회원")
+                        .buyerEmail("user1@test.com")
+                        .buyerTel("010-1111-1111")
+                        .createdAt(Timestamp.valueOf("2025-11-10 13:30:00"))
+                        .paidAt(Timestamp.valueOf("2025-11-10 13:31:00"))
+                        .build()
+        ));
+
+        log.info("결제 더미 데이터 생성 완료 (10월~11월)");
+        log.info("상담사/신고/회원 테스트 데이터 생성 완료");
     }
 
-    // 메서드
+    // ====== 헬퍼 메서드 ======
     private void saveMemberTerms(Member member, List<Terms> termsList) {
         for (Terms t : termsList) {
             memberTermsRepository.save(MemberTerms.builder()
