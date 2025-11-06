@@ -124,7 +124,7 @@ public class DataInitializer implements CommandLineRunner {
                 .price(50000)
                 .hashtags("#스트레스 #불안 #직장인")
                 .point(0)
-                .status(Status.ACTIVE)
+                .status(Status.PENDING)
                 .build();
 
         Counselor counselor2 = Counselor.builder()

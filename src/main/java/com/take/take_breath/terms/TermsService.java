@@ -45,7 +45,7 @@ public class TermsService {
     public List<MemberTermResponse> termList() {
         List<Terms> termsList = termsRepository.findAll();
         return termsList.stream()
-                .map(MemberTermResponse::new)
+                .map(m -> new MemberTermResponse(m))
                 .collect(Collectors.toList());
     }
 
