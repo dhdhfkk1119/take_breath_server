@@ -12,11 +12,19 @@ import com.take.take_breath.community.community_report.CommunityReport;
 import com.take.take_breath.community.community_report.CommunityReportRepository;
 import com.take.take_breath.community.community_report.CommunityReportStatus;
 import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.counselor.CounselorLicense;
 import com.take.take_breath.counselor.CounselorRepository;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
+import com.take.take_breath.payment.Payment;
+import com.take.take_breath.payment.PaymentRepository;
+import com.take.take_breath.payment.PaymentStatus;
+import com.take.take_breath.record.FileType;
+import com.take.take_breath.record.RecordFile;
+import com.take.take_breath.record.RecordFileRepository;
+import com.take.take_breath.record.RecordRepository;
 import com.take.take_breath.terms.MemberTerms;
 import com.take.take_breath.terms.MemberTermsRepository;
 import com.take.take_breath.terms.Terms;
@@ -27,6 +35,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -413,8 +422,8 @@ public class DataInitializer implements CommandLineRunner {
         };
 
         for (int i = 0; i < 10; i++) {
-            Record record = recordRepository.save(
-                    Record.builder()
+            com.take.take_breath.record.Record record = recordRepository.save(
+                    com.take.take_breath.record.Record.builder()
                             .member(user)
                             .title(titles[i])
                             .content(contents[i])
