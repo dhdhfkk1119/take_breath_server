@@ -27,6 +27,7 @@ public class AdminCommunityController {
         model.addAttribute("categories", categories);
         model.addAttribute("pageTitle", "커뮤니티 카테고리 관리");
         model.addAttribute("isCommunity", true);
+        model.addAttribute("isCategory", true);
         model.addAttribute("activeTab", "category");
         model.addAttribute("additionalCss", new String[]{"/css/admin-common.css"});
         model.addAttribute("additionalScript", new String[]{"/js/community-category.js"});
@@ -58,6 +59,7 @@ public class AdminCommunityController {
         model.addAttribute("posts", posts);
         model.addAttribute("pageTitle", "커뮤니티 게시글 관리");
         model.addAttribute("isCommunity", true);
+        model.addAttribute("isPost", true);
         model.addAttribute("activeTab", "posts");
         model.addAttribute("additionalCss", new String[]{"/css/admin-common.css"});
         model.addAttribute("additionalScript", new String[]{"/js/community-posts.js"});
@@ -81,6 +83,7 @@ public class AdminCommunityController {
         model.addAttribute("comments", comments);
         model.addAttribute("pageTitle", "커뮤니티 댓글 관리");
         model.addAttribute("isCommunity", true);
+        model.addAttribute("isComment", true);
         model.addAttribute("activeTab", "comments");
         model.addAttribute("additionalCss", new String[]{"/css/admin-common.css"});
         model.addAttribute("additionalScript", new String[]{"/js/community-comments.js"});
