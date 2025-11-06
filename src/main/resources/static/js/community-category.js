@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadCategories() {
     try {
-        const res = await fetch("/api/admin/community/categories");
+        const res = await fetch("/api/admin/view/community/categories");
         if (!res.ok) throw new Error("데이터를 불러오지 못했습니다.");
         const categories = await res.json();
 

@@ -2,7 +2,7 @@
 
 <div class="page-header">
     <h2>{{pageTitle}}</h2>
-    <p>커뮤니티 게시글을 관리하세요</p>
+    <p>커뮤니티 댓글을 관리하세요</p>
 </div>
 
 <div class="table-container">
@@ -10,36 +10,31 @@
         <thead>
         <tr>
             <th>ID</th>
-            <th>제목</th>
+            <th>내용</th>
             <th>작성자</th>
-            <th>카테고리</th>
-            <th>조회수</th>
-            <th>좋아요</th>
+            <th>게시글 제목</th>
             <th>신고</th>
             <th>작성일</th>
             <th>관리</th>
         </tr>
         </thead>
         <tbody>
-        {{#posts}}
+        {{#comments}}
             <tr>
                 <td>{{id}}</td>
-                <td>{{title}}</td>
+                <td class="introduction-cell">{{content}}</td>
                 <td>{{memberName}}</td>
-                <td>{{categoryName}}</td>
-                <td>{{viewCount}}</td>
-                <td>{{likeCount}}</td>
                 <td>{{createdAt}}</td>
                 <td>
-                    <form method="post" action="/api/admin/view/community/posts/{{id}}/delete">
+                    <form method="post" action="/api/admin/view/community/comments/{{id}}/delete">
                         <button type="submit" class="btn btn-danger">삭제</button>
                     </form>
                 </td>
             </tr>
-        {{/posts}}
-        {{^posts}}
-            <tr><td colspan="9" style="text-align:center;color:#999;">게시글이 없습니다.</td></tr>
-        {{/posts}}
+        {{/comments}}
+        {{^comments}}
+            <tr><td colspan="7" style="text-align:center;color:#999;">댓글이 없습니다.</td></tr>
+        {{/comments}}
         </tbody>
     </table>
 </div>
