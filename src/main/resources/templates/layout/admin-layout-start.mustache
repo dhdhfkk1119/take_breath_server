@@ -39,12 +39,12 @@
             </li>
             <li>
                 <a href="/api/admin/view/reports" class="{{#isReports}}active{{/isReports}}">
-                    <span>🚨</span> 신고관리
+                    <span>🚨</span> 신고 관리
                 </a>
             </li>
             <li class="menu-section">
                 <button class="menu-toggle {{#isCommunity}}active{{/isCommunity}}">
-                    <span>📘</span> 커뮤니티 관리
+                    <span>📘</span>커뮤니티 관리
                     <span class="arrow">▼</span>
                 </button>
                 <ul class="submenu {{#isCommunity}}open{{/isCommunity}}">
@@ -52,6 +52,11 @@
                     <li><a href="/api/admin/view/community/posts" class="{{#isPost}}active{{/isPost}}">게시글 관리</a></li>
                     <li><a href="/api/admin/view/community/comments" class="{{#isComment}}active{{/isComment}}">댓글 관리</a></li>
                 </ul>
+            </li>
+            <li>
+                <a href="/api/admin/view/payments/stats" class="{{#isPayments}}active{{/isPayments}}">
+                    <span>💰</span> 결제 통계
+                </a>
             </li>
         </ul>
         <div class="sidebar-footer">

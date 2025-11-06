@@ -5,6 +5,15 @@
     <p>시스템 전체 통계를 확인하세요</p>
 </div>
 
+<!-- 월별 결제 수수료 추이 -->
+<div class="chart-container">
+    <h3>📈 월별 결제 수수료 추이</h3>
+    <canvas id="feeChart"
+            data-labels="{{#monthlyStats}}{{month}},{{/monthlyStats}}"
+            data-values="{{#monthlyStats}}{{totalFeeAmount}},{{/monthlyStats}}"
+            height="120"></canvas>
+</div>
+
 <!-- 회원 증가 추이 차트 -->
 <h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📈 통계 차트</h3>
 <div class="charts-section">
