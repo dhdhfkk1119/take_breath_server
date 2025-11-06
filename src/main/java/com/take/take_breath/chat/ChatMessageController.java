@@ -137,7 +137,7 @@ public class ChatMessageController {
     public ResponseEntity<?> getUnreadCount(
             @RequestParam Long chatRoomId,
             @RequestParam Long memberId) {
-        Long count = chatService.getUnreadCount(chatRoomId, memberId);
+        int count = chatService.getUnreadCount(chatRoomId, memberId);
         return ResponseEntity.ok(ApiUtil.success(count));
     }
 
