@@ -32,6 +32,7 @@
             <th>상태</th>
             <th>소개</th>
             <th>해시태그</th>
+            <th>자격증</th>
             {{#isPendingFilter}}<th>승인 처리</th>{{/isPendingFilter}}
         </tr>
         </thead>
@@ -53,6 +54,22 @@
                 <td class="introduction-cell">{{introduction}}</td>
                 <td>{{hashtags}}</td>
 
+                <!-- ✅ 자격증 뱃지 추가 -->
+                <td>
+                    {{#licenses}}
+                        <span class="license-badge"
+                              data-name="{{licenseName}}"
+                              data-number="{{licenseNumber}}"
+                              data-regi="{{licenseRegiNumber}}"
+                              data-img="{{licenseImage}}">
+                              자격증 보기
+                        </span>
+                    {{/licenses}}
+                    {{^licenses}}
+                        <span style="color:#aaa;">-</span>
+                    {{/licenses}}
+                </td>
+
                 {{#isPendingFilter}}
                     <td>
                         <form action="/api/admin/view/counselors/{{id}}/approve" method="post" style="display:inline;">
@@ -65,7 +82,7 @@
         {{/counselors}}
         {{^counselors}}
             <tr>
-                <td colspan="10" style="text-align: center; padding: 2rem; color: #999;">
+                <td colspan="11" style="text-align: center; padding: 2rem; color: #999;">
                     상담사가 없습니다.
                 </td>
             </tr>

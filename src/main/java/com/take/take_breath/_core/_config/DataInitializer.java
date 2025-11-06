@@ -12,6 +12,7 @@ import com.take.take_breath.community.community_report.CommunityReport;
 import com.take.take_breath.community.community_report.CommunityReportRepository;
 import com.take.take_breath.community.community_report.CommunityReportStatus;
 import com.take.take_breath.counselor.Counselor;
+import com.take.take_breath.counselor.CounselorLicense;
 import com.take.take_breath.counselor.CounselorRepository;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
@@ -49,7 +50,7 @@ public class DataInitializer implements CommandLineRunner {
     private final CommunityCommentRepository communityCommentRepository;
     private final CommunityReportRepository communityReportRepository;
     private final CommentReportRepository commentReportRepository;
-    private final PaymentRepository paymentRepository; // ✅ 추가
+    private final PaymentRepository paymentRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -134,6 +135,23 @@ public class DataInitializer implements CommandLineRunner {
                 .point(0)
                 .status(Status.PENDING)
                 .build();
+
+        counselor1.setLicenses(List.of(
+                CounselorLicense.builder()
+                        .licenseName("임상심리사 2급")
+                        .licenseNumber("PSY-2024-001")
+                        .licenseRegiNumber("REG-001-2024")
+                        .licenseImage("license_kimhaneul_1.jpg")
+                        .counselor(counselor1)
+                        .build(),
+                CounselorLicense.builder()
+                        .licenseName("심리상담사 1급")
+                        .licenseNumber("CS-2024-045")
+                        .licenseRegiNumber("REG-045-2024")
+                        .licenseImage("license_kimhaneul_2.jpg")
+                        .counselor(counselor1)
+                        .build()
+        ));
 
         Counselor counselor2 = Counselor.builder()
                 .member(counselorMember2)
