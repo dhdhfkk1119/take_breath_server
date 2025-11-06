@@ -104,7 +104,7 @@ public class RecordService {
     }
 
     /**
-     * 기록 수정
+     * 기록 수정 - deletedImageIds 처리 추가
      * @param email
      * @param recordId
      * @param request
@@ -121,6 +121,21 @@ public class RecordService {
         }
 
         try {
+            // ✅ 삭제할 이미지 처리
+            if (request.getDeletedImageIds() != null && !request.getDeletedImageIds().isEmpty()) {
+                for (Long imageId : request.getDeletedImageIds()) {
+                    RecordFile recordFile = recordFileRepository.findById(imageId)
+                            .orElseThrow(() -> new Exception404("해당 파일이 존재하지 않습니다"));
+
+                    // 파일 시스템에서 삭제
+                    uploadFile.deleteFiles(java.util.List.of(recordFile.getFilePath()));
+
+                    // DB에서 삭제
+                    recordFileRepository.delete(recordFile);
+                    record.getRecordFiles().remove(recordFile);
+                }
+            }
+
             // 기본 필드 업데이트
             record.setTitle(request.getTitle());
             record.setContent(request.getContent());
@@ -189,23 +204,7 @@ public class RecordService {
         } catch (Exception e) {
             throw new Exception500("pdf 파일 생성에 실패했습니다");
         }
-
-        /*
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PdfWriter writer = new PdfWriter(baos);
-        PdfDocument pdf = new PdfDocument(writer);
-        Document document = new Document(pdf);
-
-        document.add(new Paragraph("Hello from Spring + iText!"));
-        document.add(new Paragraph("PDF가 정상적으로 생성되었습니다."));
-        document.close();
-
-        byte[] pdfBytes = baos.toByteArray();
-        return pdfBytes;
-        */
     }
-
-
 
     /**
      * 파일 처리 및 저장
@@ -262,5 +261,4 @@ public class RecordService {
 
         files.clear();
     }
-
 }

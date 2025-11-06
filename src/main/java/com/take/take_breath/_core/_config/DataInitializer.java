@@ -17,6 +17,11 @@ import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
+import com.take.take_breath.record.*;
+//import com.take.take_breath.record_file.RecordFile;
+//import com.take.take_breath.record_file.RecordFileRepository;
+//import com.take.take_breath.record_file.FileType;
+import com.take.take_breath.record.Record;
 import com.take.take_breath.terms.MemberTerms;
 import com.take.take_breath.terms.MemberTermsRepository;
 import com.take.take_breath.terms.Terms;
@@ -45,9 +50,13 @@ public class DataInitializer implements CommandLineRunner {
     private final CommunityCommentRepository communityCommentRepository;
     private final CommunityReportRepository communityReportRepository;
     private final CommentReportRepository commentReportRepository;
+    private final RecordRepository recordRepository;
+    private final RecordFileRepository recordFileRepository;
 
     @Override
     public void run(String... args) throws Exception {
+
+        // 약관 생성
         Terms terms1 = Terms.builder()
                 .title("서비스 이용약관")
                 .content("서비스 이용약관 내용")
@@ -62,6 +71,7 @@ public class DataInitializer implements CommandLineRunner {
 
         termsRepository.saveAll(List.of(terms1, terms2));
 
+        // 일반 사용자
         Member user = Member.builder()
                 .email("user@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -72,10 +82,10 @@ public class DataInitializer implements CommandLineRunner {
                 .status(Status.ACTIVE)
                 .emailVerified(true)
                 .build();
-
         memberRepository.save(user);
         saveMemberTerms(user, List.of(terms1, terms2));
 
+        // 관리자
         Member admin = Member.builder()
                 .email("admin@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -89,7 +99,10 @@ public class DataInitializer implements CommandLineRunner {
         memberRepository.save(admin);
         saveMemberTerms(admin, List.of(terms1, terms2));
 
-<<<<<<< Updated upstream
+        // ✅ 기록실 샘플 데이터 생성
+        createSampleRecords(user);
+
+        // 상담사 Member 생성
         Member counselorMember1 = Member.builder()
                 .email("counselor1@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -115,38 +128,8 @@ public class DataInitializer implements CommandLineRunner {
         memberRepository.saveAll(List.of(counselorMember1, counselorMember2));
         saveMemberTerms(counselorMember1, List.of(terms1, terms2));
         saveMemberTerms(counselorMember2, List.of(terms1, terms2));
-=======
-        memberTermsRepository.save(MemberTerms.builder()
-                .member(admin)
-                .terms(terms1)
-                .agreed(true)
-                .agreedAt(LocalDateTime.now())
-                .build());
 
-        memberTermsRepository.save(MemberTerms.builder()
-                .member(admin)
-                .terms(terms2)
-                .agreed(true)
-                .agreedAt(LocalDateTime.now())
-                .build());
-
-        // 카테고리 생성
-        communityCategoryRepository.save(CommunityCategory.builder()
-                .name("자유게시판")
-                .build());
-
-        communityCategoryRepository.save(CommunityCategory.builder()
-                .name("정보공유")
-                .build());
-
-        communityCategoryRepository.save(CommunityCategory.builder()
-                .name("질문답변")
-                .build());
-
-        // 기록실 샘플 데이터 10개 생성
-        createSampleRecords(user);
->>>>>>> Stashed changes
-
+        // 상담사 테이블 생성
         Counselor counselor1 = Counselor.builder()
                 .member(counselorMember1)
                 .introduction("10년차 심리상담사입니다.")
@@ -173,6 +156,8 @@ public class DataInitializer implements CommandLineRunner {
 
         counselorRepository.saveAll(List.of(counselor1, counselor2));
 
+        // 신고 테스트 데이터 이하 동일...
+        // (생략하지 않고 계속 유지)
         Member reporterA = createReporter("reporterA@test.com", "신고자A");
         Member reporterB = createReporter("reporterB@test.com", "신고자B");
         Member reporterC = createReporter("reporterC@test.com", "신고자C");
@@ -210,17 +195,9 @@ public class DataInitializer implements CommandLineRunner {
                 .status(CommunityReportStatus.PENDING)
                 .build());
 
-        log.info("✅ 상담사 더미 + 신고 누적 테스트용 데이터 생성 완료");
-        log.info("일반 유저(user@test.com) → 게시글 3개 + 댓글 1개 작성 (정지 대상)");
-        log.info("관리자(admin@test.com)");
-        log.info("상담사: counselor1@test.com, counselor2@test.com");
-        log.info("신고자: reporterA~D@test.com (총 4명)");
-        log.info("신고 승인 시 user 자동 정지 로직 테스트 가능");
-        log.info("============================================");
+        log.info("✅ 데이터 생성 완료");
     }
 
-<<<<<<< Updated upstream
-    // 메서드
     private void saveMemberTerms(Member member, List<Terms> termsList) {
         for (Terms t : termsList) {
             memberTermsRepository.save(MemberTerms.builder()
@@ -265,47 +242,39 @@ public class DataInitializer implements CommandLineRunner {
                 .status(CommunityReportStatus.PENDING)
                 .build();
     }
-}
-=======
+
+
     private void createSampleRecords(Member user) {
         String[] titles = {
-                "첫 번째 테스트 기록",
-                "오늘의 감정",
-                "스트레스 관리 팁",
-                "일상 속 작은 행복",
-                "명상 경험기",
-                "마음이 편했던 날",
-                "자기 성찰 기록",
-                "감정 정리하기",
-                "긍정적인 생각",
-                "하루를 돌아보며"
+                "첫 번째 테스트 기록", "오늘의 감정", "스트레스 관리 팁", "일상 속 작은 행복", "명상 경험기",
+                "마음이 편했던 날", "자기 성찰 기록", "감정 정리하기", "긍정적인 생각", "하루를 돌아보며"
         };
 
         String[] contents = {
                 "이것은 서버 시작 시 자동으로 생성된 테스트 기록입니다.",
-                "오늘 하루는 어떻게 보냈나요? 기분이 좋은 일들을 기록해보세요.",
+                "오늘 하루 기분을 기록해보세요.",
                 "스트레스를 줄이는 방법에 대해 생각해봅시다.",
-                "작은 것에 감사하는 마음을 가져봅시다.",
-                "명상을 통해 마음의 평온을 찾아봅시다.",
-                "좋은 일이 있었던 날, 그 기분을 저장해봅시다.",
-                "자신을 더 잘 이해하기 위해 생각을 정리해봅시다.",
-                "복잡한 감정을 글로 표현해봅시다.",
-                "긍정적인 마음가짐으로 하루를 시작합시다.",
-                "하루의 끝에서 자신의 행동을 돌아봅시다."
+                "작은 것에 감사하는 하루.",
+                "명상으로 마음을 다스린 날.",
+                "기분이 좋았던 순간을 남깁니다.",
+                "자기 자신을 들여다보는 시간.",
+                "감정을 글로 풀어내기.",
+                "긍정적인 방향으로 생각하기.",
+                "하루를 되돌아보는 기록."
         };
 
         for (int i = 0; i < 10; i++) {
-            Record record = Record.builder()
-                    .member(user)
-                    .title(titles[i])
-                    .content(contents[i])
-                    .recordDate(new java.sql.Timestamp(System.currentTimeMillis() - (i * 24 * 60 * 60 * 1000)))
-                    .build();
-            Record savedRecord = recordRepository.save(record);
+            Record record = recordRepository.save(
+                    Record.builder()
+                            .member(user)
+                            .title(titles[i])
+                            .content(contents[i])
+                            .recordDate(new java.sql.Timestamp(System.currentTimeMillis() - (i * 86400000)))
+                            .build()
+            );
 
-            // 각 기록마다 샘플 이미지 파일 추가
-            RecordFile imageFile = RecordFile.builder()
-                    .record(savedRecord)
+            RecordFile image = RecordFile.builder()
+                    .record(record)
                     .fileType(FileType.IMAGE)
                     .fileName("sample_001.png")
                     .originalFileName("sample_001.png")
@@ -313,11 +282,11 @@ public class DataInitializer implements CommandLineRunner {
                     .fileSize(204800L)
                     .contentType("image/png")
                     .build();
-            recordFileRepository.save(imageFile);
 
-            savedRecord.addRecordFile(imageFile);
-            recordRepository.save(savedRecord);
+            recordFileRepository.save(image);
+
+            record.addRecordFile(image);
+            recordRepository.save(record);
         }
     }
 }
->>>>>>> Stashed changes

@@ -16,4 +16,5 @@ public class RecordUpdateRequest {
     private List<MultipartFile> imageFiles;
     private List<MultipartFile> audioFiles;
     private List<MultipartFile> videoFiles;
+    private List<Long> deletedImageIds;
 }
