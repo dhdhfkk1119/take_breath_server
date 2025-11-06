@@ -28,14 +28,18 @@ public class UploadFile {
 
         List<String> fileNames = new ArrayList<>();
 
-        for(MultipartFile file : multipartFiles) {
+        for (MultipartFile file : multipartFiles) {
             String originFilename = file.getOriginalFilename();
             String extension = getFileExtension(originFilename);
             String uniqueFileName = generateUniqueFileName(extension);
             Path filePath = Paths.get(fullUploadPath, uniqueFileName);
             file.transferTo(filePath);
-            fileNames.add(filePath.toString());
+            String webPath = Paths.get(dir, uniqueFileName).toString();
+            webPath = "/uploads/" + webPath.replace('\\', '/');
+
+            fileNames.add(webPath);
         }
+
 
         return fileNames;
     }

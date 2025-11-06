@@ -3,9 +3,11 @@ package com.take.take_breath.community.community_post;
 import com.take.take_breath._core._utils.DateUtil;
 import com.take.take_breath.community.community_comment.CommunityComment;
 import com.take.take_breath.community.community_comment.CommunityCommentResponse;
+import com.take.take_breath.community.community_post_image.CommunityImageResponseDTO;
 import lombok.Builder;
 import lombok.Data;
 
+import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +28,7 @@ public class CommunityPostResponse {
         private int likeCount;
         private int viewCount;
         private int commentCount;
-        private String createdAt;
+        private Timestamp createdAt;
         private boolean isModified;
         private boolean liked;
 
@@ -41,7 +43,7 @@ public class CommunityPostResponse {
             this.likeCount = post.getLikeCount();
             this.viewCount = post.getViewCount();
             this.commentCount = commentCount;
-            this.createdAt = DateUtil.timestampFormat(post.getCreatedAt());
+            this.createdAt = post.getCreatedAt();
             this.isModified = post.isModified();
             this.liked = liked;
 
@@ -69,11 +71,11 @@ public class CommunityPostResponse {
         private int likeCount;
         private int viewCount;
         private int commentCount;
-        private String createdAt;
+        private Timestamp createdAt;
         private String updatedAt;
         private boolean isModified;
         private boolean liked;
-        private List<String> imageUrls;
+        private List<CommunityImageResponseDTO.ImageDTO> imageUrls;
         private List<CommunityCommentResponse.ResponseDTO> comments;
 
         @Builder
@@ -88,14 +90,14 @@ public class CommunityPostResponse {
             this.likeCount = post.getLikeCount();
             this.viewCount = post.getViewCount();
             this.commentCount = post.getComments() != null ? post.getComments().size() : 0;
-            this.createdAt = DateUtil.timestampFormat(post.getCreatedAt());
+            this.createdAt = post.getCreatedAt();
             this.updatedAt = DateUtil.timestampFormat(post.getUpdatedAt());
             this.isModified = post.isModified();
             this.liked = liked;
 
             this.imageUrls = post.getImages() != null
                     ? post.getImages().stream()
-                    .map(image -> image.getImageUrl())
+                    .map(image -> new CommunityImageResponseDTO.ImageDTO(image.getId(), image.getImageUrl()))
                     .collect(Collectors.toList())
                     : List.of();
 

@@ -241,10 +241,12 @@ public class CommunityPostService {
 
         // 모든 이미지 변경 후 썸네일 재설정
         String newThumbnailUrl = post.getImages().stream()
-                .min((image1, image2) -> image1.getCreatedAt().compareTo(image2.getCreatedAt()))
-                .map(image -> image.getImageUrl())
+                .filter(image -> image.getCreatedAt() != null) // null 제거
+                .min((i1, i2) -> i1.getCreatedAt().compareTo(i2.getCreatedAt()))
+                .map(CommunityPostImage::getImageUrl)
                 .orElse(null);
         post.setThumbnailImageUrl(newThumbnailUrl);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
