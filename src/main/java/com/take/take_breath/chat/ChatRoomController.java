@@ -22,33 +22,6 @@ public class ChatRoomController {
      * 내가 속한 채팅방 목록 조회
      * GET /api/chat/rooms
      */
-    /*
-        응답
-        {
-          "success": true,
-          "response": [
-            {
-              "roomId": 1,
-              "roomName": "사용자1 - 상담사A 채팅",
-              "unreadCount": 5,
-              "lastMessage": "안녕하세요. 상담 도와드리겠습니다.",
-              "lastMessageTime": "2025-10-24T14:30:00",
-              "otherMemberId": 2,
-              "otherMemberName": "상담사A"
-            },
-            {
-              "roomId": 3,
-              "roomName": "사용자1 - 상담사B 채팅",
-              "unreadCount": 0,
-              "lastMessage": "감사합니다.",
-              "lastMessageTime": "2025-10-23T10:15:00",
-              "otherMemberId": 4,
-              "otherMemberName": "상담사B"
-            }
-          ],
-          "error": null
-        }
-    */
     @GetMapping
     public ResponseEntity<?> getRooms(HttpServletRequest request) {
         String memberEmail = request.getAttribute("memberEmail").toString();

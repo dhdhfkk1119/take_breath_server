@@ -1,11 +1,7 @@
 package com.take.take_breath.chat.config;
 
 
-import com.take.take_breath._core._exception.Exception401;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
-import com.take.take_breath.members.Member;
-import com.take.take_breath.members.MemberRepository;
-import com.take.take_breath.members.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -15,7 +11,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 /**
  * 웹소켓 stomp 메세지에 대한 JWT 인증 인터셉터
@@ -29,14 +24,36 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class JwtChannelInterceptor implements ChannelInterceptor {
     private final JwtTokenProvider jwtTokenProvider;
-    private final MemberRepository memberRepository;
-
-    be
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        // STOMP 헤더 접근
+        if (StompCommand.CONNECT.equals(accessor.getCommand())
+                || StompCommand.SUBSCRIBE.equals(accessor.getCommand())
+                || StompCommand.SEND.equals(accessor.getCommand())) {
+
+            String token = jwtTokenProvider.resolveToken(accessor);
+
+            if (token == null || !jwtTokenProvider.validateToken(token)) {
+                log.warn("❌ 잘못된 토큰: 메시지 차단됨");
+                throw new IllegalArgumentException("유효하지 않은 토큰");
+            }
+        }
+        return message;
+    }
+}
+
+/*
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class JwtChannelInterceptor implements ChannelInterceptor {
+    private final JwtTokenProvider jwtTokenProvider;
+    private final MemberRepository memberRepository;
+
+    @Override
+    public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (accessor != null) {
@@ -68,9 +85,7 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         return message; // 메시지를 계속 흐르게 함
     }
 
-    /**
-     * STOMP 헤더에서 JWT 토큰 추출
-     */
+    // STOMP 헤더에서 JWT 토큰 추출
     private String resolveToken(StompHeaderAccessor accessor) {
         String bearerToken = accessor.getFirstNativeHeader("Authorization");
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
@@ -79,3 +94,4 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         return null;
     }
 }
+*/

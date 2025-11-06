@@ -9,7 +9,9 @@ import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -146,7 +148,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-
+    // 웹소켓 핸드셰이크 요청 토큰 추출
     public String resolveToken(ServerHttpRequest request) {
         List<String> headers = request.getHeaders().get("Authorization");
         if (headers != null && !headers.isEmpty()) {
@@ -158,4 +160,12 @@ public class JwtTokenProvider {
         return null;
     }
 
+    // 웹소켓 channel 요청 토큰 추출
+    public String resolveToken(StompHeaderAccessor accessor) {
+        String bearerToken = accessor.getFirstNativeHeader("Authorization");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
 }

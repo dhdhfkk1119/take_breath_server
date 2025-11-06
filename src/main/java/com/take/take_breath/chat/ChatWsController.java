@@ -4,20 +4,16 @@ import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.ApiUtil.ApiResult;
 import com.take.take_breath.chat.dto.ChatMessageRequest;
 import com.take.take_breath.chat.dto.ChatMessageResponse;
-import com.take.take_breath.chat.dto.MarkAsReadRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.security.Principal;
-import java.util.Map;
-
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class ChatWsController {
@@ -26,16 +22,18 @@ public class ChatWsController {
 
     /**
      * 메시지 전송
-     * Client -> /app/chat.sendMessage.{roomId}
-     * Server -> /topic/room.{roomId} (구독자들에게 브로드캐스트)
+     * Client -> Server = /pub/chat.sendMessage.{roomId}
+     * Server -> Channel /sub/chat/room.{roomId} (구독자들에게 브로드캐스트)
      */
-    @MessageMapping("/pub/chat.sendMessage.{roomId}")
+    @MessageMapping("/chat.sendMessage.{roomId}")   // 설정에 prefix로 /pub
     @SendTo("/sub/chat/room.{roomId}")
     public ApiResult<ChatMessageResponse> sendMessage(
             @DestinationVariable Long roomId,
             ChatMessageRequest request,
             SimpMessageHeaderAccessor headerAccessor) {
         Long memberId = (Long) headerAccessor.getSessionAttributes().get("memberId");
+        log.info("메세지 받음 : {}", request.getMessageType());
+        log.info("사용자 : {}", memberId);
         ChatMessageResponse response = chatService.sendMessage(roomId, memberId, request);
         return ApiUtil.success(response);
     }
