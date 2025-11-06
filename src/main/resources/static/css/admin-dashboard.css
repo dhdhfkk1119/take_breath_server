@@ -1,3 +1,4 @@
+/* 통계 그리드 */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -5,6 +6,7 @@
     margin-bottom: 2rem;
 }
 
+/* 통계 카드 */
 .stat-card {
     background: white;
     padding: 1.5rem;
@@ -59,6 +61,7 @@
     margin-top: 0.25rem;
 }
 
+/* 차트 섹션 */
 .charts-section {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -68,7 +71,7 @@
 
 .chart-container {
     background: white;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -76,11 +79,92 @@
 .chart-container h3 {
     margin-bottom: 1rem;
     color: #2c3e50;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
+.chart-container canvas {
+    max-height: 300px;
+}
+
+/* 회원 증가 추이 차트는 조금 더 크게 */
+#memberGrowthChart {
+    max-height: 350px;
+}
+
+.chart-container canvas {
+    max-height: 300px !important;
+    height: 300px !important;
+}
+
+/* 회원 증가 추이 차트만 더 크게 */
+#memberGrowthChart {
+    max-height: 350px !important;
+    height: 350px !important;
+}
+
+/* 신고 처리 추이 차트도 크게 */
+#reportProcessChart {
+    max-height: 350px !important;
+    height: 350px !important;
+}
+
+/* 차트 컨트롤 버튼 스타일 */
+.chart-controls {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* 모든 차트 버튼에 공통 스타일 적용 */
+.chart-btn,
+.member-chart-btn,
+.report-chart-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #3498db;
+    background: white;
+    color: #3498db;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.chart-btn:hover,
+.member-chart-btn:hover,
+.report-chart-btn:hover {
+    background: #ebf5fb;
+    transform: translateY(-1px);
+}
+
+.chart-btn.active,
+.member-chart-btn.active,
+.report-chart-btn.active {
+    background: #3498db;
+    color: white;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.chart-btn:active,
+.member-chart-btn:active,
+.report-chart-btn:active {
+    transform: translateY(0);
+}
+
+/* 반응형 디자인 */
 @media (max-width: 768px) {
     .charts-section {
         grid-template-columns: 1fr;
+    }
+
+    .chart-controls {
+        justify-content: flex-start;
+    }
+
+    .chart-btn,
+    .member-chart-btn,
+    .report-chart-btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
     }
 }

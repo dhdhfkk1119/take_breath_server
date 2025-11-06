@@ -1,0 +1,48 @@
+{{> layout/admin-layout-start}}
+
+<div class="page-header">
+    <h2>{{pageTitle}}</h2>
+    <p>커뮤니티 게시글을 관리하세요</p>
+</div>
+
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>카테고리</th>
+            <th>조회수</th>
+            <th>좋아요</th>
+            <th>신고</th>
+            <th>작성일</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody id="postList">
+        {{#posts}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{title}}</td>
+                <td>{{memberName}}</td>
+                <td>{{categoryName}}</td>
+                <td>{{viewCount}}</td>
+                <td>{{likeCount}}</td>
+                <td>{{createdAt}}</td>
+                <td>
+                    <form method="post" action="/api/admin/view/community/posts/{{id}}/delete">
+                        <button type="submit" class="btn btn-danger">삭제</button>
+                    </form>
+                </td>
+            </tr>
+        {{/posts}}
+        {{^posts}}
+            <tr><td colspan="9" style="text-align:center;color:#999;">게시글이 없습니다.</td></tr>
+        {{/posts}}
+        </tbody>
+    </table>
+</div>
+
+{{> layout/admin-layout-end}}

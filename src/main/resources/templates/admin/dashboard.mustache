@@ -5,8 +5,34 @@
     <p>시스템 전체 통계를 확인하세요</p>
 </div>
 
-<!-- 차트 섹션 -->
+<!-- 회원 증가 추이 차트 -->
 <h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📈 통계 차트</h3>
+<div class="charts-section">
+    <!-- 회원 증가 추이 -->
+    <div class="chart-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3>월별 회원 증가 추이</h3>
+            <div class="chart-controls">
+                <button class="member-chart-btn active" data-period="6">최근 6개월</button>
+                <button class="member-chart-btn" data-period="12">최근 12개월</button>
+                <button class="member-chart-btn" data-period="24">최근 24개월</button>
+            </div>
+        </div>
+        <canvas id="memberGrowthChart"></canvas>
+    </div>
+
+    <!-- 신고 처리 현황 -->
+    <div class="chart-container">
+        <h3>신고 상태별 처리 건수</h3>
+        <canvas id="reportStatusChart"></canvas>
+    </div>
+</div>
+
+<!-- 신고 처리 현황 차트 -->
+
+
+
+<!-- 차트 섹션 -->
 <div class="charts-section">
     <div class="chart-container">
         <h3>회원 및 상담사 현황</h3>
@@ -61,26 +87,6 @@
     </div>
 </div>
 
-<!-- 역할별 통계 -->
-<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">🔑 역할별 통계</h3>
-<div class="stats-grid">
-    <div class="stat-card info">
-        <h3>일반 회원</h3>
-        <div class="number">{{stats.userCount}}</div>
-        <div class="label">USER</div>
-    </div>
-    <div class="stat-card info">
-        <h3>상담사</h3>
-        <div class="number">{{stats.counselorCount}}</div>
-        <div class="label">COUNSELOR</div>
-    </div>
-    <div class="stat-card info">
-        <h3>관리자</h3>
-        <div class="number">{{stats.adminCount}}</div>
-        <div class="label">ADMIN</div>
-    </div>
-</div>
-
 <!-- 신고 통계 -->
 <h3 style="margin: 2rem 0 1rem; color: #2c3e50;">🚨 신고 통계</h3>
 <div class="stats-grid">
@@ -107,25 +113,17 @@
 </div>
 
 
-<!-- Chart.js 라이브러리 -->
+<!-- Chart.js 라이브러리 및 데이터 전달 -->
 <script>
-    const stats = {
-        totalMembers: {{stats.totalMembers}},
-        activeMembers: {{stats.activeMembers}},
-        suspendedMembers: {{stats.suspendedMembers}},
-        withdrawalMembers: {{stats.withdrawalMembers}},
-        totalCounselors: {{stats.totalCounselors}},
-        activeCounselors: {{stats.activeCounselors}},
-        pendingCounselors: {{stats.pendingCounselors}},
-        userCount: {{stats.userCount}},
-        counselorCount: {{stats.counselorCount}},
-        adminCount: {{stats.adminCount}}
-    };
+    window.stats = {{{statsJson}}};
+    console.log('📦 실제 window.stats 구조:', window.stats);
+    console.log('📊 memberGrowthData:', window.stats.memberGrowthData);
+    console.log('📊 reportProcessData:', window.stats.reportProcessData);
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => initCharts(stats));
+        document.addEventListener('DOMContentLoaded', () => initCharts(window.stats));
     } else {
-        initCharts(stats);
+        initCharts(window.stats);
     }
 </script>
 
