@@ -33,4 +33,17 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.status = 'PAID'")
     Long getTotalPaymentAmount();
+
+    @Query(value = """
+    SELECT 
+        DATE_FORMAT(p.created_at, '%Y-%m') AS month,
+        SUM(p.fee_amount) AS total_fee,
+        SUM(p.amount) AS total_amount,
+        COUNT(p.id) AS payment_count
+    FROM payment_tb p
+    WHERE p.status = 'PAID'
+    GROUP BY DATE_FORMAT(p.created_at, '%Y-%m')
+    ORDER BY month DESC
+""", nativeQuery = true)
+    List<Object[]> getMonthlyFeeStats();
 }

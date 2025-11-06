@@ -1,6 +1,9 @@
 let memberGrowthChart = null;
 let reportStatusChart = null;
 
+/**
+ * 메인 차트 초기화
+ */
 function initCharts(stats) {
     console.log('initCharts 함수 실행됨', stats);
 
@@ -80,18 +83,20 @@ function initCharts(stats) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
             }
         });
     }
 
-    // ─────────────── 회원 증가 추이 차트 초기화 ───────────────
+    // ─────────────── 회원 증가 추이 ───────────────
     initMemberGrowthChart(6);
 
-    // 회원 증가 추이 기간 선택 버튼 이벤트
+    // 버튼 이벤트 (6/12/24개월)
     const memberChartButtons = document.querySelectorAll('.member-chart-btn');
     memberChartButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             memberChartButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
             const period = parseInt(this.dataset.period);
@@ -99,13 +104,15 @@ function initCharts(stats) {
         });
     });
 
-    // ─────────────── 신고 처리 현황 차트 초기화 ───────────────
+    // ─────────────── 신고 처리 현황 ───────────────
     initReportStatusChart();
+
+    // ─────────────── 결제 수수료 추이 ───────────────
+    initFeeChart();
 }
 
 /**
- * 회원 증가 추이 차트 초기화 (일반회원 / 상담사)
- * @param {number} months - 표시할 개월 수 (6, 12, 24)
+ * 회원 증가 추이 차트 (일반회원 / 상담사)
  */
 function initMemberGrowthChart(months) {
     const ctx = document.getElementById('memberGrowthChart');
@@ -117,10 +124,6 @@ function initMemberGrowthChart(months) {
     if (!chartData || !Array.isArray(chartData.labels) || !Array.isArray(chartData.memberData)) {
         console.warn("회원 증가 데이터가 없습니다.");
         return;
-    }
-
-    if (chartData.labels.length === 0) {
-        console.warn("회원 증가 데이터가 비어있습니다.");
     }
 
     // 데이터셋 구성
@@ -140,7 +143,6 @@ function initMemberGrowthChart(months) {
         }
     ];
 
-    // 상담사 데이터가 있을 때만 추가
     if (chartData.counselorData && chartData.counselorData.length > 0) {
         datasets.push({
             label: '상담사',
@@ -157,7 +159,6 @@ function initMemberGrowthChart(months) {
         });
     }
 
-    // 차트 생성
     memberGrowthChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -184,32 +185,23 @@ function initMemberGrowthChart(months) {
                     titleFont: { size: 14, weight: 'bold' },
                     bodyFont: { size: 13 },
                     cornerRadius: 6,
-                    displayColors: true,
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             const label = context.dataset.label || '';
                             return `${label}: ${context.parsed.y.toLocaleString()}명`;
                         }
                     }
                 },
-                title: {
-                    display: true,
-                    text: '회원 증가 추이'
-                }
+                title: { display: true, text: '회원 증가 추이' }
             },
             scales: {
                 y: {
                     beginAtZero: false,
                     ticks: {
                         font: { size: 12 },
-                        callback: function(value) {
-                            return value.toLocaleString() + '명';
-                        }
+                        callback: value => value.toLocaleString() + '명'
                     },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    }
+                    grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false }
                 },
                 x: {
                     ticks: { font: { size: 12 } },
@@ -222,42 +214,20 @@ function initMemberGrowthChart(months) {
 
 /**
  * 신고 처리 현황 차트 (막대 그래프)
- * x축: 상태 (대기 / 승인 / 반려)
- * y축: 건수
  */
 function initReportStatusChart() {
-    console.log('initReportStatusChart 호출됨');
-
     const ctx = document.getElementById('reportStatusChart');
-    if (!ctx) {
-        console.error('reportStatusChart 캔버스를 찾을 수 없습니다!');
-        return;
-    }
+    if (!ctx) return;
 
-    console.log('reportStatusChart 캔버스 찾음');
-
-    if (reportStatusChart) {
-        console.log('🗑️ 기존 차트 삭제');
-        reportStatusChart.destroy();
-    }
+    if (reportStatusChart) reportStatusChart.destroy();
 
     const statusData = window.stats?.reportStatusData;
-    console.log('신고 상태 데이터:', statusData);
+    if (!statusData) return;
 
-    if (!statusData) {
-        console.error("❌ reportStatusData가 없습니다!");
-        console.log('window.stats:', window.stats);
-        return;
-    }
-
-    // 상태별 데이터 추출 (기본값 0)
     const pending = statusData.PENDING || 0;
-    const approved = statusData.APPROVED || 0;  // COMPLETED를 승인으로 표시
+    const approved = statusData.APPROVED || 0;
     const rejected = statusData.REJECTED || 0;
 
-    console.log('📈 차트 데이터:', { pending, approved, rejected });
-
-    // 막대 그래프 생성
     reportStatusChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -282,24 +252,12 @@ function initReportStatusChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
+                title: { display: true, text: '신고 상태별 처리 건수' },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    titleFont: { size: 14, weight: 'bold' },
-                    bodyFont: { size: 13 },
                     callbacks: {
-                        label: function(context) {
-                            return `${context.label}: ${context.parsed.y}건`;
-                        }
+                        label: ctx => `${ctx.label}: ${ctx.parsed.y}건`
                     }
-                },
-                title: {
-                    display: true,
-                    text: '신고 상태별 처리 건수',
-                    font: { size: 14 }
                 }
             },
             scales: {
@@ -307,33 +265,72 @@ function initReportStatusChart() {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1,
-                        font: { size: 12 },
-                        callback: function(value) {
-                            return value + '건';
-                        }
+                        callback: value => value + '건'
                     },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    }
+                    grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false }
                 },
-                x: {
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+/**
+ * 월별 결제 수수료 추이 차트
+ */
+function initFeeChart() {
+    const canvas = document.getElementById("feeChart");
+    if (!canvas) return;
+
+    const labelsRaw = canvas.dataset.labels?.split(",").filter(l => l.trim() !== "");
+    const valuesRaw = canvas.dataset.values?.split(",").filter(v => v.trim() !== "");
+    const container = canvas.closest(".chart-container");
+
+    if (!labelsRaw || labelsRaw.length === 0 || !valuesRaw || valuesRaw.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:2rem; color:#777;">
+                결제 데이터가 없습니다.
+            </div>
+        `;
+        return;
+    }
+
+    new Chart(canvas, {
+        type: "bar",
+        data: {
+            labels: labelsRaw,
+            datasets: [{
+                label: "월별 결제 수수료 추이",
+                data: valuesRaw,
+                backgroundColor: "rgba(52, 152, 219, 0.7)",
+                borderColor: "rgb(41, 128, 185)",
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: "월별 결제 수수료 추이" },
+                tooltip: {
+                    callbacks: { label: ctx => `${ctx.parsed.y.toLocaleString()}원` }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
                     ticks: {
-                        font: { size: 12, weight: '600' }
-                    },
-                    grid: {
-                        display: false
+                        callback: value => value.toLocaleString() + "원"
                     }
                 }
             }
         }
     });
-
-    console.log('신고 처리 현황 차트 생성 완료!');
 }
 
 /**
- * 실제 서버 데이터를 가져오는 경우 (확장용)
+ * 서버 데이터 동적 로딩용 (확장 가능)
  */
 async function fetchMemberGrowthData(months) {
     try {
@@ -346,3 +343,14 @@ async function fetchMemberGrowthData(months) {
         return { labels: [], memberData: [], counselorData: [] };
     }
 }
+
+/**
+ * DOM 로드 후 실행
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.stats) {
+        initCharts(window.stats);
+    } else {
+        console.warn("⚠️ window.stats 데이터가 없습니다!");
+    }
+});

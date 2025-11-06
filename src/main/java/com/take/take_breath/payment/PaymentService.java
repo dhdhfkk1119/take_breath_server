@@ -237,4 +237,18 @@ public class PaymentService {
     private String generateMerchantUid() {
         return "order_" + System.currentTimeMillis();
     }
+
+    // 월별 조회
+    public List<PaymentResponse.AdminFeeStatsDTO> getMonthlyFeeStats() {
+        List<Object[]> results = paymentRepository.getMonthlyFeeStats();
+
+        return results.stream()
+                .map(row -> PaymentResponse.AdminFeeStatsDTO.builder()
+                        .month((String) row[0])
+                        .totalFeeAmount(((Number) row[1]).longValue())
+                        .totalPaymentAmount(((Number) row[2]).longValue())
+                        .totalPaymentCount(((Number) row[3]).longValue())
+                        .build())
+                .toList();
+    }
 }
