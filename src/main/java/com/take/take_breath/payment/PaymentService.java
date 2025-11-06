@@ -156,7 +156,7 @@ public class PaymentService {
         try {
             // 포트원 API로 결제 정보 조회
             IamportResponse<com.siot.IamportRestClient.response.Payment> iamportResponse
-                = iamportClient.paymentByImpUid(request.getImpUid());
+                    = iamportClient.paymentByImpUid(request.getImpUid());
 
             com.siot.IamportRestClient.response.Payment iamportPayment = iamportResponse.getResponse();
 
@@ -304,14 +304,14 @@ public class PaymentService {
 
     // 월별 조회
     public List<PaymentResponse.AdminFeeStatsDTO> getMonthlyFeeStats() {
-        List<Object[]> results = paymentRepository.getMonthlyFeeStats();
+        List<Object[]> results = paymentRepository.findMonthlyFeeStats();
 
         return results.stream()
                 .map(row -> PaymentResponse.AdminFeeStatsDTO.builder()
                         .month((String) row[0])
                         .totalFeeAmount(((Number) row[1]).longValue())
-                        .totalPaymentAmount(((Number) row[2]).longValue())
-                        .totalPaymentCount(((Number) row[3]).longValue())
+                        .totalPaymentCount(((Number) row[2]).longValue())
+                        .totalPaymentAmount(((Number) row[3]).longValue())
                         .build())
                 .toList();
     }
