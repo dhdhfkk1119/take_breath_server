@@ -5,6 +5,7 @@
     <p>커뮤니티 댓글을 관리하세요</p>
 </div>
 
+
 <div class="table-container">
     <table class="data-table">
         <thead>
@@ -18,7 +19,7 @@
             <th>관리</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="commentList">
         {{#comments}}
             <tr>
                 <td>{{id}}</td>
@@ -26,9 +27,7 @@
                 <td>{{memberName}}</td>
                 <td>{{createdAt}}</td>
                 <td>
-                    <form method="post" action="/api/admin/view/community/comments/{{id}}/delete">
-                        <button type="submit" class="btn btn-danger">삭제</button>
-                    </form>
+                    <button type="button" class="btn btn-danger" onclick="deleteComment({{id}})">삭제</button>
                 </td>
             </tr>
         {{/comments}}

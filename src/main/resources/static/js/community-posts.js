@@ -1,15 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     loadPosts();
 
-    document.getElementById("searchBtn").addEventListener("click", () => {
-        const keyword = document.getElementById("searchKeyword").value.trim();
-        loadPosts(keyword);
-    });
-
-    document.getElementById("refreshBtn").addEventListener("click", () => {
-        document.getElementById("searchKeyword").value = "";
-        loadPosts();
-    });
 });
 
 async function loadPosts(keyword = "") {
@@ -54,7 +45,7 @@ async function loadPosts(keyword = "") {
 async function deletePost(id) {
     if (!confirm("정말 이 게시글을 강제 삭제하시겠습니까?")) return;
     try {
-        const res = await fetch(`/api/admin/view/community/posts/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/admin/community/posts/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("삭제 실패");
         await loadPosts();
     } catch (err) {

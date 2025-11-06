@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * ✅ 관리자 전용 커뮤니티 관리 서비스
+ * 관리자 전용 커뮤니티 관리 서비스
  * - 기존 커뮤니티 서비스 로직을 호출해서 SSR에서 사용
  */
 @Service
@@ -69,9 +69,10 @@ public class AdminCommunityService {
     // 댓글 관리
     public List<CommunityCommentResponse.ResponseDTO> getAllComments() {
         return commentRepository.findAll().stream()
+                .filter(c -> !c.isDeleted())
                 .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
                 .limit(100)
-                .map(CommunityCommentResponse.ResponseDTO::new)
+                .map(c -> new CommunityCommentResponse.ResponseDTO(c))
                 .toList();
     }
 

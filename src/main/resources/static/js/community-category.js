@@ -5,12 +5,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadCategories() {
     try {
-        const res = await fetch("/api/admin/view/community/categories");
+        const res = await fetch("/api/admin/community/categories");
         if (!res.ok) throw new Error("데이터를 불러오지 못했습니다.");
         const categories = await res.json();
 
         const tbody = document.getElementById("categoryList");
-        if (categories.length === 0) {
+        if (!categories || categories.length === 0) {
             tbody.innerHTML = `
                 <tr><td colspan="4" style="text-align:center; padding:1.5rem; color:#999;">카테고리가 없습니다.</td></tr>
             `;
@@ -21,7 +21,7 @@ async function loadCategories() {
             <tr>
                 <td>${cat.id}</td>
                 <td>${cat.name}</td>
-                <td>${cat.createdAt || '-'}</td>
+                <td>-</td>
                 <td>
                     <button class="btn btn-danger" onclick="deleteCategory(${cat.id})">삭제</button>
                 </td>
@@ -59,7 +59,9 @@ async function deleteCategory(id) {
     if (!confirm("정말 이 카테고리를 삭제하시겠습니까?")) return;
 
     try {
-        const res = await fetch(`/api/admin/community/categories/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/admin/community/categories/${id}`, {
+            method: "DELETE"
+        });
         if (!res.ok) throw new Error("삭제 실패");
         await loadCategories();
     } catch (err) {
