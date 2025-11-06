@@ -21,13 +21,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOriginPatterns("*", "null")  // 모든 origin 허용
+                .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
-                .exposedHeaders("Authorization")  // JWT 헤더 노출
-                .allowCredentials(true)
-                .maxAge(3600);  // preflight 캐싱
+                .exposedHeaders("Authorization")
+                .allowCredentials(false)
+                .maxAge(3600);
     }
+
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
