@@ -44,6 +44,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/counselors/signup",
                         "/api/counselors/login",
                         "/api/admin/**",
+                        "/api/admin/community/**",
                         "/error",                        // 스프링 기본 에러
                         "/api/test/**",                   // 테스트용
                         "/css/**", "/js/**", "/images/**", "/favicon.ico",
@@ -56,8 +57,9 @@ public class WebConfig implements WebMvcConfigurer {
 
         // 관리자 세션 인터셉터
         registry.addInterceptor(adminAuthInterceptor)
-                .addPathPatterns("/api/admin/view/**")
-                .excludePathPatterns("/api/admin/view/login");
+                .addPathPatterns("/api/admin/view/**", "/api/admin/community/**")
+                .excludePathPatterns("/api/admin/view/login",
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico");
     }
 
     @Override

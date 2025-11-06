@@ -114,30 +114,6 @@ public class AdminDashboardService {
      * 신고 상태별 통계 (PENDING, IN_PROGRESS, COMPLETED, REJECTED)
      * @return 상태별 신고 건수
      */
-//    public Map<String, Integer> getReportStatusStats() {
-//        Map<String, Integer> statusStats = new LinkedHashMap<>();
-//
-//        // 커뮤니티 신고 상태별 카운트
-//        List<Object[]> communityStatus = communityReportProcessRepository.countLatestStatusByReport();
-//
-//        // 댓글 신고 상태별 카운트
-//        List<Object[]> commentStatus = commentReportProcessRepository.countLatestStatusByReport();
-//
-//        // 상태별 합산
-//        for (Object[] row : communityStatus) {
-//            String status = String.valueOf(row[0]);
-//            Integer count = ((Number) row[1]).intValue();
-//            statusStats.put(status, statusStats.getOrDefault(status, 0) + count);
-//        }
-//
-//        for (Object[] row : commentStatus) {
-//            String status = String.valueOf(row[0]);
-//            Integer count = ((Number) row[1]).intValue();
-//            statusStats.put(status, statusStats.getOrDefault(status, 0) + count);
-//        }
-//
-//        return statusStats;
-//    }
     public Map<String, Integer> getReportStatusStats() {
         Map<String, Integer> statusStats = new LinkedHashMap<>();
 

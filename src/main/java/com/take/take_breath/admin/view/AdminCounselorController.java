@@ -18,13 +18,11 @@ public class AdminCounselorController {
 
     private final AdminCounselorService adminCounselorService;
 
-    // 상담사 관리 메인
     @GetMapping
     public String listRedirect() {
         return "redirect:/api/admin/view/counselors/list";
     }
 
-    // 전체 상담사 목록
     @GetMapping("/list")
     public String getAllCounselors(Model model) {
         List<CounselorListResponse> counselors = adminCounselorService.getAllCounselors()
@@ -36,10 +34,11 @@ public class AdminCounselorController {
         model.addAttribute("pageTitle", "전체 상담사 목록");
         model.addAttribute("isAllFilter", true);
         model.addAttribute("isCounselors", true);
+        model.addAttribute("additionalCss", new String[]{"/css/admin-counselors.css"});
+        model.addAttribute("additionalScript", new String[]{"/js/admin-counselors.js"});
         return "admin/counselor-list";
     }
 
-    // 활성 상담사 목록
     @GetMapping("/active")
     public String getActiveCounselors(Model model) {
         List<CounselorListResponse> counselors = adminCounselorService.getCounselorsByStatus(Status.ACTIVE)
@@ -51,10 +50,11 @@ public class AdminCounselorController {
         model.addAttribute("pageTitle", "활성 상담사 목록");
         model.addAttribute("isActiveFilter", true);
         model.addAttribute("isCounselors", true);
+        model.addAttribute("additionalCss", new String[]{"/css/admin-counselors.css"});
+        model.addAttribute("additionalScript", new String[]{"/js/admin-counselors.js"});
         return "admin/counselor-list";
     }
 
-    // 승인 대기 상담사 목록
     @GetMapping("/pending")
     public String getPendingCounselors(Model model) {
         List<CounselorListResponse> counselors = adminCounselorService.getCounselorsByStatus(Status.PENDING)
@@ -66,10 +66,11 @@ public class AdminCounselorController {
         model.addAttribute("pageTitle", "승인 대기 상담사 목록");
         model.addAttribute("isPendingFilter", true);
         model.addAttribute("isCounselors", true);
+        model.addAttribute("additionalCss", new String[]{"/css/admin-counselors.css"});
+        model.addAttribute("additionalScript", new String[]{"/js/admin-counselors.js"});
         return "admin/counselor-list";
     }
 
-    // 상담사 승인
     @PostMapping("/{id}/approve")
     public String approve(
             @PathVariable Long id,
@@ -81,10 +82,9 @@ public class AdminCounselorController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/api/admin/view/counselors";
+        return "redirect:/api/admin/view/counselors/pending";
     }
 
-    // 상담사 거절
     @PostMapping("/{id}/reject")
     public String reject(
             @PathVariable Long id,
@@ -97,6 +97,6 @@ public class AdminCounselorController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/api/admin/view/counselors";
+        return "redirect:/api/admin/view/counselors/pending";
     }
 }
