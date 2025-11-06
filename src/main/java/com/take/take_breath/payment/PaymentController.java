@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/payments")
@@ -92,6 +94,15 @@ public class PaymentController {
         log.info("[관리자 수수료 통계 조회] totalFee={}, count={}",
                 stats.getTotalFeeAmount(), stats.getTotalPaymentCount());
 
+        return ResponseEntity.ok(ApiUtil.success(stats));
+    }
+
+    @Auth(roles = {Role.ADMIN}, statuses = {Status.ACTIVE})
+    @GetMapping("/admin/fee-stats/monthly")
+    public ResponseEntity<ApiUtil.ApiResult<List<PaymentResponse.AdminFeeStatsDTO>>> getMonthlyFeeStats() {
+        List<PaymentResponse.AdminFeeStatsDTO> stats = paymentService.getMonthlyFeeStats();
+
+        log.info("[관리자 월별 수수료 통계 조회] size={}", stats.size());
         return ResponseEntity.ok(ApiUtil.success(stats));
     }
 }

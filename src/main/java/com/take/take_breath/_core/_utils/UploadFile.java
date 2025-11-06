@@ -20,6 +20,30 @@ public class UploadFile {
 
     private final UploadProperties uploadProperties;
 
+
+    public List<String> uploadImages(MultipartFile[] multipartFiles, String dir) throws IOException{
+        String fullUploadPath = Paths.get(uploadProperties.getRootDir(),dir).toString();
+
+        createUploadDirectory(fullUploadPath);
+
+        List<String> fileNames = new ArrayList<>();
+
+        for (MultipartFile file : multipartFiles) {
+            String originFilename = file.getOriginalFilename();
+            String extension = getFileExtension(originFilename);
+            String uniqueFileName = generateUniqueFileName(extension);
+            Path filePath = Paths.get(fullUploadPath, uniqueFileName);
+            file.transferTo(filePath);
+            String webPath = Paths.get(dir, uniqueFileName).toString();
+            webPath = "/uploads/" + webPath.replace('\\', '/');
+
+            fileNames.add(webPath);
+        }
+
+
+        return fileNames;
+    }
+
     /**
      * 단일 이미지 업로드
      * @param file 업로드할 파일

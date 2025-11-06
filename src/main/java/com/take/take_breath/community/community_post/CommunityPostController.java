@@ -1,5 +1,7 @@
 package com.take.take_breath.community.community_post;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.PageUtil;
 import com.take.take_breath._core.auth.Auth;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/community/posts")
@@ -65,32 +68,46 @@ public class CommunityPostController {
     @Auth(statuses = {Status.ACTIVE})
     @PostMapping
     public ResponseEntity<ApiUtil.ApiResult<CommunityPostResponse.ResponseDTO>> savePost(
-            @Valid @RequestBody CommunityPostRequest.SaveDTO saveDTO,
-            HttpServletRequest request) {
+            @RequestPart("saveDTO") String saveDTOJson,
+            @RequestPart(value = "files", required = false) MultipartFile[] files,
+            HttpServletRequest request) throws JsonProcessingException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        CommunityPostRequest.SaveDTO saveDTO = objectMapper.readValue(saveDTOJson, CommunityPostRequest.SaveDTO.class);
 
         Long memberId = (Long) request.getAttribute("memberId");
-        CommunityPostResponse.ResponseDTO savedPost = communityPostService.savePost(saveDTO, memberId);
+        CommunityPostResponse.ResponseDTO savedPost = communityPostService.savePost(saveDTO, memberId, files);
 
-        log.info("[게시글 작성] postId={}, memberId={}", savedPost.getId(), memberId);
         return ResponseEntity.ok(ApiUtil.success(savedPost));
     }
+
 
     /**
      * 게시글 수정
      */
     @Auth(statuses = {Status.ACTIVE})
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<ApiUtil.ApiResult<CommunityPostResponse.ResponseDTO>> updatePost(
             @PathVariable Long id,
-            @Valid @RequestBody CommunityPostRequest.UpdateDTO updateDTO,
-            HttpServletRequest request) {
+            @RequestPart("updateDTO") String updateDTOJson,
+            @RequestPart(value = "files", required = false) MultipartFile[] files,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+
+        // JSON 문자열 → DTO 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        CommunityPostRequest.UpdateDTO updateDTO = objectMapper.readValue(updateDTOJson, CommunityPostRequest.UpdateDTO.class);
 
         Long memberId = (Long) request.getAttribute("memberId");
-        CommunityPostResponse.ResponseDTO updatedPost = communityPostService.updatePost(id, updateDTO, memberId);
+
+        CommunityPostResponse.ResponseDTO updatedPost =
+                communityPostService.updatePost(id, updateDTO, memberId, files);
 
         log.info("[게시글 수정] postId={}, memberId={}", id, memberId);
+
         return ResponseEntity.ok(ApiUtil.success(updatedPost));
     }
+
 
     /**
      * 게시글 삭제 (Soft Delete)
