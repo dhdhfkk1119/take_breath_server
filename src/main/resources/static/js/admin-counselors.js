@@ -6,8 +6,7 @@ function openRejectModal(counselorId) {
 }
 
 function closeRejectModal() {
-    const modal = document.getElementById('rejectModal');
-    modal.style.display = 'none';
+    document.getElementById('rejectModal').style.display = 'none';
 }
 
 function openImageModal(licenseName, licenseNumber, licenseRegiNumber, licenseImage) {
@@ -18,25 +17,28 @@ function openImageModal(licenseName, licenseNumber, licenseRegiNumber, licenseIm
 
     const imagePath = '/uploads/counselor-images/' + licenseImage;
     document.getElementById('licenseImageDisplay').src = imagePath;
-
-    console.log('이미지 경로:', imagePath); // 디버깅용
-
     modal.style.display = 'block';
 }
 
 function closeImageModal() {
-    const modal = document.getElementById('imageModal');
-    modal.style.display = 'none';
+    document.getElementById('imageModal').style.display = 'none';
 }
+
+// ✅ license-badge 클릭 이벤트 추가
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('license-badge')) {
+        const name = e.target.dataset.name;
+        const number = e.target.dataset.number;
+        const regi = e.target.dataset.regi;
+        const img = e.target.dataset.img;
+        openImageModal(name, number, regi, img);
+    }
+});
 
 // 모달 외부 클릭 시 닫기
 window.onclick = function(event) {
     const rejectModal = document.getElementById('rejectModal');
     const imageModal = document.getElementById('imageModal');
-    if (event.target === rejectModal) {
-        closeRejectModal();
-    }
-    if (event.target === imageModal) {
-        closeImageModal();
-    }
-}
+    if (event.target === rejectModal) closeRejectModal();
+    if (event.target === imageModal) closeImageModal();
+};
