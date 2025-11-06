@@ -4,6 +4,8 @@ import com.take.take_breath._core._utils.DateUtil;
 import lombok.Builder;
 import lombok.Data;
 
+import static com.take.take_breath.refund.QRefund.refund;
+
 public class PaymentResponse {
 
     // 결제 준비 응답
@@ -36,6 +38,15 @@ public class PaymentResponse {
         private String createdAt;
         private String paidAt;
 
+        private Long refundId;
+        private Long refundAmount;
+        private String refundStatus;
+        private String refundedAt;
+
+        // 환불 가능 여부
+        private boolean canRefund;
+        private int daysUntilRefundExpiry;
+
         public ListDTO(Payment payment) {
             this.id = payment.getId();
             this.impUid = payment.getImpUid();
@@ -50,6 +61,8 @@ public class PaymentResponse {
             this.createdAt = DateUtil.timestampFormat(payment.getCreatedAt());
             this.paidAt = payment.getPaidAt() != null
                     ? DateUtil.timestampFormat(payment.getPaidAt()) : null;
+
+
         }
     }
 
@@ -90,6 +103,7 @@ public class PaymentResponse {
     @Data
     @Builder
     public static class AdminFeeStatsDTO {
+        private String month;
         private Long totalFeeAmount;      // 총 수수료 수익
         private Long totalPaymentCount;   // 결제 건수
         private Long totalPaymentAmount;  // 총 결제 금액

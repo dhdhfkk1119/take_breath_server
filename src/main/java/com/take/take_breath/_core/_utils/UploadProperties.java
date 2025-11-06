@@ -17,4 +17,5 @@ public class UploadProperties {
     private String recordImageDir;  // records/images/
     private String recordAudioDir;  // records/audio/
     private String recordVideoDir;  // records/videos/
+    private String communityDir;    // community/images
 }

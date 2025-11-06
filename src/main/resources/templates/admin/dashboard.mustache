@@ -5,10 +5,20 @@
     <p>시스템 전체 통계를 확인하세요</p>
 </div>
 
+<!-- 월별 결제 수수료 추이 -->
+<div class="chart-container">
+    <h3>📈 월별 결제 수수료 추이</h3>
+    <canvas id="feeChart"
+            data-labels="{{#monthlyStats}}{{month}},{{/monthlyStats}}"
+            data-values="{{#monthlyStats}}{{totalFeeAmount}},{{/monthlyStats}}"
+            height="120"></canvas>
+</div>
+
 <!-- 회원 증가 추이 차트 -->
-<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📊 회원 증가 추이</h3>
+<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📈 통계 차트</h3>
 <div class="charts-section">
-    <div class="chart-container" style="grid-column: 1 / -1;">
+    <!-- 회원 증가 추이 -->
+    <div class="chart-container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h3>월별 회원 증가 추이</h3>
             <div class="chart-controls">
@@ -19,20 +29,19 @@
         </div>
         <canvas id="memberGrowthChart"></canvas>
     </div>
-</div>
 
-<!-- 신고 처리 현황 차트 -->
-<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📊 신고 처리 현황</h3>
-<div class="charts-section">
+    <!-- 신고 처리 현황 -->
     <div class="chart-container">
         <h3>신고 상태별 처리 건수</h3>
         <canvas id="reportStatusChart"></canvas>
     </div>
 </div>
 
+<!-- 신고 처리 현황 차트 -->
+
+
 
 <!-- 차트 섹션 -->
-<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📈 통계 차트</h3>
 <div class="charts-section">
     <div class="chart-container">
         <h3>회원 및 상담사 현황</h3>
@@ -84,26 +93,6 @@
         <h3>승인 대기</h3>
         <div class="number">{{stats.pendingCounselors}}</div>
         <div class="label">검토 필요</div>
-    </div>
-</div>
-
-<!-- 역할별 통계 -->
-<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">🔑 역할별 통계</h3>
-<div class="stats-grid">
-    <div class="stat-card info">
-        <h3>일반 회원</h3>
-        <div class="number">{{stats.userCount}}</div>
-        <div class="label">USER</div>
-    </div>
-    <div class="stat-card info">
-        <h3>상담사</h3>
-        <div class="number">{{stats.counselorCount}}</div>
-        <div class="label">COUNSELOR</div>
-    </div>
-    <div class="stat-card info">
-        <h3>관리자</h3>
-        <div class="number">{{stats.adminCount}}</div>
-        <div class="label">ADMIN</div>
     </div>
 </div>
 

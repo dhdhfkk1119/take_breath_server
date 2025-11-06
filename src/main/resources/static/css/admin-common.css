@@ -1,3 +1,4 @@
+
 .btn {
     padding: 0.5rem 1rem;
     border: none;
@@ -181,4 +182,72 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.sidebar {
+    width: 220px;
+    background: #2c3e50;
+    color: white;
+    height: 100vh;
+    position: fixed;
+    padding-top: 1rem;
+}
+
+.menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu > li {
+    margin-bottom: 0.5rem;
+}
+
+.menu a,
+.menu-toggle {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #ecf0f1;
+    text-decoration: none;
+    border-radius: 4px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+.menu a:hover,
+.menu-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.menu a.active,
+.menu-toggle.active {
+    background: #1abc9c;
+    color: white;
+}
+
+.submenu {
+    list-style: none;
+    padding-left: 1rem;
+    display: none;
+    margin: 0;
+}
+
+.submenu.open {
+    display: block;
+}
+
+.submenu li a {
+    font-size: 0.9rem;
+    padding: 0.5rem 1.25rem;
+    display: block;
+    color: #bdc3c7;
+}
+
+.submenu li a.active {
+    color: #1abc9c;
+    font-weight: bold;
 }

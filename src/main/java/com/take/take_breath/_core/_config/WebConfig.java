@@ -21,13 +21,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOriginPatterns("*", "null")  // 모든 origin 허용
+                .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
-                .exposedHeaders("Authorization")  // JWT 헤더 노출
-                .allowCredentials(true)
-                .maxAge(3600);  // preflight 캐싱
+                .exposedHeaders("Authorization")
+                .allowCredentials(false)
+                .maxAge(3600);
     }
+
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -44,6 +45,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/counselors/signup",
                         "/api/counselors/login",
                         "/api/admin/**",
+                        "/api/admin/community/**",
                         "/error",                        // 스프링 기본 에러
                         "/api/test/**",                   // 테스트용
                         "/css/**", "/js/**", "/images/**", "/favicon.ico",
@@ -56,8 +58,9 @@ public class WebConfig implements WebMvcConfigurer {
 
         // 관리자 세션 인터셉터
         registry.addInterceptor(adminAuthInterceptor)
-                .addPathPatterns("/api/admin/view/**")
-                .excludePathPatterns("/api/admin/view/login");
+                .addPathPatterns("/api/admin/view/**", "/api/admin/community/**")
+                .excludePathPatterns("/api/admin/view/login",
+                        "/css/**", "/js/**", "/images/**", "/favicon.ico");
     }
 
     @Override

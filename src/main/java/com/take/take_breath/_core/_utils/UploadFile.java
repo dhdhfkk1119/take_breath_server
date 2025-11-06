@@ -20,6 +20,30 @@ public class UploadFile {
 
     private final UploadProperties uploadProperties;
 
+
+    public List<String> uploadImages(MultipartFile[] multipartFiles, String dir) throws IOException{
+        String fullUploadPath = Paths.get(uploadProperties.getRootDir(),dir).toString();
+
+        createUploadDirectory(fullUploadPath);
+
+        List<String> fileNames = new ArrayList<>();
+
+        for (MultipartFile file : multipartFiles) {
+            String originFilename = file.getOriginalFilename();
+            String extension = getFileExtension(originFilename);
+            String uniqueFileName = generateUniqueFileName(extension);
+            Path filePath = Paths.get(fullUploadPath, uniqueFileName);
+            file.transferTo(filePath);
+            String webPath = Paths.get(dir, uniqueFileName).toString();
+            webPath = "/uploads/" + webPath.replace('\\', '/');
+
+            fileNames.add(webPath);
+        }
+
+
+        return fileNames;
+    }
+
     /**
      * 단일 이미지 업로드
      * @param file 업로드할 파일
@@ -143,10 +167,9 @@ public class UploadFile {
             // 파일 저장
             file.transferTo(savePath);
 
-            // DB 저장용 상대 경로 (예: records/images/20251027_120000_abc123.png)
-            // String relativePath = Paths.get(subDir, savedFileName).toString().replace("\\", "/");
-            // String relativePath = Paths.get(fullUploadPath, savedFileName).toString().replace("\\", "/");
-            String relativePath = savePath.toString().replace("\\", "/");
+            // ✅ 수정: 상대 경로만 DB에 저장
+            // 예: records/images/20251105_120000_abc123.png
+            String relativePath = Paths.get(subDir, savedFileName).toString().replace("\\", "/");
 
             // 파일 정보 객체 생성
             UploadedFileInfo fileInfo = UploadedFileInfo.builder()

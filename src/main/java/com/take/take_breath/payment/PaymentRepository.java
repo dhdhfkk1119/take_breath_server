@@ -12,17 +12,14 @@ import java.util.Optional;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByMerchantUid(String merchantUid);
 
-    Optional<Payment> findByImpUid(String impUid);
-
-    Page<Payment> findByMemberIdOrderByCreatedAtDesc(Long memberId, Pageable pageable);
-
     /**
-     * FIFO: 가장 오래된 결제건부터 조회
-     * (포인트 사용 시 오래된 충전건부터 차감하기 위함)
+     * 결제 내역 조회 (PAID, CANCELLED만)
      */
-    @Query("SELECT p FROM Payment p " + "WHERE p.member.id = :memberId " +
-            "AND p.status = :status " + "ORDER BY p.paidAt ASC")
-    List<Payment> findAvailablePayments(@Param("memberId") Long memberId, @Param("status") PaymentStatus status);
+    @Query("SELECT p FROM Payment p " +
+            "WHERE p.member.id = :memberId " +
+            "AND (p.status = 'PAID' OR p.status = 'CANCELLED') " +
+            "ORDER BY p.createdAt DESC")
+    Page<Payment> findPaymentHistoryByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
     // 수수료 관련 통계
     @Query("SELECT SUM(p.feeAmount) FROM Payment p WHERE p.status = 'PAID'")
@@ -33,4 +30,18 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.status = 'PAID'")
     Long getTotalPaymentAmount();
+
+    @Query(value = """
+    SELECT 
+        DATE_FORMAT(p.paid_at, '%Y-%m') AS month,
+        SUM(p.fee_amount) AS totalFeeAmount,
+        COUNT(*) AS totalPaymentCount,
+        SUM(p.amount) AS totalPaymentAmount
+    FROM payment_tb p
+    WHERE p.status = 'PAID'
+      AND p.paid_at IS NOT NULL
+    GROUP BY DATE_FORMAT(p.paid_at, '%Y-%m')
+    ORDER BY month ASC
+    """, nativeQuery = true)
+    List<Object[]> findMonthlyFeeStats();
 }

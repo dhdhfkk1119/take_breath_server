@@ -19,6 +19,7 @@ upload:
   record-image-dir: records/images/
   record-audio-dir: records/audio/
   record-video-dir: records/videos/
+  community-dir : community-images/
 
   
 # ?? ??? ??

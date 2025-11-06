@@ -13,6 +13,7 @@ public class MemberResponseTo {
         private String accessToken;
         private String refreshToken; // 자동 로그인 시 발급, 아니면 null
         private Long id;
+        private String name;
         private String nickName;
         private String email;
         private String profileImageUrl;
@@ -25,11 +26,12 @@ public class MemberResponseTo {
         private Long daysLeft;
 
         // 1. 일반 로그인 응답을 위한 생성자 (탈퇴 상태가 아닐 때)
-        public Login(String accessToken, String refreshToken, Long id, String name, String email, String profileImageUrl, String role, String status, String phone) {
+        public Login(String accessToken, String refreshToken, Long id, String name, String nickName, String email, String profileImageUrl, String role, String status, String phone) {
             this.accessToken = accessToken;
             this.refreshToken = refreshToken;
             this.id = id;
-            this.nickName = name;
+            this.name = name;
+            this.nickName = nickName;
             this.email = email;
             this.profileImageUrl = profileImageUrl;
             this.role = role;
