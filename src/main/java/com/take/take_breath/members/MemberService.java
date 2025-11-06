@@ -154,6 +154,7 @@ public class MemberService {
                 accessToken,
                 refreshToken, // autoLogin=false면 null일 수 있음
                 member.getId(),
+                member.getName(),
                 member.getNickname(),
                 member.getEmail(),
                 member.getProfileImage(),

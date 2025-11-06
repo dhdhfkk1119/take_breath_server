@@ -14,6 +14,8 @@ import com.take.take_breath.payment.fee.FeeStrategyFactory;
 import com.take.take_breath.point.PointHistory;
 import com.take.take_breath.point.PointHistoryRepository;
 import com.take.take_breath.point.PointTransactionType;
+import com.take.take_breath.refund.Refund;
+import com.take.take_breath.refund.RefundRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Slf4j
@@ -34,6 +38,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final MemberRepository memberRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final RefundRepository refundRepository;
     private final IamportClient iamportClient;
     private final FeeStrategyFactory feeStrategyFactory;
 
@@ -151,7 +156,7 @@ public class PaymentService {
         try {
             // 포트원 API로 결제 정보 조회
             IamportResponse<com.siot.IamportRestClient.response.Payment> iamportResponse
-                = iamportClient.paymentByImpUid(request.getImpUid());
+                    = iamportClient.paymentByImpUid(request.getImpUid());
 
             com.siot.IamportRestClient.response.Payment iamportPayment = iamportResponse.getResponse();
 
@@ -205,16 +210,36 @@ public class PaymentService {
     }
 
     /**
-     * 내 결제 내역 조회
+     * 내 결제 내역 조회 (환불 정보 포함)
      */
     public Page<PaymentResponse.ListDTO> getMyPayments(Long memberId, Pageable pageable) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new Exception400("존재하지 않는 회원입니다."));
 
-        Page<Payment> payments = paymentRepository.findByMemberIdOrderByCreatedAtDesc(memberId, pageable);
+        Page<Payment> payments = paymentRepository.findPaymentHistoryByMemberId(memberId, pageable);
 
-        return payments.map(payment -> new PaymentResponse.ListDTO(payment));
+        return payments.map(payment -> {
+            PaymentResponse.ListDTO dto = new PaymentResponse.ListDTO(payment);
+
+            // 환불 정보 조회 및 설정
+            Refund refund = refundRepository.findByPaymentId(payment.getId()).orElse(null);
+            if (refund != null) {
+                dto.setRefundId(refund.getId());
+                dto.setRefundAmount(refund.getRefundAmount());
+                dto.setRefundStatus(refund.getStatus().name());
+                dto.setRefundedAt(refund.getProcessedAt() != null
+                        ? com.take.take_breath._core._utils.DateUtil.timestampFormat(refund.getProcessedAt())
+                        : null);
+            }
+
+            // 비즈니스 로직 - 환불 가능 여부 계산
+            dto.setCanRefund(calculateCanRefund(payment, refund));
+            dto.setDaysUntilRefundExpiry(calculateDaysUntilRefundExpiry(payment));
+
+            return dto;
+        });
     }
+
 
     /**
      * 관리자용 수수료 통계 조회
@@ -236,5 +261,44 @@ public class PaymentService {
      */
     private String generateMerchantUid() {
         return "order_" + System.currentTimeMillis();
+    }
+
+    /**
+     * 환불 가능 여부 계산
+     */
+    private boolean calculateCanRefund(Payment payment, Refund refund) {
+        // 결제 완료 상태가 아니면 환불 불가
+        if (payment.getStatus() != PaymentStatus.PAID) {
+            return false;
+        }
+
+        // 이미 환불된 경우 환불 불가
+        if (refund != null) {
+            return false;
+        }
+
+        // 결제일로부터 7일 이내인지 확인
+        if (payment.getPaidAt() == null) {
+            return false;
+        }
+
+        LocalDateTime paidDate = payment.getPaidAt().toLocalDateTime();
+        long daysPassed = ChronoUnit.DAYS.between(paidDate, LocalDateTime.now());
+        return daysPassed <= 7;
+    }
+
+    /**
+     * 환불 마감까지 남은 일수 계산
+     */
+    private int calculateDaysUntilRefundExpiry(Payment payment) {
+        if (payment.getPaidAt() == null) {
+            return 0;
+        }
+
+        LocalDateTime paidDate = payment.getPaidAt().toLocalDateTime();
+        LocalDateTime expiryDate = paidDate.plusDays(7);
+        long daysLeft = ChronoUnit.DAYS.between(LocalDateTime.now(), expiryDate);
+
+        return (int) Math.max(0, daysLeft);
     }
 }
