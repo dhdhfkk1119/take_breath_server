@@ -38,11 +38,18 @@ public class ChatRoomMember {
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     private Timestamp joinedAt;         // 방에 참여한 시각
-    
+
+    private Timestamp lastMessageTime;  // 이 방의 마지막 메시지 시간
+
     // 읽음처리
     public void updateLastRead(Long messageId) {
         this.lastReadMessageId = messageId;
         this.lastReadAt = Timestamp.valueOf(LocalDateTime.now());
+    }
+
+    // 마지막 메시지 시간 업데이트
+    public void updateLastMessageTime(Timestamp messageTime) {
+        this.lastMessageTime = messageTime;
     }
 }
 

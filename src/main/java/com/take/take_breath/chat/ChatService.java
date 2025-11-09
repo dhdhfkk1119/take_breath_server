@@ -3,6 +3,7 @@ package com.take.take_breath.chat;
 import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath._core._exception.Exception500;
+import com.take.take_breath._core._utils.PageUtil;
 import com.take.take_breath._core._utils.UploadFile;
 import com.take.take_breath.chat.chat_message.ChatMessage;
 import com.take.take_breath.chat.chat_message.ChatMessageRepository;
@@ -18,6 +19,9 @@ import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -346,33 +350,36 @@ public class ChatService {
 
     /**
      * 내가 속한 채팅방 목록 조회 (이메일로 조회)
-     * @param email
-     * @return
      */
     @Transactional(readOnly = true)
-    public List<ChatRoomListResponse> getMyChatRoomsByEmail(String email) {
+    public PageUtil.SliceResponse<ChatRoomListResponse> getMyChatRoomsToSlice(String email, int page, int size) {
+        // 사용자 조회
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
 
-        List<ChatRoomMember> myRoomMembers = chatRoomMemberRepository.findByMemberId(member.getId());
+        // Pageable 생성
+        Pageable pageable = PageRequest.of(page, size);
 
-        // Entity -> DTO 변환
-        return myRoomMembers.stream()
+        // Slice로 채팅방 조회
+        Slice<ChatRoomMember> chatRoomMemberSlice = chatRoomMemberRepository
+                .findByMemberIdOrderByLastMessageTime(member.getId(), pageable);
+
+        List<ChatRoomListResponse> content = chatRoomMemberSlice.getContent().stream()
                 .map(myRoomMember -> {
                     Long roomId = myRoomMember.getChatRoom().getId();
 
                     // 읽지 않은 메시지 개수 계산
                     int unreadCount = chatMessageRepository.countUnreadMessages(
                             roomId,
-                            myRoomMember.getLastReadMessageId(), // 내가 마지막으로 읽은 메시지 ID
-                            member.getId()  // 내 ID (내가 보낸 메시지는 제외)
+                            myRoomMember.getLastReadMessageId(),
+                            member.getId()
                     );
 
                     // 마지막 메시지 조회
                     ChatMessage lastMessage = chatMessageRepository
                             .findLastMessageByChatRoomId(roomId);
 
-                    // 1:1 채팅이므로 상대방 정보 조회
+                    // 상대방 정보 조회
                     ChatRoomMember otherMember = chatRoomMemberRepository
                             .findOtherMemberInRoom(roomId, member.getId());
 
@@ -387,6 +394,9 @@ public class ChatService {
                             .build();
                 })
                 .collect(Collectors.toList());
+
+        // PageUtil.SliceResponse로 변환하여 반환
+        return PageUtil.SliceResponse.of(chatRoomMemberSlice, content);
 
     }
 
@@ -467,3 +477,54 @@ public class ChatService {
                 .build();
     }
 }
+
+/*
+@Transactional(readOnly = true)
+    public List<ChatRoomListResponse> getMyChatRoomsByEmail(String email, int page, int size) {
+        // 사용자 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+
+        // Pageable 생성
+        Pageable pageable = PageRequest.of(page, size);
+
+        Slice<ChatRoomMember> chatRoomMemberSlice = chatRoomMemberRepository
+                .findByMemberIdOrderByLastMessageTime(member.getId(), pageable);
+
+
+        List<ChatRoomMember> myRoomMembers = chatRoomMemberRepository.findByMemberId(member.getId());
+
+        // Entity -> DTO 변환
+        return myRoomMembers.stream()
+                .map(myRoomMember -> {
+                    Long roomId = myRoomMember.getChatRoom().getId();
+
+                    // 읽지 않은 메시지 개수 계산
+                    int unreadCount = chatMessageRepository.countUnreadMessages(
+                            roomId,
+                            myRoomMember.getLastReadMessageId(), // 내가 마지막으로 읽은 메시지 ID
+                            member.getId()  // 내 ID (내가 보낸 메시지는 제외)
+                    );
+
+                    // 마지막 메시지 조회
+                    ChatMessage lastMessage = chatMessageRepository
+                            .findLastMessageByChatRoomId(roomId);
+
+                    // 1:1 채팅이므로 상대방 정보 조회
+                    ChatRoomMember otherMember = chatRoomMemberRepository
+                            .findOtherMemberInRoom(roomId, member.getId());
+
+                    return ChatRoomListResponse.builder()
+                            .roomId(roomId)
+                            .roomName(myRoomMember.getChatRoom().getName())
+                            .unreadCount(unreadCount)
+                            .lastMessage(lastMessage != null ? lastMessage.getContent() : null)
+                            .lastMessageTime(lastMessage != null ? lastMessage.getTime() : null)
+                            .otherMemberId(otherMember != null ? otherMember.getMember().getId() : null)
+                            .otherMemberName(otherMember != null ? otherMember.getMember().getName() : null)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+    }
+ */
