@@ -33,12 +33,6 @@ public class ChatWsController {
             SimpMessageHeaderAccessor headerAccessor) {
         Long memberId = (Long) headerAccessor.getSessionAttributes().get("memberId");
         ChatMessageResponse response = chatService.sendMessage(roomId, memberId, request);
-        log.info(response.getContent());
-        log.info(response.getSenderName());
-        log.info(response.getMessageId().toString());
-        log.info(response.getIsRead().toString());
-        log.info(response.getCurrentPoint().toString());
-
         return ApiUtil.success(response);
     }
 
