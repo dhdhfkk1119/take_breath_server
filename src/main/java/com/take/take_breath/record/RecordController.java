@@ -175,6 +175,8 @@ public class RecordController {
     }
 
 
+    // 수정된 부분 (getPdf 메서드만)
+
     // 기록 다운로드 기능 - pdf
     @GetMapping("/pdf/{id}")
     public ResponseEntity<?> getPdf(
@@ -182,13 +184,18 @@ public class RecordController {
             @PathVariable(name = "id") Long id) {
         String memberEmail = request.getAttribute("memberEmail").toString();
 
-
-
         byte[] pdf = recordService.generatePdf(memberEmail, id);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("attachment", "record.pdf");
+
+        // ✅ 수정: 영문 파일명 + 타임스탐프 사용
+        String timestamp = System.currentTimeMillis() + "";
+        String fileName = "record_" + id + "_" + timestamp + ".pdf";
+        headers.setContentDispositionFormData("attachment", fileName);
+
+        // ✅ 추가: Content-Length 헤더 설정 (중요!)
+        headers.setContentLength(pdf.length);
 
         return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
 

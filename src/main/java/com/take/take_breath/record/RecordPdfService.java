@@ -17,17 +17,24 @@ import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.properties.TextAlignment;
-import com.itextpdf.layout.properties.UnitValue;
-import com.itextpdf.layout.properties.VerticalAlignment;
+//import com.itextpdf.layout.properties.TextAlignment;
+//import com.itextpdf.layout.properties.UnitValue;
+//import com.itextpdf.layout.properties.VerticalAlignment;
+import com.itextpdf.layout.properties.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 public class RecordPdfService {
+
+    // ⭐ application.yml에서 upload.root-dir 설정값 주입
+    @Value("${upload.root-dir}")
+    private String uploadRootDir;
 
     // 한글 폰트 경로 (프로젝트의 resources/fonts 폴더에 넣어두세요)
     private static final String FONT_PATH = "fonts/NanumGothic.ttf";
@@ -252,14 +259,39 @@ public class RecordPdfService {
             document.add(metaTable);
             document.add(new Paragraph("\n").setMarginBottom(5));
 
-            // 실제 이미지 추가
+            // ⭐ 실제 이미지 추가 (수정됨 - 올바른 절대 경로 구성)
             try {
-                String imagePath = file.getFilePath(); // 실제 파일 경로
-                System.out.println(imagePath);
-                File imageFile = new File(imagePath);
+                String dbFilePath = file.getFilePath(); // DB에 저장된 상대 경로 (예: /uploads/records/images/xxx.png)
+                System.out.println("📁 DB에 저장된 경로: " + dbFilePath);
+                System.out.println("📂 uploadRootDir 설정값: " + uploadRootDir);
+
+                // ⭐ 올바른 절대 경로 구성
+                String absolutePath;
+
+                // uploadRootDir이 상대 경로인 경우 (예: ./uploads/)
+                if (uploadRootDir.startsWith(".")) {
+                    // Working directory에 상대 경로 결합
+                    String baseDir = Paths.get(System.getProperty("user.dir"), uploadRootDir)
+                            .normalize().toString();
+
+                    // DB의 /uploads/... 에서 /uploads 부분 제거
+                    String relativePart = dbFilePath.replaceFirst("^/uploads/", "");
+
+                    absolutePath = Paths.get(baseDir, relativePart).normalize().toString();
+                } else {
+                    // uploadRootDir이 이미 절대 경로인 경우
+                    String relativePart = dbFilePath.replaceFirst("^/uploads/", "");
+                    absolutePath = Paths.get(uploadRootDir, relativePart).normalize().toString();
+                }
+
+                System.out.println("🔍 최종 절대 경로: " + absolutePath);
+                System.out.println("📂 현재 working directory: " + System.getProperty("user.dir"));
+
+                File imageFile = new File(absolutePath);
 
                 if (imageFile.exists()) {
-                    Image img = new Image(ImageDataFactory.create(imagePath));
+                    System.out.println("✅ 파일 존재: " + absolutePath);
+                    Image img = new Image(ImageDataFactory.create(absolutePath));
 
                     // 이미지 크기 조절 (최대 너비: 15cm = 425pt)
                     float maxWidth = 425f;
@@ -283,6 +315,10 @@ public class RecordPdfService {
                     document.add(imgFrame);
                 } else {
                     // 이미지 파일이 없는 경우
+                    System.out.println("❌ 파일 없음: " + absolutePath);
+                    System.out.println("📂 현재 working directory: " + System.getProperty("user.dir"));
+                    System.out.println("💾 uploadRootDir: " + uploadRootDir);
+
                     Paragraph errorMsg = new Paragraph("[이미지를 로드할 수 없습니다: " + file.getFileName() + "]")
                             .setFont(fontRegular)
                             .setFontSize(10)
@@ -292,6 +328,8 @@ public class RecordPdfService {
                 }
             } catch (Exception e) {
                 // 이미지 로드 실패
+                System.out.println("⚠️ 이미지 로드 실패: " + e.getMessage());
+                e.printStackTrace();
                 Paragraph errorMsg = new Paragraph("[이미지 로드 실패: " + e.getMessage() + "]")
                         .setFont(fontRegular)
                         .setFontSize(10)

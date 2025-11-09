@@ -2,7 +2,6 @@ package com.take.take_breath.chat.config;
 
 
 import com.take.take_breath._core._jwt.JwtTokenProvider;
-import com.take.take_breath.members.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -12,9 +11,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.util.Collections;
 
 /**
  * 웹소켓 stomp 메세지에 대한 JWT 인증 인터셉터
@@ -33,42 +29,69 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if(accessor != null) {
-            StompCommand command = accessor.getCommand();
+        if (StompCommand.CONNECT.equals(accessor.getCommand())
+                || StompCommand.SUBSCRIBE.equals(accessor.getCommand())
+                || StompCommand.SEND.equals(accessor.getCommand())) {
 
-            if (StompCommand.CONNECT.equals(command) ||
-                    StompCommand.SUBSCRIBE.equals(command) ||
-                    StompCommand.SEND.equals(command)) {
-                String token = resolveToken(accessor);
-                if (token == null || !jwtTokenProvider.validateToken(token)) {
-                    log.error("WebSocket JWT 인증 실패: command={}, sessionId={}", command, accessor.getSessionId());
-                    throw new IllegalArgumentException("유효하지 않은 토큰입니다");
-                }
+            String token = jwtTokenProvider.resolveToken(accessor);
 
-                // 토큰에서 사용자 정보 추출
-                String memberEmail = jwtTokenProvider.getSubject(token);
-                Role memberRole = jwtTokenProvider.getRole(token);
-
-                // 세션 속성에 사용자 정보 저장 (Controller에서 사용 가능)
-                accessor.getSessionAttributes().put("memberEmail", memberEmail);
-                accessor.getSessionAttributes().put("memberRole", memberRole);
-
-                log.info("WebSocket JWT 인증 성공: email={}, role={}, command={}, sessionId={}",
-                        memberEmail, memberRole, command, accessor.getSessionId());
+            if (token == null || !jwtTokenProvider.validateToken(token)) {
+                log.warn("❌ 잘못된 토큰: 메시지 차단됨");
+                throw new IllegalArgumentException("유효하지 않은 토큰");
             }
         }
-        return ChannelInterceptor.super.preSend(message, channel);
+        return message;
+    }
+}
+
+/*
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class JwtChannelInterceptor implements ChannelInterceptor {
+    private final JwtTokenProvider jwtTokenProvider;
+    private final MemberRepository memberRepository;
+
+    @Override
+    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
+        if (accessor != null) {
+            StompCommand command = accessor.getCommand();
+
+            // CONNECT, SUBSCRIBE, SEND 명령 시 토큰 검증
+            if (StompCommand.CONNECT.equals(command)
+                    || StompCommand.SUBSCRIBE.equals(command)
+                    || StompCommand.SEND.equals(command)) {
+
+                // JWT 토큰 추출
+                String token = resolveToken(accessor);
+
+                if (token != null && jwtTokenProvider.validateToken(token)) {
+                    String email = jwtTokenProvider.getSubject(token);
+                    memberRepository.findByEmail(email).ifPresent(member -> {
+                        accessor.getSessionAttributes().put("memberId", member.getId());
+                        accessor.getSessionAttributes().put("memberEmail", member.getEmail());
+                    });
+
+                    log.info("✅ WebSocket 인증 성공: {}", email);
+                } else {
+                    log.warn("❌ WebSocket 인증 실패 - 잘못된 토큰 또는 누락됨");
+                    throw new IllegalArgumentException("Invalid JWT token in WebSocket message");
+                }
+            }
+        }
+
+        return message; // 메시지를 계속 흐르게 함
     }
 
-    /**
-     * STOMP 헤더에서 JWT 토큰 추출
-     */
+    // STOMP 헤더에서 JWT 토큰 추출
     private String resolveToken(StompHeaderAccessor accessor) {
         String bearerToken = accessor.getFirstNativeHeader("Authorization");
-
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;
     }
 }
+*/

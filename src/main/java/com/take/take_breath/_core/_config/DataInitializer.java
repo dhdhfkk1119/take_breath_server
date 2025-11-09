@@ -1,5 +1,14 @@
 package com.take.take_breath._core._config;
 
+import com.take.take_breath.chat.chat_message.ChatMessage;
+import com.take.take_breath.chat.chat_message.ChatMessageRepository;
+import com.take.take_breath.chat.chat_message.MessageStatus;
+import com.take.take_breath.chat.chat_message.MessageType;
+import com.take.take_breath.chat.chat_room.ChatRoom;
+import com.take.take_breath.chat.chat_room.ChatRoomRepository;
+import com.take.take_breath.chat.chat_room.RoomType;
+import com.take.take_breath.chat.chat_room_member.ChatRoomMember;
+import com.take.take_breath.chat.chat_room_member.ChatRoomMemberRepository;
 import com.take.take_breath.community.comment_report.CommentReport;
 import com.take.take_breath.community.comment_report.CommentReportRepository;
 import com.take.take_breath.community.community_category.CommunityCategory;
@@ -21,6 +30,10 @@ import com.take.take_breath.members.Status;
 import com.take.take_breath.payment.Payment;
 import com.take.take_breath.payment.PaymentRepository;
 import com.take.take_breath.payment.PaymentStatus;
+import com.take.take_breath.record.FileType;
+import com.take.take_breath.record.RecordFile;
+import com.take.take_breath.record.RecordFileRepository;
+import com.take.take_breath.record.RecordRepository;
 import com.take.take_breath.terms.MemberTerms;
 import com.take.take_breath.terms.MemberTermsRepository;
 import com.take.take_breath.terms.Terms;
@@ -50,11 +63,16 @@ public class DataInitializer implements CommandLineRunner {
     private final CommunityCommentRepository communityCommentRepository;
     private final CommunityReportRepository communityReportRepository;
     private final CommentReportRepository commentReportRepository;
+    private final RecordRepository recordRepository;
+    private final RecordFileRepository recordFileRepository;
     private final PaymentRepository paymentRepository;
+
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Override
     public void run(String... args) throws Exception {
-        // 약관
         Terms terms1 = Terms.builder()
                 .title("서비스 이용약관")
                 .content("서비스 이용약관 내용")
@@ -69,7 +87,6 @@ public class DataInitializer implements CommandLineRunner {
 
         termsRepository.saveAll(List.of(terms1, terms2));
 
-        // 일반 회원
         Member user = Member.builder()
                 .email("user@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -79,11 +96,12 @@ public class DataInitializer implements CommandLineRunner {
                 .role(Role.USER)
                 .status(Status.ACTIVE)
                 .emailVerified(true)
+                .point(10000L)
                 .build();
+
         memberRepository.save(user);
         saveMemberTerms(user, List.of(terms1, terms2));
 
-        // 관리자
         Member admin = Member.builder()
                 .email("admin@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -97,7 +115,10 @@ public class DataInitializer implements CommandLineRunner {
         memberRepository.save(admin);
         saveMemberTerms(admin, List.of(terms1, terms2));
 
-        // 상담사
+        // ✅ 기록실 샘플 데이터 생성
+        createSampleRecords(user);
+
+        // 상담사 Member 생성
         Member counselorMember1 = Member.builder()
                 .email("counselor1@test.com")
                 .password(passwordEncoder.encode("1234"))
@@ -167,7 +188,8 @@ public class DataInitializer implements CommandLineRunner {
 
         counselorRepository.saveAll(List.of(counselor1, counselor2));
 
-        // 신고자 더미
+        // 신고 테스트 데이터 이하 동일...
+        // (생략하지 않고 계속 유지)
         Member reporterA = createReporter("reporterA@test.com", "신고자A");
         Member reporterB = createReporter("reporterB@test.com", "신고자B");
         Member reporterC = createReporter("reporterC@test.com", "신고자C");
@@ -206,6 +228,108 @@ public class DataInitializer implements CommandLineRunner {
                 .status(CommunityReportStatus.PENDING)
                 .build());
 
+        // ===
+        ChatRoom counselingRoom = ChatRoom.builder()
+                .name("test채팅방")
+                .roomType(RoomType.COUNSELING)
+                .build();
+        chatRoomRepository.save(counselingRoom);
+
+        // 2. 채팅방에 멤버 추가 (testUser)
+        ChatRoomMember userMember = ChatRoomMember.builder()
+                .chatRoom(counselingRoom)
+                .member(user)
+                .lastReadMessageId(null)
+                .build();
+        chatRoomMemberRepository.save(userMember);
+
+        // 3. 채팅방에 멤버 추가 (counselor1)
+        ChatRoomMember counselorMember = ChatRoomMember.builder()
+                .chatRoom(counselingRoom)
+                .member(counselorMember1)
+                .lastReadMessageId(null)
+                .build();
+        chatRoomMemberRepository.save(counselorMember);
+
+        ChatMessage message1 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(counselorMember1)
+                .content("안녕하세요! 상담사 김하늘입니다. 편하게 말씀해주세요 😊")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.READ)
+                .build();
+        chatMessageRepository.save(message1);
+
+        ChatMessage message2 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(user)
+                .content("안녕하세요. 요즘 직장에서 스트레스가 너무 심해서 상담 받고 싶어요.")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.READ)
+                .build();
+        chatMessageRepository.save(message2);
+
+        ChatMessage message3 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(counselorMember1)
+                .content("직장 스트레스로 힘드시군요. 구체적으로 어떤 상황이 가장 힘드신가요?")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.READ)
+                .build();
+        chatMessageRepository.save(message3);
+
+        ChatMessage message4 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(user)
+                .content("업무량이 너무 많고, 상사와의 관계도 좋지 않아요. 매일 퇴근하면 기진맥진합니다.")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.READ)
+                .build();
+        chatMessageRepository.save(message4);
+
+        ChatMessage message5 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(counselorMember1)
+                .content("많이 힘드셨겠어요. 업무 부담과 대인관계 문제가 함께 겹치면 더욱 지치실 수 있습니다.")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.READ)
+                .build();
+        chatMessageRepository.save(message5);
+
+        ChatMessage message6 = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(counselorMember1)
+                .content("우선 하루 일과 중 본인만의 휴식 시간을 확보하는 것이 중요합니다. 점심시간이나 퇴근 후 짧은 산책도 도움이 될 수 있어요.")
+                .type(MessageType.TEXT)
+                .status(MessageStatus.SENT)
+                .build();
+        chatMessageRepository.save(message6);
+
+        ChatMessage systemMessage = ChatMessage.builder()
+                .chatRoom(counselingRoom)
+                .sender(counselorMember1)
+                .content("상담 시간이 30분 남았습니다.")
+                .type(MessageType.SYSTEM)
+                .status(MessageStatus.SENT)
+                .build();
+        chatMessageRepository.save(systemMessage);
+
+        userMember.updateLastRead(message5.getId());
+        chatRoomMemberRepository.save(userMember);
+
+        counselorMember.updateLastRead(systemMessage.getId());
+        chatRoomMemberRepository.save(counselorMember);
+
+
+        log.info("✅ 상담사 더미 + 신고 누적 테스트용 데이터 생성 완료");
+        log.info("일반 유저(user@test.com) → 게시글 3개 + 댓글 1개 작성 (정지 대상)");
+        log.info("관리자(admin@test.com)");
+        log.info("상담사: counselor1@test.com, counselor2@test.com");
+        log.info("신고자: reporterA~D@test.com (총 4명)");
+        log.info("신고 승인 시 user 자동 정지 로직 테스트 가능");
+        log.info("============================================");
+
+        log.info("✅ 데이터 생성 완료");
         // ✅ 결제 더미 데이터 추가
         paymentRepository.saveAll(List.of(
                 // 5월
@@ -346,7 +470,7 @@ public class DataInitializer implements CommandLineRunner {
         log.info("상담사/신고/회원 테스트 데이터 생성 완료");
     }
 
-    // ====== 헬퍼 메서드 ======
+    // 메서드
     private void saveMemberTerms(Member member, List<Terms> termsList) {
         for (Terms t : termsList) {
             memberTermsRepository.save(MemberTerms.builder()
@@ -390,5 +514,52 @@ public class DataInitializer implements CommandLineRunner {
                 .reason(reason)
                 .status(CommunityReportStatus.PENDING)
                 .build();
+    }
+
+
+    private void createSampleRecords(Member user) {
+        String[] titles = {
+                "첫 번째 테스트 기록", "오늘의 감정", "스트레스 관리 팁", "일상 속 작은 행복", "명상 경험기",
+                "마음이 편했던 날", "자기 성찰 기록", "감정 정리하기", "긍정적인 생각", "하루를 돌아보며"
+        };
+
+        String[] contents = {
+                "이것은 서버 시작 시 자동으로 생성된 테스트 기록입니다.",
+                "오늘 하루 기분을 기록해보세요.",
+                "스트레스를 줄이는 방법에 대해 생각해봅시다.",
+                "작은 것에 감사하는 하루.",
+                "명상으로 마음을 다스린 날.",
+                "기분이 좋았던 순간을 남깁니다.",
+                "자기 자신을 들여다보는 시간.",
+                "감정을 글로 풀어내기.",
+                "긍정적인 방향으로 생각하기.",
+                "하루를 되돌아보는 기록."
+        };
+
+        for (int i = 0; i < 10; i++) {
+            com.take.take_breath.record.Record record = recordRepository.save(
+                    com.take.take_breath.record.Record.builder()
+                            .member(user)
+                            .title(titles[i])
+                            .content(contents[i])
+                            .recordDate(new java.sql.Timestamp(System.currentTimeMillis() - (i * 86400000)))
+                            .build()
+            );
+
+            RecordFile image = RecordFile.builder()
+                    .record(record)
+                    .fileType(FileType.IMAGE)
+                    .fileName("sample_001.png")
+                    .originalFileName("sample_001.png")
+                    .filePath("/uploads/records/images/sample_001.png")
+                    .fileSize(204800L)
+                    .contentType("image/png")
+                    .build();
+
+            recordFileRepository.save(image);
+
+            record.addRecordFile(image);
+            recordRepository.save(record);
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.take.take_breath.chat.config;
 
+import com.take.take_breath._core._jwt.JwtTokenProvider;
+import com.take.take_breath.members.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -13,32 +15,56 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @RequiredArgsConstructor
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
     private final JwtChannelInterceptor jwtChannelInterceptor;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final MemberRepository memberRepository;
 
     /**
      * 웹소켓 연결을 위한 엔드포인트 등록
+     *
      * @param registry
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-chat")
+        JwtHandshakeHandler jwtHandshakeHandler =
+                new JwtHandshakeHandler(jwtTokenProvider, memberRepository);
+
+        registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*")
+                .setHandshakeHandler(jwtHandshakeHandler)
+                .addInterceptors()
                 .withSockJS();
+
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
+                .setHandshakeHandler(jwtHandshakeHandler)
+                .addInterceptors();
+    }
+
+    /**
+     * 클라이언트로부터 들어오는 메시지를 처리하는 채널을 설정
+     *
+     * @param registration
+     */
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(jwtChannelInterceptor);
     }
 
     /**
      * 메세지 브로커 설정
+     *
      * @param registry
      */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic");  // 서버 -> 클라
-        registry.setApplicationDestinationPrefixes("/app");     // 클라 -> 서버
+        registry.setApplicationDestinationPrefixes("/pub");     // 클라 -> 서버 - [전송]
+        registry.enableSimpleBroker("/sub");  // 서버 -> 클라 - [구독]
     }
 
     /**
      * 웹소켓 전송 관련 설정 (메시지 크기 제한, 버퍼 크기 등)을 구성
+     *
      * @param registration
      */
     @Override
@@ -48,14 +74,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registration.setSendTimeLimit(20 * 1000);             // 송신 제한 시간 (밀리초)
     }
 
-    /**
-     * 클라이언트로부터 들어오는 메시지를 처리하는 채널을 설정
-     * @param registration
-     */
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(jwtChannelInterceptor);
-    }
 }
 
 // 연결 - ws://localhost:8080/ws-chat
