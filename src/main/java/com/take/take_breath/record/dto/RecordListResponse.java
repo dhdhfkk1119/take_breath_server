@@ -19,8 +19,14 @@ public class RecordListResponse {
     private Integer imageFileCount;
     private Integer audioFileCount;
     private Integer videoFileCount;
+    private String thumbnailUrl;
 
     public static RecordListResponse fromEntity(Record record) {
+        String thumbnailUrl = null;
+        if (record.getImageFiles() != null && !record.getImageFiles().isEmpty()) {
+            thumbnailUrl = record.getImageFiles().get(0).getFilePath();
+        }
+
         return RecordListResponse.builder()
                 .id(record.getId())
                 .title(record.getTitle())
@@ -31,6 +37,7 @@ public class RecordListResponse {
                 .imageFileCount(record.getImageFiles().size())
                 .audioFileCount(record.getAudioFiles().size())
                 .videoFileCount(record.getVideoFiles().size())
+                .thumbnailUrl(thumbnailUrl)
                 .build();
     }
 }
