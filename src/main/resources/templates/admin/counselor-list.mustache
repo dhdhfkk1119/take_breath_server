@@ -31,6 +31,7 @@
             <th>포인트</th>
             <th>상태</th>
             <th>소개</th>
+            <th>좋아요</th>
             <th>해시태그</th>
             <th>자격증</th>
             {{#isPendingFilter}}<th>승인 처리</th>{{/isPendingFilter}}
@@ -52,6 +53,7 @@
                     {{#isRejected}}<span class="badge badge-REJECTED">거절</span>{{/isRejected}}
                 </td>
                 <td class="introduction-cell">{{introduction}}</td>
+                <td>{{likeCount}}</td>
                 <td>{{hashtags}}</td>
 
                 <!-- ✅ 자격증 뱃지 추가 -->
