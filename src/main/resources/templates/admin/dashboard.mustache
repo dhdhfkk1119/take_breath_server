@@ -8,14 +8,16 @@
 <!-- 월별 결제 수수료 추이 -->
 <div class="chart-container">
     <h3>📈 월별 결제 수수료 추이</h3>
-    <canvas id="feeChart"
-            data-labels="{{#monthlyStats}}{{month}},{{/monthlyStats}}"
-            data-values="{{#monthlyStats}}{{totalFeeAmount}},{{/monthlyStats}}"
-            height="120"></canvas>
+    <div class="chart-wrapper">
+        <canvas id="feeChart"
+                data-labels="{{#monthlyStats}}{{month}},{{/monthlyStats}}"
+                data-values="{{#monthlyStats}}{{totalFeeAmount}},{{/monthlyStats}}">
+        </canvas>
+    </div>
 </div>
 
-<!-- 회원 증가 추이 차트 -->
-<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📈 통계 차트</h3>
+<!-- 통계 차트 -->
+<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📊 통계 차트</h3>
 <div class="charts-section">
     <!-- 회원 증가 추이 -->
     <div class="chart-container">
@@ -27,50 +29,54 @@
                 <button class="member-chart-btn" data-period="24">최근 24개월</button>
             </div>
         </div>
-        <canvas id="memberGrowthChart"></canvas>
+        <div class="chart-wrapper">
+            <canvas id="memberGrowthChart"></canvas>
+        </div>
     </div>
 
     <!-- 신고 처리 현황 -->
     <div class="chart-container">
         <h3>신고 상태별 처리 건수</h3>
-        <canvas id="reportStatusChart"></canvas>
+        <div class="chart-wrapper">
+            <canvas id="reportStatusChart"></canvas>
+        </div>
     </div>
 </div>
-
-<!-- 신고 처리 현황 차트 -->
-
-
 
 <!-- 차트 섹션 -->
 <div class="charts-section">
     <div class="chart-container">
         <h3>회원 및 상담사 현황</h3>
-        <canvas id="statsChart"></canvas>
+        <div class="chart-wrapper">
+            <canvas id="statsChart"></canvas>
+        </div>
     </div>
     <div class="chart-container">
         <h3>역할별 비율</h3>
-        <canvas id="roleChart"></canvas>
+        <div class="chart-wrapper">
+            <canvas id="roleChart"></canvas>
+        </div>
     </div>
 </div>
 
 <!-- 회원 통계 -->
 <h3 style="margin-bottom: 1rem; color: #2c3e50;">👤 회원 통계</h3>
 <div class="stats-grid">
-    <div class="stat-card primary" onclick="location.href='/api/admin/view/members/list'" style="cursor: pointer;">
+    <div class="stat-card primary" onclick="location.href='/api/admin/view/members/list'">
         <h3>전체 회원</h3>
         <div class="number">{{stats.totalMembers}}</div>
     </div>
-    <div class="stat-card success" onclick="location.href='/api/admin/view/members/active'" style="cursor: pointer;">
+    <div class="stat-card success" onclick="location.href='/api/admin/view/members/active'">
         <h3>활성 회원</h3>
         <div class="number">{{stats.activeMembers}}</div>
         <div class="label">정상 이용 중</div>
     </div>
-    <div class="stat-card danger" onclick="location.href='/api/admin/view/members/suspended'" style="cursor: pointer;">
+    <div class="stat-card danger" onclick="location.href='/api/admin/view/members/suspended'">
         <h3>정지 회원</h3>
         <div class="number">{{stats.suspendedMembers}}</div>
         <div class="label">이용 정지</div>
     </div>
-    <div class="stat-card warning" onclick="location.href='/api/admin/view/members/withdrawal'" style="cursor: pointer;">
+    <div class="stat-card warning" onclick="location.href='/api/admin/view/members/withdrawal'">
         <h3>탈퇴 대기</h3>
         <div class="number">{{stats.withdrawalMembers}}</div>
         <div class="label">3개월 내 자동 삭제</div>
@@ -80,16 +86,16 @@
 <!-- 상담사 통계 -->
 <h3 style="margin: 2rem 0 1rem; color: #2c3e50;">💼 상담사 통계</h3>
 <div class="stats-grid">
-    <div class="stat-card primary" onclick="location.href='/api/admin/view/counselors/list'" style="cursor: pointer;">
+    <div class="stat-card primary" onclick="location.href='/api/admin/view/counselors/list'">
         <h3>전체 상담사</h3>
         <div class="number">{{stats.totalCounselors}}</div>
     </div>
-    <div class="stat-card success" onclick="location.href='/api/admin/view/counselors/active'" style="cursor: pointer;">
+    <div class="stat-card success" onclick="location.href='/api/admin/view/counselors/active'">
         <h3>활성 상담사</h3>
         <div class="number">{{stats.activeCounselors}}</div>
         <div class="label">상담 가능</div>
     </div>
-    <div class="stat-card warning" onclick="location.href='/api/admin/view/counselors/pending'" style="cursor: pointer;">
+    <div class="stat-card warning" onclick="location.href='/api/admin/view/counselors/pending'">
         <h3>승인 대기</h3>
         <div class="number">{{stats.pendingCounselors}}</div>
         <div class="label">검토 필요</div>
@@ -99,41 +105,39 @@
 <!-- 신고 통계 -->
 <h3 style="margin: 2rem 0 1rem; color: #2c3e50;">🚨 신고 통계</h3>
 <div class="stats-grid">
-    <div class="stat-card primary" onclick="location.href='/api/admin/view/reports'" style="cursor: pointer;">
+    <div class="stat-card primary" onclick="location.href='/api/admin/view/reports'">
         <h3>전체 신고</h3>
         <div class="number">{{stats.totalReports}}</div>
         <div class="label">게시글 {{stats.postReports}} / 댓글 {{stats.commentReports}}</div>
     </div>
-    <div class="stat-card warning" onclick="location.href='/api/admin/view/reports/pending'" style="cursor: pointer;">
+    <div class="stat-card warning" onclick="location.href='/api/admin/view/reports/pending'">
         <h3>대기 중</h3>
         <div class="number">{{stats.pendingReports}}</div>
         <div class="label">처리 필요</div>
     </div>
-    <div class="stat-card success" onclick="location.href='/api/admin/view/reports/approved'" style="cursor: pointer;">
+    <div class="stat-card success" onclick="location.href='/api/admin/view/reports/approved'">
         <h3>승인됨</h3>
         <div class="number">{{stats.approvedReports}}</div>
         <div class="label">제재 완료</div>
     </div>
-    <div class="stat-card danger" onclick="location.href='/api/admin/view/reports/rejected'" style="cursor: pointer;">
+    <div class="stat-card danger" onclick="location.href='/api/admin/view/reports/rejected'">
         <h3>반려됨</h3>
         <div class="number">{{stats.rejectedReports}}</div>
         <div class="label">신고 기각</div>
     </div>
 </div>
 
-
-<!-- Chart.js 라이브러리 및 데이터 전달 -->
 <script>
-    window.stats = {{{statsJson}}};
-    console.log('📦 실제 window.stats 구조:', window.stats);
-    console.log('📊 memberGrowthData:', window.stats.memberGrowthData);
-    console.log('📊 reportProcessData:', window.stats.reportProcessData);
+    Chart.defaults.responsive = false;
+    Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.responsiveAnimationDuration = 0;
+    Chart.defaults.resizeDelay = 1000;
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => initCharts(window.stats));
-    } else {
+    window.stats = {{{statsJson}}};
+
+    document.addEventListener('DOMContentLoaded', () => {
         initCharts(window.stats);
-    }
+    });
 </script>
 
 {{> layout/admin-layout-end}}
