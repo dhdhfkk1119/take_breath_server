@@ -1,10 +1,14 @@
 package com.take.take_breath.counselor.like;
 
+import com.take.take_breath._core._utils.PageUtil;
 import com.take.take_breath.counselor.Counselor;
 import com.take.take_breath.counselor.CounselorRepository;
+import com.take.take_breath.counselor.dto.CounselorResponse;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,13 +47,27 @@ public class CounselorLikeService {
     }
 
     /**
-     * 내가 좋아요 누른 상담사 목록 조회
+     * 내가 좋아요 누른 상담사 목록 조회 (페이지 네이션)
      */
-    public List<CounselorLike> getLikedCounselors(Long memberId) {
+    public PageUtil.PageResponse<CounselorResponse> getLikedCounselors(Long memberId, Pageable pageable) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
-        return likeRepository.findAllByMember(member);
+
+        Page<CounselorLike> page = likeRepository.findAllByMember(member, pageable);
+
+        List<CounselorResponse> content = page.getContent().stream()
+                .map(like -> {
+                    Counselor counselor = like.getCounselor();
+                    CounselorResponse dto = CounselorResponse.from(counselor);
+                    dto.setLikeCount(countLikes(counselor.getId()));
+                    dto.setLikedByMe(true);
+                    return dto;
+                })
+                .toList();
+
+        return PageUtil.PageResponse.of(page, content);
     }
+
 
     /**
      * 특정 상담사의 좋아요 개수 조회

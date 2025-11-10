@@ -2,6 +2,8 @@ package com.take.take_breath.counselor.like;
 
 import com.take.take_breath.counselor.Counselor;
 import com.take.take_breath.members.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,7 +13,7 @@ public interface CounselorLikeRepository extends JpaRepository<CounselorLike, Lo
 
     Optional<CounselorLike> findByMemberAndCounselor(Member member, Counselor counselor);
 
-    List<CounselorLike> findAllByMember(Member member);
+    Page<CounselorLike> findAllByMember(Member member, Pageable pageable);
 
     long countByCounselor(Counselor counselor);
 }
