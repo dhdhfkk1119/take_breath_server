@@ -9,15 +9,15 @@
 <div class="stats-cards">
     <div class="stats-card">
         <h4>💰 총 결제 금액</h4>
-        <p>{{totalStats.totalPaymentAmount}}원</p>
+        <p>{{totalStats.formattedTotalPaymentAmount}}원</p>
     </div>
     <div class="stats-card">
         <h4>💸 총 수수료 금액</h4>
-        <p>{{totalStats.totalFeeAmount}}원</p>
+        <p>{{totalStats.formattedTotalFeeAmount}}원</p>
     </div>
     <div class="stats-card">
         <h4>🧾 결제 건수</h4>
-        <p>{{totalStats.totalPaymentCount}}건</p>
+        <p>{{totalStats.formattedTotalPaymentCount}}건</p>
     </div>
 </div>
 
@@ -38,9 +38,9 @@
         {{#monthlyStats}}
             <tr>
                 <td>{{month}}</td>
-                <td>{{totalFeeAmount}}원</td>
-                <td>{{totalPaymentAmount}}원</td>
-                <td>{{totalPaymentCount}}</td>
+                <td>{{formattedTotalFeeAmount}}원</td>
+                <td>{{formattedTotalPaymentAmount}}원</td>
+                <td>{{formattedTotalPaymentCount}}</td>
             </tr>
         {{/monthlyStats}}
 

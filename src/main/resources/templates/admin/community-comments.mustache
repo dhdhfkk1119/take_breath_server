@@ -5,34 +5,39 @@
     <p>커뮤니티 댓글을 관리하세요</p>
 </div>
 
-
 <div class="table-container">
     <table class="data-table">
         <thead>
         <tr>
             <th>ID</th>
-            <th>내용</th>
             <th>작성자</th>
-            <th>게시글 제목</th>
-            <th>신고</th>
+            <th>내용</th>
             <th>작성일</th>
             <th>관리</th>
         </tr>
         </thead>
-        <tbody id="commentList">
+        <tbody>
         {{#comments}}
             <tr>
                 <td>{{id}}</td>
-                <td class="introduction-cell">{{content}}</td>
                 <td>{{memberName}}</td>
+                <td style="max-width:300px;word-break:break-word;">{{content}}</td>
                 <td>{{createdAt}}</td>
                 <td>
-                    <button type="button" class="btn btn-danger" onclick="deleteComment({{id}})">삭제</button>
+                    <form method="post" action="/api/admin/view/community/comments/{{id}}/delete"
+                          onsubmit="return confirm('정말 이 댓글을 삭제하시겠습니까?')"
+                          style="display:inline;">
+                        <button type="submit" class="btn btn-danger">삭제</button>
+                    </form>
                 </td>
             </tr>
         {{/comments}}
         {{^comments}}
-            <tr><td colspan="7" style="text-align:center;color:#999;">댓글이 없습니다.</td></tr>
+            <tr>
+                <td colspan="6" style="text-align:center;padding:1.5rem;color:#999;">
+                    댓글이 없습니다.
+                </td>
+            </tr>
         {{/comments}}
         </tbody>
     </table>
