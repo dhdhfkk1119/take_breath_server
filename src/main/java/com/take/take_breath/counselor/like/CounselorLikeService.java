@@ -1,11 +1,12 @@
 package com.take.take_breath.counselor.like;
 
-import com.take.take_breath._core._utils.PageUtil;
+import com.take.take_breath._core._utils.PageUtil.PageResponse;
 import com.take.take_breath.counselor.Counselor;
 import com.take.take_breath.counselor.CounselorRepository;
 import com.take.take_breath.counselor.dto.CounselorResponse;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,13 +25,16 @@ public class CounselorLikeService {
     private final MemberRepository memberRepository;
 
     /**
-     * 좋아요 토글 (누르면 추가, 다시 누르면 취소)
+     * ✅ 토큰 기반 좋아요 토글 (memberId 없이 동작)
      */
-    public boolean toggleLike(Long counselorId, Long memberId) {
-        Counselor counselor = counselorRepository.findById(counselorId)
-                .orElseThrow(() -> new IllegalArgumentException("상담사를 찾을 수 없습니다."));
+    public boolean toggleLike(Long counselorId,Long memberId) {
+
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+
+        Counselor counselor = counselorRepository.findById(counselorId)
+                .orElseThrow(() -> new IllegalArgumentException("상담사를 찾을 수 없습니다."));
 
         return likeRepository.findByMemberAndCounselor(member, counselor)
                 .map(like -> {
@@ -47,44 +51,51 @@ public class CounselorLikeService {
     }
 
     /**
-     * 내가 좋아요 누른 상담사 목록 조회 (페이지 네이션)
+     * ✅ 내가 좋아요한 상담사 목록 (페이지네이션)
      */
-    public PageUtil.PageResponse<CounselorResponse> getLikedCounselors(Long memberId, Pageable pageable) {
-        Member member = memberRepository.findById(memberId)
+    public PageResponse<CounselorResponse> getLikedCounselors(Pageable pageable, HttpServletRequest request) {
+        String memberEmail = (String) request.getAttribute("memberEmail");
+        if (memberEmail == null) {
+            throw new IllegalArgumentException("인증된 사용자가 아닙니다.");
+        }
+
+        Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
         Page<CounselorLike> page = likeRepository.findAllByMember(member, pageable);
 
         List<CounselorResponse> content = page.getContent().stream()
                 .map(like -> {
-                    Counselor counselor = like.getCounselor();
-                    CounselorResponse dto = CounselorResponse.from(counselor);
-                    dto.setLikeCount(countLikes(counselor.getId()));
+                    Counselor c = like.getCounselor();
+                    CounselorResponse dto = CounselorResponse.from(c);
+                    dto.setLikeCount(countLikes(c.getId()));
                     dto.setLikedByMe(true);
                     return dto;
                 })
                 .toList();
 
-        return PageUtil.PageResponse.of(page, content);
+        return PageResponse.of(page, content);
     }
 
-
     /**
-     * 특정 상담사의 좋아요 개수 조회
+     * ✅ 특정 상담사의 좋아요 개수
      */
     public long countLikes(Long counselorId) {
         Counselor counselor = counselorRepository.findById(counselorId)
                 .orElseThrow(() -> new IllegalArgumentException("상담사를 찾을 수 없습니다."));
         return likeRepository.countByCounselor(counselor);
     }
+
     /**
-     * 현재 회원이 특정 상담사를 좋아요 눌렀는지 여부
+     * ✅ 현재 사용자가 특정 상담사를 좋아요했는지 여부
      */
-    public boolean isLikedByMember(Long counselorId, Long memberId) {
+    public boolean isLikedByMember(Long counselorId, String memberEmail) {
+        if (memberEmail == null) return false;
+
+        Member member = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
         Counselor counselor = counselorRepository.findById(counselorId)
                 .orElseThrow(() -> new IllegalArgumentException("상담사를 찾을 수 없습니다."));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
         return likeRepository.findByMemberAndCounselor(member, counselor).isPresent();
     }
