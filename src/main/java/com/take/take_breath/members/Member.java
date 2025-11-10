@@ -7,7 +7,6 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,7 @@ public class Member {
     private String password;
 
     @ColumnDefault("'익명'")
-    private String nickname;
+    private String nickName;
 
     private String profileImage;
 
@@ -42,8 +41,8 @@ public class Member {
             profileImage = "http://localhost:8080/uploads/member-images/default_profile.png";
         }
 
-        if (nickname == null || nickname.isBlank()) {
-            nickname = "익명";
+        if (nickName == null || nickName.isBlank()) {
+            nickName = "익명";
         }
     }
 
