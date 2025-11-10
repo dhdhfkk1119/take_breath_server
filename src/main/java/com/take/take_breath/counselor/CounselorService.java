@@ -9,6 +9,10 @@ import com.take.take_breath.members.MemberService;
 import com.take.take_breath.members.Status;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,6 +48,18 @@ public class CounselorService {
                 .collect(Collectors.toList());
     }
 
+    // 페이지네이션
+    public Page<CounselorResponse> findAll(int page, int size, String sortBy, String direction) {
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return counselorRepository.findAll(pageable)
+                .map(counselor -> CounselorResponse.from(counselor));
+    }
+
     // 상담사 상세 조회
     public CounselorResponse findById(Long id) {
         Counselor counselor = counselorRepository.findById(id)
@@ -58,5 +74,4 @@ public class CounselorService {
                 .map(counselor -> CounselorResponse.from(counselor))
                 .collect(Collectors.toList());
     }
-
 }
