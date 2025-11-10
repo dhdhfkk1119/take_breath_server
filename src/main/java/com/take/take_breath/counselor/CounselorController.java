@@ -7,6 +7,7 @@ import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/counselors")
 @RequiredArgsConstructor
@@ -37,6 +39,7 @@ public class CounselorController {
             Pageable pageable
     ) {
         PageUtil.PageResponse<CounselorResponse> response = counselorService.findAll(pageable);
+        log.info("상담사 전체 조회 정보 : {}",response);
         return ResponseEntity.ok(response);
     }
 

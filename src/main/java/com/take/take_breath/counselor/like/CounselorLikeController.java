@@ -1,6 +1,7 @@
 package com.take.take_breath.counselor.like;
 
 import com.take.take_breath.counselor.dto.CounselorResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,8 @@ public class CounselorLikeController {
     @PostMapping("/{counselorId}")
     public ResponseEntity<String> toggleLike(
             @PathVariable Long counselorId,
-            @RequestParam Long memberId) {
+            HttpServletRequest request) {
+        Long memberId = (Long) request.getAttribute("memberId");
         boolean liked = likeService.toggleLike(counselorId, memberId);
         String message = liked ? "좋아요가 추가되었습니다." : "좋아요가 취소되었습니다.";
         return ResponseEntity.ok(message);
