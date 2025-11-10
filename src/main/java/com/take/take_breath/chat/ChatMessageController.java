@@ -1,10 +1,8 @@
 package com.take.take_breath.chat;
 
 import com.take.take_breath._core._utils.ApiUtil;
-import com.take.take_breath.chat.dto.ChatMessageResponse;
-import com.take.take_breath.chat.dto.ImageMessageResponse;
-import com.take.take_breath.chat.dto.ImageUploadRequest;
-import com.take.take_breath.chat.dto.MarkAsReadRequest;
+import com.take.take_breath.chat.dto.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -23,67 +20,13 @@ public class ChatMessageController {
     private final ChatService chatService;
 
     /**
-     * 에러 반환
-     */
-    /*
-        응답
-        {
-          "success": false,
-          "response": null,
-          "error": {
-            "message": "회원을 찾을 수 없습니다.",
-            "status": 404,
-            "code": "MEMBER_NOT_FOUND"
-          }
-        }
-     */
-
-
-    /**
      * 채팅방의 메시지 목록 조회 (읽음 여부 포함)
-     * GET /api/chat/messages?chatRoomId=1&memberId=1
+     * GET /api/chat/messages/1
      */
-    /*
-        응답
-        {
-          "success": true,
-          "response": [
-            {
-              "messageId": 1,
-              "senderId": 1,
-              "senderName": "사용자1",
-              "content": "안녕하세요",
-              "messageType": "TEXT",
-              "createdAt": "2025-10-24T10:00:00",
-              "isRead": true
-            },
-            {
-              "messageId": 2,
-              "senderId": 2,
-              "senderName": "상담사A",
-              "content": "네, 안녕하세요. 무엇을 도와드릴까요?",
-              "messageType": "TEXT",
-              "createdAt": "2025-10-24T10:01:00",
-              "isRead": true
-            },
-            {
-              "messageId": 3,
-              "senderId": 2,
-              "senderName": "상담사A",
-              "content": "상담 가능한 시간대를 알려드리겠습니다.",
-              "messageType": "TEXT",
-              "createdAt": "2025-10-24T10:05:00",
-              "isRead": false
-            }
-          ],
-          "error": null
-        }
-    */
-    @GetMapping
-    public ResponseEntity<?> getMessages(
-            @RequestParam Long chatRoomId,
-            @RequestParam Long memberId) {
-        List<ChatMessageResponse> messages = chatService.getChatMessages(chatRoomId, memberId);
+    @GetMapping("/{roomId}")
+    public ResponseEntity<?> getMessages(@PathVariable(name = "roomId") Long roomId, HttpServletRequest request) {
+        String memberEmail = request.getAttribute("memberEmail").toString();
+        List<ChatMessageResponse> messages = chatService.getChatMessages(memberEmail, roomId);
         return ResponseEntity.ok(ApiUtil.success(messages));
     }
 
@@ -92,25 +35,6 @@ public class ChatMessageController {
      * 메시지 읽음 처리
      * POST /api/chat/messages/read
      */
-    /*
-        성공
-        {
-          "success": true,
-          "response": "메시지를 읽음 처리했습니다.",
-          "error": null
-        }
-        
-        실패
-        {
-          "success": false,
-          "response": null,
-          "error": {
-            "message": "채팅방에 속하지 않은 사용자입니다.",
-            "status": 400,
-            "code": "NOT_MEMBER_OF_CHATROOM"
-          }
-        }
-    */
     @PostMapping("/read")
     public ResponseEntity<?> markAsRead(@RequestBody MarkAsReadRequest request) {
         chatService.markAsRead(

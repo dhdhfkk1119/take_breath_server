@@ -1,6 +1,8 @@
 package com.take.take_breath.chat.chat_room_member;
 
 import com.take.take_breath.chat.chat_room.ChatRoom;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,15 +19,23 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
     List<ChatRoomMember> findByMemberId(Long memberId);
 
     /**
+     * 특정 회원이 속한 채팅방 조회 (Slice, 마지막 메시지 시간 기준 정렬)
+     */
+    @Query("SELECT crm FROM ChatRoomMember crm " +
+            "WHERE crm.member.id = :memberId " +
+            "ORDER BY crm.lastMessageTime DESC NULLS LAST, crm.joinedAt DESC")
+    Slice<ChatRoomMember> findByMemberIdOrderByLastMessageTime(
+            @Param("memberId") Long memberId,
+            Pageable pageable
+    );
+
+    /**
      * 특정 채팅방의 특정 회원 정보 조회
      */
     Optional<ChatRoomMember> findByChatRoomIdAndMemberId(Long chatRoomId, Long memberId);
 
     /**
      * 1:1 채팅방에서 상대방 정보 조회
-     * - chatRoomId: 채팅방 ID
-     * - memberId: 내 ID
-     * - 결과: 나를 제외한 상대방의 ChatRoomMember 정보
      */
     @Query("SELECT crm FROM ChatRoomMember crm " +
             "WHERE crm.chatRoom.id = :chatRoomId " +
@@ -53,4 +63,9 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
             @Param("memberId1") Long memberId1,
             @Param("memberId2") Long memberId2
     );
+
+    /**
+     * 특정 채팅방의 모든 멤버 조회 (메시지 저장 시 lastMessageTime 업데이트용)
+     */
+    List<ChatRoomMember> findByChatRoomId(Long chatRoomId);
 }

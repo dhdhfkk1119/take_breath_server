@@ -301,4 +301,18 @@ public class PaymentService {
 
         return (int) Math.max(0, daysLeft);
     }
+
+    // 월별 조회
+    public List<PaymentResponse.AdminFeeStatsDTO> getMonthlyFeeStats() {
+        List<Object[]> results = paymentRepository.findMonthlyFeeStats();
+
+        return results.stream()
+                .map(row -> PaymentResponse.AdminFeeStatsDTO.builder()
+                        .month((String) row[0])
+                        .totalFeeAmount(((Number) row[1]).longValue())
+                        .totalPaymentCount(((Number) row[2]).longValue())
+                        .totalPaymentAmount(((Number) row[3]).longValue())
+                        .build())
+                .toList();
+    }
 }

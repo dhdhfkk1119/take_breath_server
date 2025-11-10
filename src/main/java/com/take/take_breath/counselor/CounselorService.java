@@ -1,6 +1,7 @@
 package com.take.take_breath.counselor;
 
 import com.take.take_breath._core._exception.Exception400;
+import com.take.take_breath._core._utils.PageUtil;
 import com.take.take_breath.counselor.dto.CounselorRequest;
 import com.take.take_breath.counselor.dto.CounselorResponse;
 import com.take.take_breath.members.Member;
@@ -9,6 +10,10 @@ import com.take.take_breath.members.MemberService;
 import com.take.take_breath.members.Status;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,6 +49,16 @@ public class CounselorService {
                 .collect(Collectors.toList());
     }
 
+    // 페이지네이션
+    public PageUtil.PageResponse<CounselorResponse> findAll(Pageable pageable) {
+        Page<Counselor> counselorPage = counselorRepository.findAll(pageable);
+
+        List<CounselorResponse> content = counselorPage.getContent().stream()
+                .map(counselor -> CounselorResponse.from(counselor))
+                .collect(Collectors.toList());
+
+        return PageUtil.PageResponse.of(counselorPage, content);
+    }
     // 상담사 상세 조회
     public CounselorResponse findById(Long id) {
         Counselor counselor = counselorRepository.findById(id)
@@ -58,5 +73,4 @@ public class CounselorService {
                 .map(counselor -> CounselorResponse.from(counselor))
                 .collect(Collectors.toList());
     }
-
 }

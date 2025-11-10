@@ -2,6 +2,7 @@ package com.take.take_breath._core._utils;
 
 import lombok.Data;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 
 import java.util.List;
 
@@ -47,6 +48,49 @@ public class PageUtil {
             response.totalPages = page.getTotalPages();
             response.isFirst = page.isFirst();
             response.isLast = page.isLast();
+            return response;
+        }
+    }
+
+
+    /**
+     * 무한 스크롤 응답을 위한 공통 DTO
+     */
+    @Data
+    public static class SliceResponse<T> {
+        private List<T> content;          // 실제 데이터
+        private int pageNumber;           // 현재 페이지 번호 (0부터 시작)
+        private int pageSize;             // 페이지당 항목 수
+        private boolean hasNext;          // 다음 페이지 존재 여부
+        private boolean isFirst;          // 첫 페이지 여부
+        private boolean isLast;           // 마지막 페이지 여부
+
+        /**
+         * Spring Data Slice 객체를 SliceResponse로 변환
+         */
+        public static <T> SliceResponse<T> of(Slice<T> slice) {
+            SliceResponse<T> response = new SliceResponse<>();
+            response.content = slice.getContent();
+            response.pageNumber = slice.getNumber();
+            response.pageSize = slice.getSize();
+            response.hasNext = slice.hasNext();
+            response.isFirst = slice.isFirst();
+            response.isLast = slice.isLast();
+            return response;
+        }
+
+        /**
+         * 데이터를 변환하여 SliceResponse를 생성
+         * Slice<Entity>를 Slice<DTO>로 변환할 때 사용
+         */
+        public static <T> SliceResponse<T> of(Slice<?> slice, List<T> content) {
+            SliceResponse<T> response = new SliceResponse<>();
+            response.content = content;
+            response.pageNumber = slice.getNumber();
+            response.pageSize = slice.getSize();
+            response.hasNext = slice.hasNext();
+            response.isFirst = slice.isFirst();
+            response.isLast = slice.isLast();
             return response;
         }
     }

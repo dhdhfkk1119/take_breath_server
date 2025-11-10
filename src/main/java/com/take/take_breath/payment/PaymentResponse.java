@@ -103,6 +103,7 @@ public class PaymentResponse {
     @Data
     @Builder
     public static class AdminFeeStatsDTO {
+        private String month;
         private Long totalFeeAmount;      // 총 수수료 수익
         private Long totalPaymentCount;   // 결제 건수
         private Long totalPaymentAmount;  // 총 결제 금액

@@ -168,12 +168,15 @@ public class RecordController {
         String email = request.getAttribute("memberEmail").toString();
         recordService.deleteRecord(email, id);
 
+
         // 일반적인 RESTAPI의 관례 - 삭제 시 not found
         // return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(ApiUtil.success("기록이 성공적으로 삭제되었습니다."));
     }
 
+
+    // 수정된 부분 (getPdf 메서드만)
 
     // 기록 다운로드 기능 - pdf
     @GetMapping("/pdf/{id}")
@@ -182,19 +185,24 @@ public class RecordController {
             @PathVariable(name = "id") Long id) {
         String memberEmail = request.getAttribute("memberEmail").toString();
 
-
-
         byte[] pdf = recordService.generatePdf(memberEmail, id);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("attachment", "record.pdf");
+
+
+        String timestamp = System.currentTimeMillis() + "";
+        String fileName = "record_" + id + "_" + timestamp + ".pdf";
+        headers.setContentDispositionFormData("attachment", fileName);
+
+        // 추가: Content-Length 헤더 설정 (중요!)
+        headers.setContentLength(pdf.length);
 
         return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
 
         /**
          * axios.get('http://localhost:8080/api/record/pdf/5', {
-         *   responseType: 'blob', // ✅ 이게 중요! (binary로 받기)
+         *   responseType: 'blob', // 이게 중요! (binary로 받기)
          *   headers: {
          *     Authorization: `Bearer ${token}`,
          *   },
