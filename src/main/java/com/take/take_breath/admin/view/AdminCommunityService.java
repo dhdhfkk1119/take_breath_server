@@ -3,7 +3,6 @@ package com.take.take_breath.admin.view;
 import com.take.take_breath.community.community_category.CommunityCategoryRequest;
 import com.take.take_breath.community.community_category.CommunityCategoryResponse;
 import com.take.take_breath.community.community_category.CommunityCategoryService;
-import com.take.take_breath.community.community_comment.CommunityComment;
 import com.take.take_breath.community.community_comment.CommunityCommentResponse;
 import com.take.take_breath.community.community_comment.CommunityCommentService;
 import com.take.take_breath.community.community_comment.CommunityCommentRepository;
@@ -19,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 관리자 전용 커뮤니티 관리 서비스
- * - 기존 커뮤니티 서비스 로직을 호출해서 SSR에서 사용
+ * 관리자 전용 커뮤니티 관리 서비스 (SSR 리스트 버전)
+ * - REST API 대신 Mustache 렌더링용 리스트 반환
  */
 @Service
 @RequiredArgsConstructor
@@ -33,7 +32,7 @@ public class AdminCommunityService {
     private final CommunityCommentRepository commentRepository;
     private final HttpSession session;
 
-    // 카테고리 관리
+    /** 카테고리 관리 */
     public List<CommunityCategoryResponse.ListDTO> getAllCategories() {
         return categoryService.findAllCategories();
     }
@@ -52,10 +51,11 @@ public class AdminCommunityService {
         categoryService.deleteCategory(id, adminId);
     }
 
-    // 게시글 관리
+    /** 게시글 관리 (단순 리스트형 SSR용) */
     public List<CommunityPostResponse.ListDTO> getAllPosts() {
         Long adminId = getAdminId();
         CommunityPostRequest.SearchDTO searchDTO = new CommunityPostRequest.SearchDTO();
+        // 단순 리스트 조회 (최근순 100개)
         return postService.searchPosts(adminId, searchDTO, PageRequest.of(0, 100))
                 .getContent();
     }
@@ -66,13 +66,13 @@ public class AdminCommunityService {
         postService.forceDeletePost(id, "관리자 페이지에서 강제 삭제됨", adminId);
     }
 
-    // 댓글 관리
+    /** 댓글 관리 (리스트형 SSR용) */
     public List<CommunityCommentResponse.ResponseDTO> getAllComments() {
         return commentRepository.findAll().stream()
                 .filter(c -> !c.isDeleted())
                 .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
                 .limit(100)
-                .map(c -> new CommunityCommentResponse.ResponseDTO(c))
+                .map(CommunityCommentResponse.ResponseDTO::new)
                 .toList();
     }
 
@@ -82,8 +82,7 @@ public class AdminCommunityService {
         commentService.forceDeleteComment(id, "관리자 페이지에서 강제 삭제됨", adminId);
     }
 
-
-    // 세션에서 관리자 ID 추출
+    /** 세션에서 관리자 ID 추출 */
     private Long getAdminId() {
         Object adminIdObj = session.getAttribute("adminId");
         if (adminIdObj == null) {

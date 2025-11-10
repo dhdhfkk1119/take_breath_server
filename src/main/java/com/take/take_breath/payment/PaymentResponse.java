@@ -107,5 +107,24 @@ public class PaymentResponse {
         private Long totalFeeAmount;      // 총 수수료 수익
         private Long totalPaymentCount;   // 결제 건수
         private Long totalPaymentAmount;  // 총 결제 금액
+
+        // 천 단위 콤마 포맷 메서드 추가
+        public String getFormattedTotalFeeAmount() {
+            return formatNumber(totalFeeAmount);
+        }
+
+        public String getFormattedTotalPaymentAmount() {
+            return formatNumber(totalPaymentAmount);
+        }
+
+        public String getFormattedTotalPaymentCount() {
+            return formatNumber(totalPaymentCount);
+        }
+
+        private String formatNumber(Long value) {
+            if (value == null) return "0";
+            return java.text.NumberFormat.getInstance(java.util.Locale.KOREA).format(value);
+        }
     }
+
 }
