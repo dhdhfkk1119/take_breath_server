@@ -64,14 +64,12 @@ public class AuthInterceptor implements HandlerInterceptor {
             // 4. 권한(Role) 확인
             checkRoleAndStatus(auth, role,status);
 
-
             // request에 JWT 정보 저장 -> 컨트롤러에서 필요 시 사용 가능
             request.setAttribute("memberEmail", email);
             request.setAttribute("memberRole", role);
             request.setAttribute("memberId", member.getId());
 
             return true;
-
         } catch (Exception401 | Exception403 e) {
             throw e;
         } catch (Exception e) {
@@ -109,6 +107,4 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
         }
     }
-
-
 }

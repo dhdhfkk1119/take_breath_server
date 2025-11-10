@@ -54,6 +54,10 @@ public class UploadFile {
         // 디렉터리 구분 (yml 설정에서 가져옴)
         String subDir = resolveDirectory(dirType);
 
+        System.out.println("📂 dirType = {}" + dirType);
+        System.out.println("📂 subDir = {}" + subDir);
+        System.out.println("📂 rootDir = {}" + uploadProperties.getRootDir());
+
         // 전체 업로드 경로: ./uploads/member-images/
         String fullUploadPath = Paths.get(uploadProperties.getRootDir(), subDir).toString();
 

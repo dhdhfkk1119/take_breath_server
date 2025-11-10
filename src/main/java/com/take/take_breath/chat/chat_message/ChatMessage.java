@@ -1,5 +1,6 @@
 package com.take.take_breath.chat.chat_message;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.take.take_breath._core._utils.DateUtil;
 import com.take.take_breath.chat.chat_room.ChatRoom;
 import com.take.take_breath.members.Member;
@@ -57,6 +58,7 @@ public class ChatMessage {
 
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private Timestamp createdAt;    // 메세지 생성 시간
 
     public String getTime() {

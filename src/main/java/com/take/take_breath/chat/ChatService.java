@@ -3,7 +3,9 @@ package com.take.take_breath.chat;
 import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath._core._exception.Exception500;
+import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.PageUtil;
+import com.take.take_breath._core._utils.PageUtil.SliceResponse;
 import com.take.take_breath._core._utils.UploadFile;
 import com.take.take_breath.chat.chat_message.ChatMessage;
 import com.take.take_breath.chat.chat_message.ChatMessageRepository;
@@ -48,9 +50,9 @@ public class ChatService {
      * 채팅방의 메시지 목록 조회 (읽음 여부 포함)
      */
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> getChatMessages(String memberEmail, Long roomId) {
+    public List<ChatMessageResponse> getChatMessages(Long memberId, Long roomId) {
         // 예외 처리
-        Member member = memberRepository.findByEmail(memberEmail)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다"));
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new Exception404("채팅방을 찾을 수 없습니다"));
@@ -83,6 +85,7 @@ public class ChatService {
                             .messageType(message.getType())
                             .createdAt(message.getCreatedAt())
                             .isRead(isRead)
+                            .attachmentPath(message.getAttachmentPath())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -91,30 +94,26 @@ public class ChatService {
     /**
      * 텍스트 메시지 전송
      */
-    public ChatMessageResponse sendMessage(Long roomId, Long memberId, ChatMessageRequest request) {
+    public ChatMessageResponse sendMessage(Long roomId, Long senderId, ChatMessageRequest request) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new Exception404("채팅방을 찾을 수 없습니다."));
-        Member sender = memberRepository.findById(memberId)
+        Member sender = memberRepository.findById(senderId)
                 .orElseThrow(() -> new Exception404("회원을 찾을 수 없습니다."));
 
-        // 사용자가 메세지를 보낼 때만 포인트 검증
+        Long currentPoint = null;
         if (sender.getRole() == Role.USER) {
             if (sender.getPoint() < REQUIRED_POINT) {
-                // 포인트 부족 시 현재 포인트 정보를 담은 응답 생성
-                return ChatMessageResponse.builder()
-                        .senderId(sender.getId())
-                        .senderName(sender.getName())
-                        .content(request.getContent())
-                        .messageType(MessageType.TEXT)
-                        .currentPoint(sender.getPoint())
-                        .build();
+                throw new Exception400("포인트가 부족합니다. 현재 포인트: " + sender.getPoint());
             }
 
+            // 포인트 차감
             sender.setPoint(sender.getPoint() - REQUIRED_POINT);
             memberRepository.save(sender);
+            currentPoint = sender.getPoint();  // 차감 후 포인트
 
+            // 상담사 포인트 적립
             ChatRoomMember otherMember = chatRoomMemberRepository
-                    .findOtherMemberInRoom(roomId, memberId);
+                    .findOtherMemberInRoom(roomId, senderId);
 
             if (otherMember != null && otherMember.getMember().getRole() == Role.COUNSELOR) {
                 Counselor counselor = otherMember.getMember().getCounselor();
@@ -137,7 +136,7 @@ public class ChatService {
         chatMessageRepository.save(message);
 
         // 발신자는 읽음 처리
-        markAsRead(roomId, memberId, message.getId());
+        markAsRead(roomId, senderId, message.getId());
 
         // Entity -> DTO 변환
         return ChatMessageResponse.builder()
@@ -148,39 +147,36 @@ public class ChatService {
                 .messageType(message.getType())
                 .createdAt(message.getCreatedAt())
                 .isRead(true)
-                .currentPoint(sender.getPoint())
+                .currentPoint(currentPoint)
                 .build();
     }
 
     /**
      * 이미지 메시지 전송
      */
-    public ImageMessageResponse sendImageMessage(ImageUploadRequest request) {
-        ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
+    public ChatMessageResponse sendImageMessage(
+            Long roomId,
+            Long senderId,
+            MultipartFile image) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new Exception404("채팅방을 찾을 수 없습니다."));
-        Member sender = memberRepository.findById(request.getSenderId())
+        Member sender = memberRepository.findById(senderId)
                 .orElseThrow(() -> new Exception404("회원을 찾을 수 없습니다."));
 
+        Long currentPoint = null;
         if (sender.getRole() == Role.USER) {
-            // 포인트 부족 체크
             if (sender.getPoint() < REQUIRED_POINT) {
-                // 포인트 부족 시 현재 포인트 정보를 담은 응답 생성
-
-                return ImageMessageResponse.builder()
-                        .senderId(sender.getId())
-                        .senderName(sender.getName())
-                        .messageType("IMAGE")
-                        .currentPoint(String.valueOf(sender.getPoint()))
-                        .build();
+                throw new Exception400("포인트가 부족합니다. 현재 포인트: " + sender.getPoint());
             }
 
             // 포인트 차감
             sender.setPoint(sender.getPoint() - REQUIRED_POINT);
             memberRepository.save(sender);
+            currentPoint = sender.getPoint();  // 차감 후 포인트
 
-            // 상대방(상담사) 포인트 적립
+            // 상담사 포인트 적립
             ChatRoomMember otherMember = chatRoomMemberRepository
-                    .findOtherMemberInRoom(request.getChatRoomId(), request.getSenderId());
+                    .findOtherMemberInRoom(roomId, senderId);
 
             if (otherMember != null && otherMember.getMember().getRole() == Role.COUNSELOR) {
                 Counselor counselor = otherMember.getMember().getCounselor();
@@ -191,30 +187,33 @@ public class ChatService {
         }
 
         // 이미지 파일 검증
-        MultipartFile image = request.getImage();
         if (image == null || image.isEmpty()) {
             throw new Exception400("이미지 파일이 없습니다.");
         }
 
         // 이미지 파일 크기 제한 (예: 10MB)
+        /*
         long maxSize = 10 * 1024 * 1024; // 10MB
         if (image.getSize() > maxSize) {
             throw new Exception400("이미지 파일 크기는 10MB를 초과할 수 없습니다.");
         }
+        */
 
         // 이미지 파일 형식 검증
+        /*
         String contentType = image.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new Exception400("이미지 파일만 업로드 가능합니다.");
         }
+        */
 
         // UploadFile을 사용해서 파일 저장
         String attachmentPath;
         try {
-            attachmentPath = uploadFile.uploadImage(image, "chat");
+            String relativePath = uploadFile.uploadImage(image, "chat");
+            attachmentPath = "/uploads/chat-images/" + relativePath;
         } catch (IOException e) {
             throw new Exception500("이미지 업로드에 실패했습니다.");
-
         }
 
         // 메시지 생성 및 저장
@@ -230,19 +229,27 @@ public class ChatService {
         chatMessageRepository.save(message);
 
         // 발신자는 자동으로 읽음 처리
-        markAsRead(request.getChatRoomId(), request.getSenderId(), message.getId());
+        markAsRead(chatRoom.getId(), sender.getId(), message.getId());
 
         // 웹소켓으로 자동 브로드캐스트
-        ImageMessageResponse response = ImageMessageResponse.builder()
+        ChatMessageResponse response = ChatMessageResponse.builder()
                 .messageId(message.getId())
-                .senderId(message.getSender().getId())
-                .senderName(message.getSender().getName())
-                .messageType(message.getType().name())
-                .createdAt(message.getTime())
+                .senderId(senderId)
+                .senderName(sender.getName())
+                .content("[이미지]")
+                .messageType(MessageType.IMAGE)
+                .createdAt(message.getCreatedAt())
                 .isRead(true)
+                .attachmentPath(attachmentPath)
+                .currentPoint(currentPoint)
                 .build();
 
-        messagingTemplate.convertAndSend("/topic/room." + request.getChatRoomId(), response);
+        // 웹소켓 브로드캐스트
+        messagingTemplate.convertAndSend(
+                "/sub/chat/room." + roomId,
+                ApiUtil.success(response)
+        );
+
         return response;
     }
 
@@ -301,7 +308,6 @@ public class ChatService {
         }
     }
 
-
     /**
      * 내가 속한 채팅방 목록 조회 (읽지 않은 메시지 개수 포함)
      */
@@ -352,9 +358,9 @@ public class ChatService {
      * 내가 속한 채팅방 목록 조회 (이메일로 조회)
      */
     @Transactional(readOnly = true)
-    public PageUtil.SliceResponse<ChatRoomListResponse> getMyChatRoomsToSlice(String email, int page, int size) {
+    public SliceResponse<ChatRoomListResponse> getMyChatRoomsToSlice(Long memberId, int page, int size) {
         // 사용자 조회
-        Member member = memberRepository.findByEmail(email)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
 
         // Pageable 생성
@@ -395,9 +401,7 @@ public class ChatService {
                 })
                 .collect(Collectors.toList());
 
-        // PageUtil.SliceResponse로 변환하여 반환
-        return PageUtil.SliceResponse.of(chatRoomMemberSlice, content);
-
+        return SliceResponse.of(chatRoomMemberSlice, content);
     }
 
     /**
