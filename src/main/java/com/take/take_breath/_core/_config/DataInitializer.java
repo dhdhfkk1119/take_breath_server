@@ -141,9 +141,61 @@ public class DataInitializer implements CommandLineRunner {
                 .emailVerified(true)
                 .build();
 
-        memberRepository.saveAll(List.of(counselorMember1, counselorMember2));
+        Member counselorMember3 = Member.builder()
+                .email("counselor3@test.com")
+                .password(passwordEncoder.encode("1234"))
+                .name("상담사 박하늘")
+                .phone("01099996666")
+                .address("서울시 강서구")
+                .role(Role.COUNSELOR)
+                .status(Status.PENDING)
+                .emailVerified(true)
+                .build();
+
+        Member counselorMember4 = Member.builder()
+                .email("counselor4@test.com")
+                .password(passwordEncoder.encode("1234"))
+                .name("상담사 정바람")
+                .phone("01099995555")
+                .address("부산시 해운대구")
+                .role(Role.COUNSELOR)
+                .status(Status.ACTIVE)
+                .emailVerified(true)
+                .build();
+
+        Member counselorMember5 = Member.builder()
+                .email("counselor5@test.com")
+                .password(passwordEncoder.encode("1234"))
+                .name("상담사 한별")
+                .phone("01099994444")
+                .address("인천시 연수구")
+                .role(Role.COUNSELOR)
+                .status(Status.PENDING)
+                .emailVerified(true)
+                .build();
+
+        Member counselorMember6 = Member.builder()
+                .email("counselor6@test.com")
+                .password(passwordEncoder.encode("1234"))
+                .name("상담사 최가람")
+                .phone("01099993333")
+                .address("대전시 유성구")
+                .role(Role.COUNSELOR)
+                .status(Status.ACTIVE)
+                .emailVerified(true)
+                .build();
+
+        memberRepository.saveAll(List.of(
+                counselorMember1, counselorMember2, counselorMember3,
+                counselorMember4, counselorMember5, counselorMember6
+        ));
+
         saveMemberTerms(counselorMember1, List.of(terms1, terms2));
         saveMemberTerms(counselorMember2, List.of(terms1, terms2));
+        saveMemberTerms(counselorMember3, List.of(terms1, terms2));
+        saveMemberTerms(counselorMember4, List.of(terms1, terms2));
+        saveMemberTerms(counselorMember5, List.of(terms1, terms2));
+        saveMemberTerms(counselorMember6, List.of(terms1, terms2));
 
         Counselor counselor1 = Counselor.builder()
                 .member(counselorMember1)
@@ -156,6 +208,68 @@ public class DataInitializer implements CommandLineRunner {
                 .point(0)
                 .status(Status.PENDING)
                 .build();
+
+        Counselor counselor2 = Counselor.builder()
+                .member(counselorMember2)
+                .introduction("대인관계, 번아웃, 우울 관련 상담을 진행합니다.")
+                .gender("남성")
+                .profileImage("default_profile2.png")
+                .specialty("대인관계, 번아웃, 우울")
+                .price(60000)
+                .hashtags("#대인관계 #번아웃 #우울")
+                .point(0)
+                .status(Status.ACTIVE)
+                .build();
+
+        Counselor counselor3 = Counselor.builder()
+                .member(counselorMember3)
+                .introduction("20대 여성 대상 우울감 및 자존감 회복 상담을 전문으로 합니다.")
+                .gender("여성")
+                .profileImage("default_profile3.png")
+                .specialty("우울, 자존감")
+                .price(55000)
+                .hashtags("#우울 #자존감 #힐링")
+                .point(70)
+                .status(Status.PENDING)
+                .build();
+
+        Counselor counselor4 = Counselor.builder()
+                .member(counselorMember4)
+                .introduction("감정 조절과 분노 관리 중심의 심리상담을 진행합니다.")
+                .gender("남성")
+                .profileImage("default_profile4.png")
+                .specialty("분노조절, 감정관리")
+                .price(65000)
+                .hashtags("#분노 #감정관리")
+                .point(100)
+                .status(Status.ACTIVE)
+                .build();
+
+        Counselor counselor5 = Counselor.builder()
+                .member(counselorMember5)
+                .introduction("청소년 심리 및 진로 상담 경험이 풍부합니다.")
+                .gender("여성")
+                .profileImage("default_profile5.png")
+                .specialty("청소년, 진로")
+                .price(40000)
+                .hashtags("#청소년 #진로 #학업")
+                .point(50)
+                .status(Status.PENDING)
+                .build();
+
+        Counselor counselor6 = Counselor.builder()
+                .member(counselorMember6)
+                .introduction("커플 및 부부 관계 문제에 대한 상담을 전문으로 합니다.")
+                .gender("남성")
+                .profileImage("default_profile6.png")
+                .specialty("부부관계, 커플상담")
+                .price(70000)
+                .hashtags("#커플 #부부 #의사소통")
+                .point(200)
+                .status(Status.ACTIVE)
+                .build();
+
+        counselorRepository.saveAll(List.of(counselor1, counselor2, counselor3, counselor4, counselor5, counselor6));
 
         counselor1.setLicenses(List.of(
                 CounselorLicense.builder()
@@ -174,19 +288,47 @@ public class DataInitializer implements CommandLineRunner {
                         .build()
         ));
 
-        Counselor counselor2 = Counselor.builder()
-                .member(counselorMember2)
-                .introduction("대인관계, 번아웃, 우울 관련 상담을 진행합니다.")
-                .gender("남성")
-                .profileImage("default_profile2.png")
-                .specialty("대인관계, 번아웃, 우울")
-                .price(60000)
-                .hashtags("#대인관계 #번아웃 #우울")
-                .point(0)
-                .status(Status.ACTIVE)
-                .build();
+        counselor3.setLicenses(List.of(
+                CounselorLicense.builder()
+                        .licenseName("청소년상담사 2급")
+                        .licenseNumber("YTH-2023-021")
+                        .licenseRegiNumber("CL-0004")
+                        .licenseImage("license_parkhaneul_1.jpg")
+                        .counselor(counselor3)
+                        .build()
+        ));
 
-        counselorRepository.saveAll(List.of(counselor1, counselor2));
+        counselor4.setLicenses(List.of(
+                CounselorLicense.builder()
+                        .licenseName("분노조절상담사 1급")
+                        .licenseNumber("ANG-2023-033")
+                        .licenseRegiNumber("CL-0005")
+                        .licenseImage("license_jeongbaram_1.jpg")
+                        .counselor(counselor4)
+                        .build()
+        ));
+
+        counselor5.setLicenses(List.of(
+                CounselorLicense.builder()
+                        .licenseName("진로상담전문가")
+                        .licenseNumber("CAREER-2023-045")
+                        .licenseRegiNumber("CL-0006")
+                        .licenseImage("license_hanbyeol_1.jpg")
+                        .counselor(counselor5)
+                        .build()
+        ));
+
+        counselor6.setLicenses(List.of(
+                CounselorLicense.builder()
+                        .licenseName("부부·가족상담사")
+                        .licenseNumber("COUPLE-2023-052")
+                        .licenseRegiNumber("CL-0007")
+                        .licenseImage("license_choigaram_1.jpg")
+                        .counselor(counselor6)
+                        .build()
+        ));
+
+        counselorRepository.saveAll(List.of(counselor1, counselor3, counselor4, counselor5, counselor6));
 
         // 신고 테스트 데이터 이하 동일...
         // (생략하지 않고 계속 유지)

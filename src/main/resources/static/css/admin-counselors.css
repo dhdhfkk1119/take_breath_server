@@ -102,3 +102,133 @@ th {
 .image-modal-content .license-info p {
     margin: 0.5rem 0;
 }
+
+/* 페이지네이션 컨테이너 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 30px 0;
+    padding: 20px 0;
+}
+
+/* 페이지 버튼 공통 스타일 */
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.page-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+    color: #007bff;
+    transform: translateY(-1px);
+}
+
+.page-btn:active {
+    transform: translateY(0);
+}
+
+/* 첫 페이지/마지막 페이지 버튼 */
+.first-btn,
+.last-btn {
+    padding: 8px 10px;
+    color: #666;
+}
+
+.first-btn:hover,
+.last-btn:hover {
+    color: #007bff;
+}
+
+/* 페이지 번호 컨테이너 */
+.page-numbers {
+    display: flex;
+    gap: 4px;
+    margin: 0 8px;
+}
+
+/* 개별 페이지 번호 */
+.page-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.page-num:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+    color: #007bff;
+    transform: translateY(-1px);
+}
+
+/* 현재 페이지 */
+.page-num.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    cursor: default;
+    font-weight: 600;
+}
+
+.page-num.active:hover {
+    transform: none;
+}
+
+/* 아이콘 스타일 */
+.pagination i {
+    font-size: 12px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .pagination {
+        gap: 4px;
+    }
+
+    .page-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    .page-num {
+        min-width: 32px;
+        height: 32px;
+        font-size: 13px;
+    }
+
+    /* 모바일에서는 첫/마지막 페이지 버튼 숨김 */
+    .first-btn,
+    .last-btn {
+        display: none;
+    }
+
+    /* 모바일에서 "이전"/"다음" 텍스트 숨기고 아이콘만 표시 */
+    .prev-btn, .next-btn {
+        padding: 6px 8px;
+    }
+}

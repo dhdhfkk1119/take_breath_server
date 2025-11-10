@@ -91,6 +91,50 @@
     </table>
 </div>
 
+<!-- 페이징 -->
+<div class="pagination">
+    <!-- 첫 페이지로 -->
+    {{^pageInfo.first}}
+        <a href="?page=0" class="page-btn first-btn" title="첫 페이지">
+            처음
+            <i class="fas fa-angle-double-left"></i>
+        </a>
+    {{/pageInfo.first}}
+
+    <!-- 이전 페이지 -->
+    {{^pageInfo.first}}
+        <a href="?page={{prevPage}}" class="page-btn prev-btn">
+        <i class="fas fa-angle-left"></i> 이전
+        </a>
+    {{/pageInfo.first}}
+
+    <!-- 페이지 번호들 -->
+    <div class="page-numbers">
+        {{#pageNumbers}}
+            {{#isCurrent}}
+                <span class="page-num active">{{pageNum}}</span>
+            {{/isCurrent}}
+            {{^isCurrent}}
+                <a href="?page={{pageIndex}}" class="page-num">{{pageNum}}</a>
+            {{/isCurrent}}
+        {{/pageNumbers}}
+    </div>
+
+    <!-- 다음 페이지 -->
+    {{^pageInfo.last}}
+        <a href="?page={{nextPage}}" class="page-btn next-btn">
+        다음 <i class="fas fa-angle-right"></i>
+        </a>
+    {{/pageInfo.last}}
+
+    <!-- 마지막 페이지로 -->
+    {{^pageInfo.last}}
+        <a href="?page={{#totalPage}}{{.}}{{/totalPage}}" class="page-btn last-btn" title="마지막 페이지">
+        마지막 <i class="fas fa-angle-double-right"></i>
+        </a>
+    {{/pageInfo.last}}
+</div>
+
 <!-- 승인/거절 처리 모달 -->
 <div id="rejectModal" class="modal" style="display: none;">
     <div class="modal-content">
