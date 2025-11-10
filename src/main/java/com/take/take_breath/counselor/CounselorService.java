@@ -1,6 +1,7 @@
 package com.take.take_breath.counselor;
 
 import com.take.take_breath._core._exception.Exception400;
+import com.take.take_breath._core._utils.PageUtil;
 import com.take.take_breath.counselor.dto.CounselorRequest;
 import com.take.take_breath.counselor.dto.CounselorResponse;
 import com.take.take_breath.members.Member;
@@ -49,17 +50,15 @@ public class CounselorService {
     }
 
     // 페이지네이션
-    public Page<CounselorResponse> findAll(int page, int size, String sortBy, String direction) {
-        Sort sort = direction.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
+    public PageUtil.PageResponse<CounselorResponse> findAll(Pageable pageable) {
+        Page<Counselor> counselorPage = counselorRepository.findAll(pageable);
 
-        Pageable pageable = PageRequest.of(page, size, sort);
+        List<CounselorResponse> content = counselorPage.getContent().stream()
+                .map(counselor -> CounselorResponse.from(counselor))
+                .collect(Collectors.toList());
 
-        return counselorRepository.findAll(pageable)
-                .map(counselor -> CounselorResponse.from(counselor));
+        return PageUtil.PageResponse.of(counselorPage, content);
     }
-
     // 상담사 상세 조회
     public CounselorResponse findById(Long id) {
         Counselor counselor = counselorRepository.findById(id)
