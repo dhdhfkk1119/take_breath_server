@@ -32,6 +32,7 @@ public class CounselorListResponse {
     private final String hashtags;
     private final Member member;
     private final List<LicenseDTO> licenses;
+    private final long likeCount;
 
     // 상태 체크 (Mustache용)
     private final boolean isActive;
@@ -39,7 +40,7 @@ public class CounselorListResponse {
     private final boolean isSuspended;
     private final boolean isRejected;
 
-    public CounselorListResponse(Counselor counselor) {
+    public CounselorListResponse(Counselor counselor, long likeCount) {
         this.id = counselor.getId();
         this.name = counselor.getMember() != null ? counselor.getMember().getName() : "N/A";
         this.email = counselor.getMember() != null ? counselor.getMember().getEmail() : "N/A";
@@ -50,6 +51,7 @@ public class CounselorListResponse {
         this.introduction = counselor.getIntroduction();
         this.hashtags = counselor.getHashtags();
         this.member = counselor.getMember();
+        this.likeCount = likeCount;
 
         // 자격증 리스트
         this.licenses = counselor.getLicenses() != null
