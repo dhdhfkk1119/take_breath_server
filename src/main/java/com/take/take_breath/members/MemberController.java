@@ -89,7 +89,13 @@ public class MemberController {
     @GetMapping("/info")
     public ResponseEntity<?> getMemberInfo(HttpServletRequest req) {
         String email = (String) req.getAttribute("memberEmail");
+        String token = req.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
         MemberResponse response = memberService.getMemberInfo(email);
+        response.setAccessToken(token);
         return ResponseEntity.ok(response);
     }
 
@@ -98,11 +104,11 @@ public class MemberController {
     @PatchMapping("/update")
     public ResponseEntity<?> updateProfile(
             HttpServletRequest request,
-            @RequestPart(value = "nickname", required = false) String nickname,
+            @RequestPart(value = "nickName", required = false) String nickName,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) throws IOException {
         String email = (String) request.getAttribute("memberEmail");
-        memberService.updateMemberInfo(email, nickname, image);
+        memberService.updateMemberInfo(email, nickName, image);
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
     }
 
