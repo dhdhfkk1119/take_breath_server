@@ -28,8 +28,13 @@ public class CounselorController {
 
     // 상담사 전체 조회
     @GetMapping
-    public ResponseEntity<List<CounselorResponse>> getAllCounselors() {
-        return ResponseEntity.ok(counselorService.findAll());
+    public ResponseEntity<?> getAllCounselors(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        return ResponseEntity.ok(counselorService.findAll(page, size, sortBy, direction));
     }
 
     // 상담사 상세 조회
