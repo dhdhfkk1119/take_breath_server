@@ -10,16 +10,20 @@ import com.take.take_breath.community.comment_report_process.CommentReportProces
 import com.take.take_breath.community.community_event.CommentCreatedEvent;
 import com.take.take_breath.community.community_post.CommunityPost;
 import com.take.take_breath.community.community_post.CommunityPostRepository;
+import com.take.take_breath.community.community_post.CommunityPostResponse;
 import com.take.take_breath.community.community_report.CommunityReportStatus;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -76,6 +80,18 @@ public class CommunityCommentService {
         return communityCommentRepository.findByPostId(postId).stream()
                 .map(comment -> new CommunityCommentResponse.ResponseDTO(comment))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자별 게시글 조회 (좋아요 여부 포함)
+     */
+    public Page<CommunityCommentResponse.ResponseDTO> findCommentByMemberId(Long targetMemberId, Pageable pageable) {
+
+        Page<CommunityComment> comments = communityCommentRepository.findByMemberId(targetMemberId, pageable);
+
+        return comments.map(comment -> CommunityCommentResponse.ResponseDTO.builder()
+                .comment(comment)
+                .build());
     }
 
     /**
