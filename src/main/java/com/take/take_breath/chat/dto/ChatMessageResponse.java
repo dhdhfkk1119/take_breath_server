@@ -18,6 +18,6 @@ public class ChatMessageResponse {
     private MessageType messageType;
     private Timestamp createdAt;
     private Boolean isRead;
-    private String imageUrl;
+    private String attachmentPath;
     private Long currentPoint;
 }

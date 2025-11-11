@@ -1,5 +1,6 @@
 package com.take.take_breath.chat.chat_message;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.take.take_breath._core._utils.DateUtil;
 import com.take.take_breath.chat.chat_room.ChatRoom;
 import com.take.take_breath.members.Member;
@@ -43,7 +44,7 @@ public class ChatMessage {
     @Builder.Default
     private MessageStatus status = MessageStatus.SENT;
 
-    // 파일 저장 경로 (상대 경로) - "2025/10/27/a3f5b2c1-4d8e-4f1a-9c3b-1e5f6a7b8c9d.jpg"
+    // 파일 저장 경로 (상대 경로) - "/uploads/chat-images/a3f5b2c1-4d8e-4f1a-9c3b-1e5f6a7b8c9d.jpg"
     @Column(name = "attachment_path")
     private String attachmentPath;
 
@@ -57,6 +58,7 @@ public class ChatMessage {
 
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private Timestamp createdAt;    // 메세지 생성 시간
 
     public String getTime() {

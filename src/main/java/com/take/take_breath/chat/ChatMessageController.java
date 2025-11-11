@@ -1,7 +1,9 @@
 package com.take.take_breath.chat;
 
 import com.take.take_breath._core._utils.ApiUtil;
+import com.take.take_breath._core.auth.Auth;
 import com.take.take_breath.chat.dto.*;
+import com.take.take_breath.members.Status;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -23,10 +25,11 @@ public class ChatMessageController {
      * 채팅방의 메시지 목록 조회 (읽음 여부 포함)
      * GET /api/chat/messages/1
      */
+    @Auth(statuses = {Status.ACTIVE})
     @GetMapping("/{roomId}")
     public ResponseEntity<?> getMessages(@PathVariable(name = "roomId") Long roomId, HttpServletRequest request) {
-        String memberEmail = request.getAttribute("memberEmail").toString();
-        List<ChatMessageResponse> messages = chatService.getChatMessages(memberEmail, roomId);
+        Long memberId = (Long) request.getAttribute("memberId");
+        List<ChatMessageResponse> messages = chatService.getChatMessages(memberId, roomId);
         return ResponseEntity.ok(ApiUtil.success(messages));
     }
 
@@ -35,6 +38,8 @@ public class ChatMessageController {
      * 메시지 읽음 처리
      * POST /api/chat/messages/read
      */
+    /*
+    @Auth(statuses = {Status.ACTIVE})
     @PostMapping("/read")
     public ResponseEntity<?> markAsRead(@RequestBody MarkAsReadRequest request) {
         chatService.markAsRead(
@@ -44,19 +49,14 @@ public class ChatMessageController {
         );
         return ResponseEntity.ok(ApiUtil.success("메시지를 읽음 처리했습니다."));
     }
+    */
 
 
     /**
      * 안읽은 메시지 개수 조회
      * GET /api/chat/messages/unread-count?chatRoomId=1&memberId=1
      */
-    /*
-        {
-          "success": true,
-          "response": 5,
-          "error": null
-        }
-     */
+    @Auth(statuses = {Status.ACTIVE})
     @GetMapping("/unread-count")
     public ResponseEntity<?> getUnreadCount(
             @RequestParam Long chatRoomId,
@@ -71,39 +71,14 @@ public class ChatMessageController {
      * 서버가 자동으로 WebSocket 브로드캐스트
      * POST /api/chat/messages/image
      */
-    /*
-        chatRoomId: 1
-        senderId: 1
-        image: [이미지 파일]
-     */
-    /*
-        {
-          "success": true,
-          "response": {
-            "messageId": 20,
-            "senderId": 1,
-            "senderName": "김철수",
-            "messageType": "IMAGE",
-            "imageUrl": "/api/chat/messages/image/20",
-            "createdAt": "2025-10-24T16:00:00",
-            "isRead": true
-          },
-          "error": null
-        }
-     */
-    @PostMapping("/image")
+    @Auth(statuses = {Status.ACTIVE})
+    @PostMapping("/{roomId}/image")
     public ResponseEntity<?> sendImageMessage(
-            @RequestParam Long chatRoomId,
-            @RequestParam Long senderId,
+            HttpServletRequest request,
+            @PathVariable(name = "roomId") Long roomId,
             @RequestParam("image") MultipartFile image) {
-        // 이미지 메시지 저장
-        ImageUploadRequest request = ImageUploadRequest.builder()
-                .chatRoomId(chatRoomId)
-                .senderId(senderId)
-                .image(image)
-                .build();
-
-        ImageMessageResponse response = chatService.sendImageMessage(request);
+        Long memberId = (Long) request.getAttribute("memberId");
+        ChatMessageResponse response = chatService.sendImageMessage(roomId, memberId, image);
         return ResponseEntity.ok(ApiUtil.success(response));
     }
 
@@ -112,6 +87,7 @@ public class ChatMessageController {
      * 이미지 다운로드
      * GET /api/chat/messages/image/{messageId}
      */
+    @Auth(statuses = {Status.ACTIVE})
     @GetMapping("/image/{messageId}")
     public ResponseEntity<byte[]> getImage(@PathVariable Long messageId) {
         try {
