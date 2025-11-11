@@ -1,5 +1,8 @@
 package com.take.take_breath.members;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception401;
 import com.take.take_breath._core._exception.Exception403;
@@ -13,6 +16,7 @@ import com.take.take_breath.email.dto.EmailResponse;
 import com.take.take_breath.members.dto.*;
 import com.take.take_breath.members.dto.MemberRequestTo;
 import com.take.take_breath.members.dto.MemberResponseTo;
+import com.take.take_breath.social.google.SocialLoginRequest;
 import com.take.take_breath.terms.dto.MemberTermsRequest;
 import com.take.take_breath.terms.MemberTerms;
 import com.take.take_breath.terms.Terms;
@@ -30,6 +34,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -96,6 +101,7 @@ public class MemberService {
     }
 
 
+    // 로그인
     public MemberResponseTo.Login login(MemberRequestTo.MemberLoginRequest req) {
         Member member = memberRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new Exception400("존재하지 않는 이메일입니다."));
@@ -166,6 +172,97 @@ public class MemberService {
         );
     }
 
+    // 소셜 로그인
+    @Transactional
+    public MemberResponseTo.Login socialLogin(SocialLoginRequest req) {
+        FirebaseToken decodedToken;
+        try {
+            // A. Firebase ID Token 검증 및 디코드
+            decodedToken = FirebaseAuth.getInstance().verifyIdToken(req.getIdToken());
+        } catch (FirebaseAuthException e) {
+            // 토큰이 유효하지 않거나 만료된 경우
+            throw new Exception401("유효하지 않은 소셜 로그인 토큰입니다.");
+        }
+
+        // B. 추출된 정보
+        String email = decodedToken.getEmail();
+        String name = decodedToken.getName(); // Firebase에서 제공하는 이름
+        String uid = decodedToken.getUid();   // Firebase 고유 UID
+
+        // 1. 자체 DB에서 사용자 확인 (이메일 기준)
+        Member member = memberRepository.findByEmail(email).orElse(null);
+
+        if (member == null) {
+            // 2. 신규 사용자: 자동 회원가입
+            log.info("신규 소셜 사용자 자동 가입: {}", email);
+            member = autoRegisterSocialUser(email, name, req.getProvider());
+        } else {
+            // 3. 기존 사용자: 상태 및 기타 검사
+            if (member.getStatus() == Status.PENDING) {
+                throw new Exception403("관리자 승인 대기 중입니다.");
+            }
+            if (member.getStatus() == Status.SUSPENDED) {
+                // 기존 login 메서드의 정지 계정 처리 로직 재활용
+                LocalDateTime suspendedUntil = member.getSuspendedUntil();
+                long daysLeft = (suspendedUntil != null && LocalDate.now().isBefore(suspendedUntil.toLocalDate()))
+                        ? ChronoUnit.DAYS.between(LocalDate.now(), suspendedUntil.toLocalDate())
+                        : 0;
+                throw new Exception403("이용 정지된 계정입니다. 정지 해제까지 " + daysLeft + "일 남았습니다.");
+            }
+        }
+
+        // 4. 자체 JWT 토큰 발급 (Refresh Token은 일단 발급하지 않음, 필요 시 로직 추가 가능)
+        String accessToken = jwtTokenProvider.createToken(member);
+
+        // 5. 로그인 응답 DTO 반환 (refresh token은 소셜로그인 기본 로직에서는 생략)
+        return new MemberResponseTo.Login(
+                accessToken,
+                null, // RefreshToken은 일단 null
+                member.getId(),
+                member.getName(),
+                member.getNickName(),
+                member.getEmail(),
+                member.getProfileImage(),
+                member.getRole().name(),
+                member.getStatus().name(),
+                member.getPhone()
+        );
+    }
+
+    // 자동 소셜 로그인 
+    @Transactional
+    private Member autoRegisterSocialUser(String email, String name, String provider) {
+        // 닉네임, 이름, 전화번호 등은 구글에서 제공하는 정보를 사용하거나 기본값으로 설정할 수 있습니다.
+
+        // Member 엔티티 생성 (비밀번호 없음)
+        Member newMember = Member.builder()
+                .email(email)
+                // 소셜 로그인 사용자는 이메일 인증이 되었다고 간주
+                .emailVerified(true)
+                .name(name != null ? name : "소셜 사용자")
+                .nickName("S-" + provider + "-" + System.currentTimeMillis() % 10000) // 닉네임 기본 설정
+                .role(Role.USER) // 기본 역할 설정
+                .status(Status.ACTIVE) // 바로 활성화
+                // 비밀번호는 null 또는 암호화된 빈 문자열로 처리 (자체 로그인 불가능하게 막음)
+                .password(passwordEncoder.encode(""))
+                .build();
+
+        // 약관 동의 처리 (필수 약관에 기본 동의 처리)
+
+        List<Terms> requiredTerms = termsRepository.findByIsRequired(true);
+        for (Terms terms : requiredTerms) {
+            MemberTerms memberTerms = MemberTerms.builder()
+                    .member(newMember)
+                    .terms(terms)
+                    .agreed(true)
+                    .build();
+            memberTermsRepository.save(memberTerms);
+        }
+            
+        return memberRepository.save(newMember);
+    }
+
+    
     public MemberResponseTo.isCheckEmailDTO checkEmail(String email) {
         boolean isExist = memberRepository.existsByEmail(email);
 

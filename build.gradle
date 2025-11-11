@@ -72,6 +72,10 @@ dependencies {
 
     // pdf 생성 의존성
     implementation 'com.itextpdf:itext7-core:8.0.3'
+
+    // firebase auth 소셜 로그인
+    implementation group: 'com.google.firebase', name: 'firebase-admin', version: '8.0.1'
+
 }
 
 tasks.named('test') {
