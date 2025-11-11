@@ -12,6 +12,8 @@ public class CommunityCommentResponse {
         private String content;
         private Long memberId;
         private String memberName;
+        private Long postId;
+        private String postTitle;
         private String createdAt;
         private String updatedAt;
         private boolean isModified;
@@ -23,6 +25,8 @@ public class CommunityCommentResponse {
             this.content = comment.getContent();
             this.memberId = comment.getMember() != null ? comment.getMember().getId() : null;
             this.memberName = comment.getMember() != null ? comment.getMember().getName() : null;
+            this.postId = comment.getPost() != null ? comment.getPost().getId() : null;
+            this.postTitle = comment.getPost() != null ? comment.getPost().getTitle() : "삭제된 게시글";
             this.createdAt = DateUtil.timestampFormat(comment.getCreatedAt());
             this.updatedAt = DateUtil.timestampFormat(comment.getUpdatedAt());
             this.isDeleted = comment.isDeleted();

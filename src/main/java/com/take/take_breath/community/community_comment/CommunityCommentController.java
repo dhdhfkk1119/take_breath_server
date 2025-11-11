@@ -1,6 +1,7 @@
 package com.take.take_breath.community.community_comment;
 
 import com.take.take_breath._core._utils.ApiUtil;
+import com.take.take_breath._core._utils.PageUtil;
 import com.take.take_breath._core.auth.Auth;
 import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
@@ -8,6 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +36,20 @@ public class CommunityCommentController {
         List<CommunityCommentResponse.ResponseDTO> comments = communityCommentService.findCommentsByPostId(postId);
         log.info("[댓글 목록 조회] postId={}, count={}", postId, comments.size());
         return ResponseEntity.ok(ApiUtil.success(comments));
+    }
+
+    /**
+     * 내가 작성한 댓글 목록 조회
+     */
+    @Auth(statuses = {Status.ACTIVE})
+    @GetMapping("/mine")
+    public ResponseEntity<ApiUtil.ApiResult<PageUtil.PageResponse<CommunityCommentResponse.ResponseDTO>>> findMyComments(
+            HttpServletRequest request,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Long memberId = (Long) request.getAttribute("memberId");
+        Page<CommunityCommentResponse.ResponseDTO> posts = communityCommentService.findCommentByMemberId(memberId, pageable);
+        log.info("[내 댓글 조회] memberId={}", memberId);
+        return ResponseEntity.ok(ApiUtil.success(PageUtil.PageResponse.of(posts)));
     }
 
     /**
