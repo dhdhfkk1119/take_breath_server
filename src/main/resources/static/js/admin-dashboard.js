@@ -7,10 +7,10 @@ window.addEventListener('error', function (e) {
 console.log('✅ admin-dashboard.js 파일 진입 확인');
 
 // ✅ Chart 전역 설정 (성능 최적화)
-Chart.defaults.responsive = false;
+Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
-Chart.defaults.responsiveAnimationDuration = 0;
-Chart.defaults.resizeDelay = 1000;
+Chart.defaults.animation = false;
+Chart.defaults.resizeDelay = 200;
 
 // ───────────────────────────────
 // 전역 인스턴스 (중복 생성 방지)
@@ -91,7 +91,7 @@ function initFeeChart() {
     const values = canvas.dataset.values?.split(',').map(Number) || [];
 
     if (labels.length === 0 || values.length === 0) {
-        const wrapper = document.getElementById('feeChartWrapper');
+        const wrapper = canvas.parentElement;
         if (wrapper) {
             wrapper.innerHTML = '<p style="text-align:center; padding:2rem; color:#888;">📉 결제 데이터가 없습니다.</p>';
         }
@@ -99,8 +99,9 @@ function initFeeChart() {
     }
 
     const ctx = canvas.getContext('2d');
+    const wrapper = canvas.parentElement;
     canvas.height = 350;
-    canvas.width = canvas.offsetWidth;
+    canvas.width = wrapper.offsetWidth;
 
     feeChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -115,6 +116,8 @@ function initFeeChart() {
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             animation: false,
             plugins: {
                 legend: { display: false },
@@ -153,8 +156,9 @@ function initMemberGrowthChart(stats, months = 6) {
     }
 
     const ctx = canvas.getContext('2d');
+    const wrapper = canvas.parentElement;
     canvas.height = 350;
-    canvas.width = canvas.offsetWidth;
+    canvas.width = wrapper.offsetWidth;
 
     memberGrowthChartInstance = new Chart(ctx, {
         type: 'line',
@@ -184,6 +188,8 @@ function initMemberGrowthChart(stats, months = 6) {
             ]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             animation: false,
             plugins: {
                 legend: { display: true, position: 'top' },
@@ -211,8 +217,9 @@ function initStatsChart(stats) {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
+    const wrapper = canvas.parentElement;
     canvas.height = 350;
-    canvas.width = canvas.offsetWidth;
+    canvas.width = wrapper.offsetWidth;
 
     statsChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -237,6 +244,8 @@ function initStatsChart(stats) {
             ]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             animation: false,
             plugins: {
                 legend: { position: 'top' }
@@ -259,8 +268,9 @@ function initRoleChart(stats) {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
+    const wrapper = canvas.parentElement;
     canvas.height = 350;
-    canvas.width = canvas.offsetWidth;
+    canvas.width = wrapper.offsetWidth;
 
     roleChartInstance = new Chart(ctx, {
         type: 'pie',
@@ -278,6 +288,8 @@ function initRoleChart(stats) {
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             animation: false,
             plugins: {
                 legend: { position: 'bottom' },
@@ -294,3 +306,31 @@ function initRoleChart(stats) {
         }
     });
 }
+
+// ───────────────────────────────
+// 🔄 브라우저 리사이즈 대응
+// ───────────────────────────────
+let resizeTimeout;
+
+window.addEventListener('resize', function() {
+    // 연속된 리사이즈 이벤트 방지 (디바운싱)
+    clearTimeout(resizeTimeout);
+
+    resizeTimeout = setTimeout(function() {
+        console.log('🔄 리사이즈 이벤트 발생 - 차트 업데이트');
+
+        // 각 차트 인스턴스의 resize() 호출
+        if (feeChartInstance) {
+            feeChartInstance.resize();
+        }
+        if (memberGrowthChartInstance) {
+            memberGrowthChartInstance.resize();
+        }
+        if (statsChartInstance) {
+            statsChartInstance.resize();
+        }
+        if (roleChartInstance) {
+            roleChartInstance.resize();
+        }
+    }, 250); // 250ms 대기 후 실행
+});
