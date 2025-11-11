@@ -34,7 +34,7 @@ public class CounselorRequest {
     private String introduction;
     private String gender;
     private String profileImage;
-    private String hashtags;
+    private List<String> hashtags;
     private int price;
 
     // 자격증 목록
@@ -48,7 +48,9 @@ public class CounselorRequest {
                 .introduction(introduction)
                 .gender(gender)
                 .profileImage(profileImage)
-                .hashtags(hashtags)
+                .hashtags(hashtags != null && !hashtags.isEmpty()
+                        ? String.join("#", hashtags)
+                        : null)
                 .price(price)
                 .status(Status.PENDING)
                 .build();
