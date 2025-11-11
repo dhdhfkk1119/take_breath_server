@@ -50,7 +50,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/test/**",                   // 테스트용
                         "/css/**", "/js/**", "/images/**", "/favicon.ico",
                         "/uploads/**",
-                        "/api/terms/**"
+                        "/api/terms/**",
+                        "/api/social/**"
                 );
 
         registry.addInterceptor(authInterceptor)

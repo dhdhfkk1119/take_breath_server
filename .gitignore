@@ -272,3 +272,6 @@ $RECYCLE.BIN/
 /src/main/resources/application.properties
 /src/main/generated/
 /build/
+
+# Firebase Admin SDK 인증
+src/main/resources/firebase.json

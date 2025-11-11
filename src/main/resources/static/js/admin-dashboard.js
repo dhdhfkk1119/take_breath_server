@@ -1,38 +1,44 @@
 // ──────────────────────────────────────────────
-// 📊 Admin Dashboard Chart Script (Fast Render Optimized)
+// 📊 Admin Dashboard Chart Script (Stable & Optimized)
 // ──────────────────────────────────────────────
+window.addEventListener('error', function (e) {
+  console.error('💥 JS 전역 오류 발생:', e.message, e.filename, e.lineno);
+});
+console.log('✅ admin-dashboard.js 파일 진입 확인');
 
-// ✅ Chart 전역 설정 (흔들림 / 재렌더링 차단)
-Chart.defaults.responsive = false;
+// ✅ Chart 전역 설정 (성능 최적화)
+Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
-Chart.defaults.responsiveAnimationDuration = 0;
-Chart.defaults.resizeDelay = 1000;
+Chart.defaults.animation = false;
+Chart.defaults.resizeDelay = 200;
 
+// ───────────────────────────────
+// 전역 인스턴스 (중복 생성 방지)
+// ───────────────────────────────
 let feeChartInstance,
     memberGrowthChartInstance,
-    reportStatusChartInstance,
     statsChartInstance,
     roleChartInstance;
 
 let isInitialized = false;
 
 // ───────────────────────────────
-// 메인 진입 (DOMContentLoaded보다 빠르게 실행)
+// 초기 실행 (한 번만)
 // ───────────────────────────────
-document.addEventListener('readystatechange', function() {
-    if (document.readyState === 'interactive' && !isInitialized) {
-        if (!window.stats) return;
-
-        // ✅ 순차적으로 차트 렌더링 (부하 분산)
-        setTimeout(() => initFeeChart(), 0);
-        setTimeout(() => initMemberGrowthChart(window.stats, 6), 50);
-        setTimeout(() => initReportStatusChart(window.stats), 100);
-        setTimeout(() => initStatsChart(window.stats), 150);
-        setTimeout(() => initRoleChart(window.stats), 200);
-
-        setupEventListeners();
-        isInitialized = true;
+window.addEventListener('load', function () {
+    console.log('✅ admin-dashboard.js fully loaded');
+    if (!window.stats) {
+        console.error('❌ window.stats 없음');
+        return;
     }
+
+    // 순차적으로 차트 렌더링
+    setTimeout(() => initFeeChart(), 0);
+    setTimeout(() => initMemberGrowthChart(window.stats, 6), 50);
+    setTimeout(() => initStatsChart(window.stats), 100);
+    setTimeout(() => initRoleChart(window.stats), 150);
+
+    setupEventListeners();
 });
 
 // ───────────────────────────────
@@ -85,16 +91,17 @@ function initFeeChart() {
     const values = canvas.dataset.values?.split(',').map(Number) || [];
 
     if (labels.length === 0 || values.length === 0) {
-        const wrapper = document.getElementById('feeChartWrapper');
+        const wrapper = canvas.parentElement;
         if (wrapper) {
             wrapper.innerHTML = '<p style="text-align:center; padding:2rem; color:#888;">📉 결제 데이터가 없습니다.</p>';
         }
         return;
     }
 
-    canvas.height = 350;
-    canvas.width = canvas.offsetWidth;
     const ctx = canvas.getContext('2d');
+    const wrapper = canvas.parentElement;
+    canvas.height = 350;
+    canvas.width = wrapper.offsetWidth;
 
     feeChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -109,7 +116,7 @@ function initFeeChart() {
             }]
         },
         options: {
-            responsive: false,
+            responsive: true,
             maintainAspectRatio: false,
             animation: false,
             plugins: {
@@ -148,9 +155,10 @@ function initMemberGrowthChart(stats, months = 6) {
         counselorData = counselorData.slice(-months);
     }
 
-    canvas.height = 350;
-    canvas.width = canvas.offsetWidth;
     const ctx = canvas.getContext('2d');
+    const wrapper = canvas.parentElement;
+    canvas.height = 350;
+    canvas.width = wrapper.offsetWidth;
 
     memberGrowthChartInstance = new Chart(ctx, {
         type: 'line',
@@ -180,10 +188,9 @@ function initMemberGrowthChart(stats, months = 6) {
             ]
         },
         options: {
-            responsive: false,
+            responsive: true,
             maintainAspectRatio: false,
             animation: false,
-            interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { display: true, position: 'top' },
                 tooltip: {
@@ -203,54 +210,16 @@ function initMemberGrowthChart(stats, months = 6) {
 }
 
 // ───────────────────────────────
-// 🚨 신고 처리 현황
-// ───────────────────────────────
-function initReportStatusChart(stats) {
-    const canvas = document.getElementById('reportStatusChart');
-    if (!canvas) return;
-
-    canvas.height = 350;
-    canvas.width = canvas.offsetWidth;
-    const data = stats?.reportStatusData || {};
-    const ctx = canvas.getContext('2d');
-
-    reportStatusChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: data.labels || ['대기중', '승인됨', '반려됨'],
-            datasets: [{
-                data: data.values || [0, 0, 0],
-                backgroundColor: ['#f39c12', '#2ecc71', '#e74c3c'],
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: false,
-            maintainAspectRatio: false,
-            animation: false,
-            plugins: {
-                legend: { position: 'bottom' },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => ctx.label + ': ' + ctx.parsed + '건'
-                    }
-                }
-            }
-        }
-    });
-}
-
-// ───────────────────────────────
 // 👥 회원/상담사 현황
 // ───────────────────────────────
 function initStatsChart(stats) {
     const canvas = document.getElementById('statsChart');
     if (!canvas) return;
 
-    canvas.height = 350;
-    canvas.width = canvas.offsetWidth;
     const ctx = canvas.getContext('2d');
+    const wrapper = canvas.parentElement;
+    canvas.height = 350;
+    canvas.width = wrapper.offsetWidth;
 
     statsChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -275,7 +244,7 @@ function initStatsChart(stats) {
             ]
         },
         options: {
-            responsive: false,
+            responsive: true,
             maintainAspectRatio: false,
             animation: false,
             plugins: {
@@ -298,9 +267,10 @@ function initRoleChart(stats) {
     const canvas = document.getElementById('roleChart');
     if (!canvas) return;
 
-    canvas.height = 350;
-    canvas.width = canvas.offsetWidth;
     const ctx = canvas.getContext('2d');
+    const wrapper = canvas.parentElement;
+    canvas.height = 350;
+    canvas.width = wrapper.offsetWidth;
 
     roleChartInstance = new Chart(ctx, {
         type: 'pie',
@@ -318,7 +288,7 @@ function initRoleChart(stats) {
             }]
         },
         options: {
-            responsive: false,
+            responsive: true,
             maintainAspectRatio: false,
             animation: false,
             plugins: {
@@ -336,3 +306,31 @@ function initRoleChart(stats) {
         }
     });
 }
+
+// ───────────────────────────────
+// 🔄 브라우저 리사이즈 대응
+// ───────────────────────────────
+let resizeTimeout;
+
+window.addEventListener('resize', function() {
+    // 연속된 리사이즈 이벤트 방지 (디바운싱)
+    clearTimeout(resizeTimeout);
+
+    resizeTimeout = setTimeout(function() {
+        console.log('🔄 리사이즈 이벤트 발생 - 차트 업데이트');
+
+        // 각 차트 인스턴스의 resize() 호출
+        if (feeChartInstance) {
+            feeChartInstance.resize();
+        }
+        if (memberGrowthChartInstance) {
+            memberGrowthChartInstance.resize();
+        }
+        if (statsChartInstance) {
+            statsChartInstance.resize();
+        }
+        if (roleChartInstance) {
+            roleChartInstance.resize();
+        }
+    }, 250); // 250ms 대기 후 실행
+});

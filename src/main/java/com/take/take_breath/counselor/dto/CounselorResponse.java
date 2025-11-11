@@ -3,6 +3,7 @@ package com.take.take_breath.counselor.dto;
 import com.take.take_breath.counselor.Counselor;
 import lombok.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,7 @@ public class CounselorResponse {
     private String specialty;
     private String introduction;
     private String profileImage;
-    private String hashtags;
+    private List<String> hashtags;
     private String gender;
     private int price;
     private long likeCount;
@@ -34,7 +35,7 @@ public class CounselorResponse {
                 .introduction(counselor.getIntroduction())
                 .gender(counselor.getGender())
                 .profileImage(counselor.getProfileImage())
-                .hashtags(counselor.getHashtags())
+                .hashtags(convertHashtags(counselor.getHashtags()))
                 .price(counselor.getPrice())
                 .licenses(
                         counselor.getLicenses() != null
@@ -46,5 +47,13 @@ public class CounselorResponse {
                 .likeCount(0)
                 .likedByMe(false)
                 .build();
+    }
+
+    private static List<String> convertHashtags(String hashtags) {
+        if (hashtags == null || hashtags.isBlank()) return List.of();
+        return Arrays.stream(hashtags.split("#"))
+                .filter(tag -> !tag.isBlank())
+                .map(tag -> "#" + tag.trim())
+                .collect(Collectors.toList());
     }
 }
