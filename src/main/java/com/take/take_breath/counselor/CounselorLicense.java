@@ -21,7 +21,7 @@ public class CounselorLicense {
     private String licenseRegiNumber; // 상세 설명
     private String licenseImage;  // 자격증 이미지 경로
 
-    // ✅ Counselor와 N:1 관계
+    // Counselor와 N:1 관계
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "counselor_id")
     private Counselor counselor;
