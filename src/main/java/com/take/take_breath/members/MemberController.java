@@ -85,7 +85,7 @@ public class MemberController {
     }
 
     // 회원정보 불러오기
-    @Auth
+    @Auth(roles = {Role.USER}, statuses = {Status.ACTIVE})
     @GetMapping("/info")
     public ResponseEntity<?> getMemberInfo(HttpServletRequest req) {
         String email = (String) req.getAttribute("memberEmail");
@@ -100,7 +100,7 @@ public class MemberController {
     }
 
     // 회원정보 수정
-    @Auth
+    @Auth(roles = {Role.USER}, statuses = {Status.ACTIVE})
     @PatchMapping("/update")
     public ResponseEntity<?> updateProfile(
             HttpServletRequest request,
@@ -113,14 +113,14 @@ public class MemberController {
     }
 
     // 로그아웃
-    @Auth
+    @Auth(roles = {Role.USER}, statuses = {Status.ACTIVE})
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
     // 회원 탈퇴 요청
-    @Auth
+    @Auth(roles = {Role.USER}, statuses = {Status.ACTIVE})
     @PostMapping("/withdrawal")
     public ResponseEntity<?> requestWithdrawal(
             HttpServletRequest request,
@@ -134,14 +134,13 @@ public class MemberController {
     }
 
     // 탈퇴 취소
-    @Auth
+    @Auth(roles = {Role.USER}, statuses = {Status.WITHDRAWAL})
     @PostMapping("/cancel-withdrawal")
     public ResponseEntity<?> cancelWithdrawal(HttpServletRequest request) {
         String email = (String) request.getAttribute("memberEmail");
         memberWithdrawalService.cancelWithdrawal(email);
         return ResponseEntity.ok("계정이 복구되었습니다.");
     }
-
 
 
 }
