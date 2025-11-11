@@ -25,7 +25,7 @@ public class CounselorLikeService {
     private final MemberRepository memberRepository;
 
     /**
-     * ✅ 토큰 기반 좋아요 토글 (memberId 없이 동작)
+     * 토큰 기반 좋아요 토글 (memberId 없이 동작)
      */
     public boolean toggleLike(Long counselorId,Long memberId) {
 
@@ -51,7 +51,7 @@ public class CounselorLikeService {
     }
 
     /**
-     * ✅ 내가 좋아요한 상담사 목록 (페이지네이션)
+     * 내가 좋아요한 상담사 목록 (페이지네이션)
      */
     public PageResponse<CounselorResponse> getLikedCounselors(Pageable pageable, HttpServletRequest request) {
         String memberEmail = (String) request.getAttribute("memberEmail");
@@ -78,7 +78,7 @@ public class CounselorLikeService {
     }
 
     /**
-     * ✅ 특정 상담사의 좋아요 개수
+     * 특정 상담사의 좋아요 개수
      */
     public long countLikes(Long counselorId) {
         Counselor counselor = counselorRepository.findById(counselorId)
@@ -87,7 +87,7 @@ public class CounselorLikeService {
     }
 
     /**
-     * ✅ 현재 사용자가 특정 상담사를 좋아요했는지 여부
+     * 현재 사용자가 특정 상담사를 좋아요했는지 여부
      */
     public boolean isLikedByMember(Long counselorId, String memberEmail) {
         if (memberEmail == null) return false;
