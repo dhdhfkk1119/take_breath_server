@@ -80,10 +80,18 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     // JWT 토큰 "Bearer " 제거
     private String resolveToken(HttpServletRequest request) {
+        // 1. Authorization 헤더에서 먼저 시도
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
+
+        // 2. 없으면 쿼리 파라미터에서 토큰 가져오기 (SSE용)
+        String tokenParam = request.getParameter("token");
+        if (tokenParam != null) {
+            return tokenParam;
+        }
+
         return null;
     }
 

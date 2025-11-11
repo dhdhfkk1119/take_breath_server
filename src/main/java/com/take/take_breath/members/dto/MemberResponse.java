@@ -6,13 +6,16 @@ import com.take.take_breath.members.Role;
 import com.take.take_breath.members.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 @AllArgsConstructor
 public class MemberResponse {
-    private String token;
+    private Long id;
+    private String accessToken;
     private String email;
-    private String nickname;
+    private String nickName;
     private String profileImage;
     private String name;
     private String phone;
@@ -26,8 +29,9 @@ public class MemberResponse {
     private Long daysLeft;                   // 남은 일수
 
     public MemberResponse(Member member) {
+        this.id = member.getId();
         this.email = member.getEmail();
-        this.nickname = member.getNickname();
+        this.nickName = member.getNickName();
         this.profileImage = member.getProfileImage();
         this.name = member.getName();
         this.phone = member.getPhone();

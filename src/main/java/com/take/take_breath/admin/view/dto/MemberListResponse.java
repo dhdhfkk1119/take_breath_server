@@ -33,7 +33,7 @@ public class MemberListResponse {
         this.id = member.getId();
         this.email = member.getEmail();
         this.name = member.getName();
-        this.nickname = member.getNickname();
+        this.nickname = member.getNickName();
         this.role = member.getRole();
         this.status = member.getStatus();
         this.withdrawalRequestedAt = member.getWithdrawalRequestedAt();

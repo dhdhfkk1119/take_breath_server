@@ -66,6 +66,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 업로드된 파일을 웹에서 접근 가능하게 설정
+        registry.addResourceHandler("/member-images/**")
+                .addResourceLocations("file:./uploads/");
+
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:./uploads/");
         // JS 파일 매핑

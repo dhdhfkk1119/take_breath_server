@@ -21,7 +21,7 @@ upload:
   record-video-dir: records/videos/
   community-dir : community-images/
 
-  
+
 # ?? ??? ??
 # ERROR > WARN > INFO > DEBUG > TRACE
 logging:

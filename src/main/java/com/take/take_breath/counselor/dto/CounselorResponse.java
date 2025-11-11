@@ -21,6 +21,8 @@ public class CounselorResponse {
     private String hashtags;
     private String gender;
     private int price;
+    private long likeCount;
+    private boolean likedByMe;
 
     private List<CounselorLicenseResponse> licenses; // 자격증 목록
 
@@ -41,6 +43,8 @@ public class CounselorResponse {
                                 .collect(Collectors.toList())
                                 : null
                 )
+                .likeCount(0)
+                .likedByMe(false)
                 .build();
     }
 }

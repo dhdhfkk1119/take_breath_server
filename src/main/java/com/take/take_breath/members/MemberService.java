@@ -5,6 +5,7 @@ import com.take.take_breath._core._exception.Exception401;
 import com.take.take_breath._core._exception.Exception403;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
 import com.take.take_breath._core._utils.UploadProperties;
+import com.take.take_breath.counselor.CounselorRepository;
 import com.take.take_breath.email.EmailCodeStore;
 import com.take.take_breath.email.EmailService;
 import com.take.take_breath.email.dto.EmailRequest;
@@ -155,7 +156,7 @@ public class MemberService {
                 refreshToken, // autoLogin=false면 null일 수 있음
                 member.getId(),
                 member.getName(),
-                member.getNickname(),
+                member.getNickName(),
                 member.getEmail(),
                 member.getProfileImage(),
                 member.getRole().name(),
@@ -239,13 +240,14 @@ public class MemberService {
 
     // 회원정보 수정
     @Transactional
-    public void  updateMemberInfo (String email, String nickname, MultipartFile image) throws IOException {
+    public void  updateMemberInfo (String email, String nickName, MultipartFile image) throws IOException {
+        System.out.println("updateMemberInfo 호출됨: nickName=" + nickName);
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception400("회원 정보를 찾을 수 없습니다."));
 
         // 닉네임 수정
-        if (nickname != null && !nickname.isEmpty()) {
-            member.setNickname(nickname);
+        if (nickName != null && !nickName.isEmpty()) {
+            member.setNickName(nickName);
         }
 
         // 프로필 이미지 수정
