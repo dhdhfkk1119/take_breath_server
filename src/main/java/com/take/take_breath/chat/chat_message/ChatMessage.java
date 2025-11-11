@@ -44,7 +44,7 @@ public class ChatMessage {
     @Builder.Default
     private MessageStatus status = MessageStatus.SENT;
 
-    // 파일 저장 경로 (상대 경로) - "2025/10/27/a3f5b2c1-4d8e-4f1a-9c3b-1e5f6a7b8c9d.jpg"
+    // 파일 저장 경로 (상대 경로) - "/uploads/chat-images/a3f5b2c1-4d8e-4f1a-9c3b-1e5f6a7b8c9d.jpg"
     @Column(name = "attachment_path")
     private String attachmentPath;
 

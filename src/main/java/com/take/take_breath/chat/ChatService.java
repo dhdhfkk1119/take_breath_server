@@ -211,7 +211,7 @@ public class ChatService {
         String attachmentPath;
         try {
             String relativePath = uploadFile.uploadImage(image, "chat");
-            attachmentPath = "/uploads/chat-images/" + relativePath;
+            attachmentPath = "/uploads/" + relativePath;
         } catch (IOException e) {
             throw new Exception500("이미지 업로드에 실패했습니다.");
         }
