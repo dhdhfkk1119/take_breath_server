@@ -7,9 +7,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 @Slf4j
@@ -18,12 +20,13 @@ public class FirebaseInitializer {
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
         log.info("Initializing Firebase.");
-        FileInputStream serviceAccount =
-                new FileInputStream("./firebase.json");
+
+        // resources 디렉토리에서 파일을 읽어옵니다.
+        InputStream serviceAccount = new ClassPathResource("firebase.json").getInputStream();
 
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .setStorageBucket("heroku-sample.appspot.com")
+                .setStorageBucket("takeabreath-72320.appspot.com")
                 .build();
 
         FirebaseApp app = FirebaseApp.initializeApp(options);

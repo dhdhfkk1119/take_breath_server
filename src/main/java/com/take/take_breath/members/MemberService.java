@@ -177,10 +177,14 @@ public class MemberService {
     public MemberResponseTo.Login socialLogin(SocialLoginRequest req) {
         FirebaseToken decodedToken;
         try {
-            // A. Firebase ID Token 검증 및 디코드
+            log.info("Attempting to verify token: {}", req.getIdToken().substring(0, 50) + "...");
+
+            // FirebaseAuth를 기본값으로 가져오기 (firebaseApp() 제거)
             decodedToken = FirebaseAuth.getInstance().verifyIdToken(req.getIdToken());
+
+            log.info("Token verified successfully for email: {}", decodedToken.getEmail());
         } catch (FirebaseAuthException e) {
-            // 토큰이 유효하지 않거나 만료된 경우
+            log.error("Firebase token verification failed: {}", e.getMessage());
             throw new Exception401("유효하지 않은 소셜 로그인 토큰입니다.");
         }
 
@@ -215,24 +219,34 @@ public class MemberService {
         String accessToken = jwtTokenProvider.createToken(member);
 
         // 5. 로그인 응답 DTO 반환 (refresh token은 소셜로그인 기본 로직에서는 생략)
-        return new MemberResponseTo.Login(
-                accessToken,
-                null, // RefreshToken은 일단 null
-                member.getId(),
-                member.getName(),
-                member.getNickName(),
-                member.getEmail(),
-                member.getProfileImage(),
-                member.getRole().name(),
-                member.getStatus().name(),
-                member.getPhone()
-        );
+        return MemberResponseTo.Login.builder()
+                .accessToken(accessToken)
+                .refreshToken("")
+                .id(member.getId())
+                .name(member.getName())
+                .nickName(member.getNickName())
+                .email(member.getEmail())
+                .profileImage(member.getProfileImage())
+                .role(member.getRole().name())
+                .status(member.getStatus().name())
+                .phone(member.getPhone())
+                .daysLeft(null)
+                .build();
     }
 
     // 자동 소셜 로그인 
     @Transactional
     private Member autoRegisterSocialUser(String email, String name, String provider) {
         // 닉네임, 이름, 전화번호 등은 구글에서 제공하는 정보를 사용하거나 기본값으로 설정할 수 있습니다.
+        LoginType loginType;
+        try {
+            // provider 문자열을 대문자로 변환하여 Enum으로 파싱
+            loginType = LoginType.valueOf(provider.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // 유효하지 않은 provider일 경우 기본값 또는 예외 처리
+            loginType = LoginType.LOCAL; // 또는 throw new Exception400("유효하지 않은 소셜 제공자입니다.");
+        }
+
 
         // Member 엔티티 생성 (비밀번호 없음)
         Member newMember = Member.builder()
@@ -243,13 +257,12 @@ public class MemberService {
                 .nickName("S-" + provider + "-" + System.currentTimeMillis() % 10000) // 닉네임 기본 설정
                 .role(Role.USER) // 기본 역할 설정
                 .status(Status.ACTIVE) // 바로 활성화
-                // 비밀번호는 null 또는 암호화된 빈 문자열로 처리 (자체 로그인 불가능하게 막음)
+                .loginType(loginType)
                 .password(passwordEncoder.encode(""))
                 .build();
 
         // 약관 동의 처리 (필수 약관에 기본 동의 처리)
-
-        List<Terms> requiredTerms = termsRepository.findByIsRequired(true);
+        List<Terms> requiredTerms = termsRepository.findByRequired(true);
         for (Terms terms : requiredTerms) {
             MemberTerms memberTerms = MemberTerms.builder()
                     .member(newMember)
