@@ -5,6 +5,31 @@
     <p>시스템 전체 통계를 확인하세요</p>
 </div>
 
+<!-- 신고 통계 -->
+<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">🚨 신고 통계</h3>
+<div class="stats-grid">
+    <div class="stat-card primary" onclick="location.href='/api/admin/view/reports'">
+        <h3>전체 신고</h3>
+        <div class="number">{{stats.totalReports}}</div>
+        <div class="label">게시글 {{stats.postReports}} / 댓글 {{stats.commentReports}}</div>
+    </div>
+    <div class="stat-card warning" onclick="location.href='/api/admin/view/reports/pending'">
+        <h3>대기 중</h3>
+        <div class="number">{{stats.pendingReports}}</div>
+        <div class="label">처리 필요</div>
+    </div>
+    <div class="stat-card success" onclick="location.href='/api/admin/view/reports/approved'">
+        <h3>승인됨</h3>
+        <div class="number">{{stats.approvedReports}}</div>
+        <div class="label">제재 완료</div>
+    </div>
+    <div class="stat-card danger" onclick="location.href='/api/admin/view/reports/rejected'">
+        <h3>반려됨</h3>
+        <div class="number">{{stats.rejectedReports}}</div>
+        <div class="label">신고 기각</div>
+    </div>
+</div>
+
 <!-- 월별 결제 수수료 추이 -->
 <div class="chart-container">
     <h3>📈 월별 결제 수수료 추이</h3>
@@ -18,32 +43,23 @@
 
 <!-- 통계 차트 -->
 <h3 style="margin: 2rem 0 1rem; color: #2c3e50;">📊 통계 차트</h3>
-<div class="charts-section">
-    <!-- 회원 증가 추이 -->
-    <div class="chart-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3>월별 회원 증가 추이</h3>
-            <div class="chart-controls">
-                <button class="member-chart-btn active" data-period="6">최근 6개월</button>
-                <button class="member-chart-btn" data-period="12">최근 12개월</button>
-                <button class="member-chart-btn" data-period="24">최근 24개월</button>
-            </div>
-        </div>
-        <div class="chart-wrapper">
-            <canvas id="memberGrowthChart"></canvas>
+
+<!-- 회원 증가 추이 (전체 너비) -->
+<div class="chart-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3>월별 회원 증가 추이</h3>
+        <div class="chart-controls">
+            <button class="member-chart-btn active" data-period="6">최근 6개월</button>
+            <button class="member-chart-btn" data-period="12">최근 12개월</button>
+            <button class="member-chart-btn" data-period="24">최근 24개월</button>
         </div>
     </div>
-
-    <!-- 신고 처리 현황 -->
-    <div class="chart-container">
-        <h3>신고 상태별 처리 건수</h3>
-        <div class="chart-wrapper">
-            <canvas id="reportStatusChart"></canvas>
-        </div>
+    <div class="chart-wrapper" id="memberGrowthChartWrapper">
+        <canvas id="memberGrowthChart"></canvas>
     </div>
 </div>
 
-<!-- 차트 섹션 -->
+<!-- 회원/상담사 현황 + 역할별 비율 (가로 배치) -->
 <div class="charts-section">
     <div class="chart-container">
         <h3>회원 및 상담사 현황</h3>
@@ -102,42 +118,10 @@
     </div>
 </div>
 
-<!-- 신고 통계 -->
-<h3 style="margin: 2rem 0 1rem; color: #2c3e50;">🚨 신고 통계</h3>
-<div class="stats-grid">
-    <div class="stat-card primary" onclick="location.href='/api/admin/view/reports'">
-        <h3>전체 신고</h3>
-        <div class="number">{{stats.totalReports}}</div>
-        <div class="label">게시글 {{stats.postReports}} / 댓글 {{stats.commentReports}}</div>
-    </div>
-    <div class="stat-card warning" onclick="location.href='/api/admin/view/reports/pending'">
-        <h3>대기 중</h3>
-        <div class="number">{{stats.pendingReports}}</div>
-        <div class="label">처리 필요</div>
-    </div>
-    <div class="stat-card success" onclick="location.href='/api/admin/view/reports/approved'">
-        <h3>승인됨</h3>
-        <div class="number">{{stats.approvedReports}}</div>
-        <div class="label">제재 완료</div>
-    </div>
-    <div class="stat-card danger" onclick="location.href='/api/admin/view/reports/rejected'">
-        <h3>반려됨</h3>
-        <div class="number">{{stats.rejectedReports}}</div>
-        <div class="label">신고 기각</div>
-    </div>
-</div>
+
 
 <script>
-    Chart.defaults.responsive = false;
-    Chart.defaults.maintainAspectRatio = false;
-    Chart.defaults.responsiveAnimationDuration = 0;
-    Chart.defaults.resizeDelay = 1000;
-
     window.stats = {{{statsJson}}};
-
-    document.addEventListener('DOMContentLoaded', () => {
-        initCharts(window.stats);
-    });
 </script>
 
 {{> layout/admin-layout-end}}

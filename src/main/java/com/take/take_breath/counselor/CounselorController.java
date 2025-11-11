@@ -1,10 +1,13 @@
 package com.take.take_breath.counselor;
 
 import com.take.take_breath._core._utils.PageUtil;
+import com.take.take_breath._core.auth.Auth;
 import com.take.take_breath.counselor.dto.CounselorProfileUpdateRequest;
 import com.take.take_breath.counselor.dto.CounselorRequest;
 import com.take.take_breath.counselor.dto.CounselorResponse;
 import com.take.take_breath.members.MemberService;
+import com.take.take_breath.members.Role;
+import com.take.take_breath.members.Status;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +72,7 @@ public class CounselorController {
     }
 
     // 상담사 프로필 수정 (이미지, 한줄소개만)
+    @Auth(roles = {Role.COUNSELOR}, statuses = {Status.ACTIVE})
     @PutMapping("/{id}/profile")
     public ResponseEntity<?> updateProfile(
             @RequestParam Long id,
