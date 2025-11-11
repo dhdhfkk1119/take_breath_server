@@ -17,7 +17,7 @@ public class AdminCommunityController {
 
     private final AdminCommunityService adminCommunityService;
 
-    /** ✅ 카테고리 관리 페이지 */
+    /** 카테고리 관리 페이지 */
     @GetMapping("/categories")
     public String categoryView(Model model) {
         List<CommunityCategoryResponse.ListDTO> categories = adminCommunityService.getAllCategories();
@@ -31,14 +31,14 @@ public class AdminCommunityController {
         return "admin/community-category";
     }
 
-    // ✅ 카테고리 추가
+    // 카테고리 추가
     @PostMapping("/categories")
     public String addCategory(@RequestParam String name) {
         adminCommunityService.addCategory(name);
         return "redirect:/api/admin/view/community/categories";
     }
 
-    // ✅ 카테고리 삭제
+    // 카테고리 삭제
     @PostMapping("/categories/{id}/delete")
     public String deleteCategory(@PathVariable Long id) {
         adminCommunityService.deleteCategory(id);
@@ -46,7 +46,7 @@ public class AdminCommunityController {
     }
 
 
-    /** ✅ 게시글 관리 페이지 (리스트형 SSR) */
+    /** 게시글 관리 페이지 (리스트형 SSR) */
     @GetMapping("/posts")
     public String postsView(Model model) {
         List<CommunityPostResponse.ListDTO> posts = adminCommunityService.getAllPosts();
@@ -60,7 +60,7 @@ public class AdminCommunityController {
         return "admin/community-posts";
     }
 
-    // ✅ 게시글 강제 삭제
+    // 게시글 강제 삭제
     @PostMapping("/posts/{id}/delete")
     public String deletePost(@PathVariable Long id) {
         adminCommunityService.deletePost(id);
@@ -68,7 +68,7 @@ public class AdminCommunityController {
     }
 
 
-    /** ✅ 댓글 관리 페이지 (리스트형 SSR) */
+    /** 댓글 관리 페이지 (리스트형 SSR) */
     @GetMapping("/comments")
     public String commentsView(Model model) {
         List<CommunityCommentResponse.ResponseDTO> comments = adminCommunityService.getAllComments();
@@ -82,7 +82,7 @@ public class AdminCommunityController {
         return "admin/community-comments";
     }
 
-    // ✅ 댓글 강제 삭제
+    // 댓글 강제 삭제
     @PostMapping("/comments/{id}/delete")
     public String deleteComment(@PathVariable Long id) {
         adminCommunityService.deleteComment(id);

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminLoginController {
 
     private final AdminAuthService adminAuthService;
-    private final MemberRepository memberRepository; // ✅ 추가
+    private final MemberRepository memberRepository;
 
     // 로그인 페이지
     @GetMapping("/login")
@@ -46,7 +46,7 @@ public class AdminLoginController {
             // 세션에 관리자 정보 저장
             session.setAttribute("adminToken", token);
             session.setAttribute("adminEmail", email);
-            session.setAttribute("adminId", admin.getId()); // ✅ 핵심 라인
+            session.setAttribute("adminId", admin.getId());
 
             // 로그인 성공 시 대시보드로 이동
             return "redirect:/api/admin/view/dashboard";
