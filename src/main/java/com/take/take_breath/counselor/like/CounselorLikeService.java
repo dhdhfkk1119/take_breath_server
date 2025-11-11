@@ -25,15 +25,12 @@ public class CounselorLikeService {
     private final MemberRepository memberRepository;
 
     /**
-     * ✅ 토큰 기반 좋아요 토글 (memberId 없이 동작)
+     * 토큰 기반 좋아요 토글 (memberId 없이 동작)
      */
-    public boolean toggleLike(Long counselorId, HttpServletRequest request) {
-        String memberEmail = (String) request.getAttribute("memberEmail");
-        if (memberEmail == null) {
-            throw new IllegalArgumentException("인증된 사용자가 아닙니다.");
-        }
+    public boolean toggleLike(Long counselorId,Long memberId) {
 
-        Member member = memberRepository.findByEmail(memberEmail)
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
         Counselor counselor = counselorRepository.findById(counselorId)
@@ -54,7 +51,7 @@ public class CounselorLikeService {
     }
 
     /**
-     * ✅ 내가 좋아요한 상담사 목록 (페이지네이션)
+     * 내가 좋아요한 상담사 목록 (페이지네이션)
      */
     public PageResponse<CounselorResponse> getLikedCounselors(Pageable pageable, HttpServletRequest request) {
         String memberEmail = (String) request.getAttribute("memberEmail");
@@ -81,7 +78,7 @@ public class CounselorLikeService {
     }
 
     /**
-     * ✅ 특정 상담사의 좋아요 개수
+     * 특정 상담사의 좋아요 개수
      */
     public long countLikes(Long counselorId) {
         Counselor counselor = counselorRepository.findById(counselorId)
@@ -90,7 +87,7 @@ public class CounselorLikeService {
     }
 
     /**
-     * ✅ 현재 사용자가 특정 상담사를 좋아요했는지 여부
+     * 현재 사용자가 특정 상담사를 좋아요했는지 여부
      */
     public boolean isLikedByMember(Long counselorId, String memberEmail) {
         if (memberEmail == null) return false;

@@ -115,7 +115,7 @@ public class DataInitializer implements CommandLineRunner {
         memberRepository.save(admin);
         saveMemberTerms(admin, List.of(terms1, terms2));
 
-        // ✅ 기록실 샘플 데이터 생성
+        // 기록실 샘플 데이터 생성
         createSampleRecords(user);
 
         // 상담사 Member 생성
@@ -204,7 +204,7 @@ public class DataInitializer implements CommandLineRunner {
                 .profileImage("default_profile1.png")
                 .specialty("직장 내 스트레스, 불안")
                 .price(50000)
-                .hashtags("#스트레스 #불안 #직장인")
+                .hashtags("#스트레스#불안#직장인")
                 .point(0)
                 .status(Status.PENDING)
                 .build();
@@ -216,7 +216,7 @@ public class DataInitializer implements CommandLineRunner {
                 .profileImage("default_profile2.png")
                 .specialty("대인관계, 번아웃, 우울")
                 .price(60000)
-                .hashtags("#대인관계 #번아웃 #우울")
+                .hashtags("#대인관계#번아웃#우울")
                 .point(0)
                 .status(Status.ACTIVE)
                 .build();
@@ -228,7 +228,7 @@ public class DataInitializer implements CommandLineRunner {
                 .profileImage("default_profile3.png")
                 .specialty("우울, 자존감")
                 .price(55000)
-                .hashtags("#우울 #자존감 #힐링")
+                .hashtags("#우울#자존감#힐링")
                 .point(70)
                 .status(Status.PENDING)
                 .build();
@@ -240,7 +240,7 @@ public class DataInitializer implements CommandLineRunner {
                 .profileImage("default_profile4.png")
                 .specialty("분노조절, 감정관리")
                 .price(65000)
-                .hashtags("#분노 #감정관리")
+                .hashtags("#분노#감정관리")
                 .point(100)
                 .status(Status.ACTIVE)
                 .build();
@@ -252,7 +252,7 @@ public class DataInitializer implements CommandLineRunner {
                 .profileImage("default_profile5.png")
                 .specialty("청소년, 진로")
                 .price(40000)
-                .hashtags("#청소년 #진로 #학업")
+                .hashtags("#청소년#진로#학업")
                 .point(50)
                 .status(Status.PENDING)
                 .build();
@@ -264,7 +264,7 @@ public class DataInitializer implements CommandLineRunner {
                 .profileImage("default_profile6.png")
                 .specialty("부부관계, 커플상담")
                 .price(70000)
-                .hashtags("#커플 #부부 #의사소통")
+                .hashtags("#커플#부부#의사소통")
                 .point(200)
                 .status(Status.ACTIVE)
                 .build();

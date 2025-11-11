@@ -1,5 +1,6 @@
 package com.take.take_breath._core._utils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
@@ -18,8 +19,8 @@ public class PageUtil {
         private int pageSize;             // 페이지당 항목 수
         private long totalElements;       // 전체 항목 수
         private int totalPages;           // 전체 페이지 수
-        private boolean isFirst;          // 첫 페이지 여부
-        private boolean isLast;           // 마지막 페이지 여부
+        @JsonProperty("isFirst") private boolean isFirst;          // 첫 페이지 여부
+        @JsonProperty("isLast") private boolean isLast;           // 마지막 페이지 여부
 
         /**
          * Spring Data Page 객체를 PageResponse로 변환
@@ -62,8 +63,8 @@ public class PageUtil {
         private int pageNumber;           // 현재 페이지 번호 (0부터 시작)
         private int pageSize;             // 페이지당 항목 수
         private boolean hasNext;          // 다음 페이지 존재 여부
-        private boolean isFirst;          // 첫 페이지 여부
-        private boolean isLast;           // 마지막 페이지 여부
+        @JsonProperty("isFirst") private boolean isFirst;          // 첫 페이지 여부
+        @JsonProperty("isLast") private boolean isLast;           // 마지막 페이지 여부
 
         /**
          * Spring Data Slice 객체를 SliceResponse로 변환

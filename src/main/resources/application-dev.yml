@@ -15,13 +15,13 @@ upload:
   root-dir: ./uploads/
   counselor-dir: counselor-images/
   member-dir: member-images/
-  chat-dir: chat-images/
+  chat-image-dir: chat-images/
   record-image-dir: records/images/
   record-audio-dir: records/audio/
   record-video-dir: records/videos/
   community-dir : community-images/
 
-  
+
 # ?? ??? ??
 # ERROR > WARN > INFO > DEBUG > TRACE
 logging:

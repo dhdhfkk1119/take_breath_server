@@ -64,14 +64,12 @@ public class AuthInterceptor implements HandlerInterceptor {
             // 4. 권한(Role) 확인
             checkRoleAndStatus(auth, role,status);
 
-
             // request에 JWT 정보 저장 -> 컨트롤러에서 필요 시 사용 가능
             request.setAttribute("memberEmail", email);
             request.setAttribute("memberRole", role);
             request.setAttribute("memberId", member.getId());
 
             return true;
-
         } catch (Exception401 | Exception403 e) {
             throw e;
         } catch (Exception e) {
@@ -82,10 +80,18 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     // JWT 토큰 "Bearer " 제거
     private String resolveToken(HttpServletRequest request) {
+        // 1. Authorization 헤더에서 먼저 시도
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
+
+        // 2. 없으면 쿼리 파라미터에서 토큰 가져오기 (SSE용)
+        String tokenParam = request.getParameter("token");
+        if (tokenParam != null) {
+            return tokenParam;
+        }
+
         return null;
     }
 
@@ -109,6 +115,4 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
         }
     }
-
-
 }

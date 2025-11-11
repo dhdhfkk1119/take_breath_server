@@ -21,8 +21,8 @@ public class UploadFile {
     private final UploadProperties uploadProperties;
 
 
-    public List<String> uploadImages(MultipartFile[] multipartFiles, String dir) throws IOException{
-        String fullUploadPath = Paths.get(uploadProperties.getRootDir(),dir).toString();
+    public List<String> uploadImages(MultipartFile[] multipartFiles, String dir) throws IOException {
+        String fullUploadPath = Paths.get(uploadProperties.getRootDir(), dir).toString();
 
         createUploadDirectory(fullUploadPath);
 
@@ -34,15 +34,16 @@ public class UploadFile {
             String uniqueFileName = generateUniqueFileName(extension);
             Path filePath = Paths.get(fullUploadPath, uniqueFileName);
             file.transferTo(filePath);
-            String webPath = Paths.get(dir, uniqueFileName).toString();
-            webPath = "/uploads/" + webPath.replace('\\', '/');
+
+            // '/uploads/' 제거
+            String webPath = Paths.get(dir, uniqueFileName).toString().replace('\\', '/');
 
             fileNames.add(webPath);
         }
 
-
         return fileNames;
     }
+
 
     /**
      * 단일 이미지 업로드
@@ -53,6 +54,10 @@ public class UploadFile {
     public String uploadImage(MultipartFile file, String dirType) throws IOException {
         // 디렉터리 구분 (yml 설정에서 가져옴)
         String subDir = resolveDirectory(dirType);
+
+        System.out.println("📂 dirType = {}" + dirType);
+        System.out.println("📂 subDir = {}" + subDir);
+        System.out.println("📂 rootDir = {}" + uploadProperties.getRootDir());
 
         // 전체 업로드 경로: ./uploads/member-images/
         String fullUploadPath = Paths.get(uploadProperties.getRootDir(), subDir).toString();
