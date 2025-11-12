@@ -44,17 +44,21 @@ public class CounselorController {
     }
 
     // 상담사 페이지네이션 (기존 그대로)
+    @Auth(statuses = {Status.ACTIVE})
     @GetMapping("/page")
     public ResponseEntity<PageUtil.PageResponse<CounselorResponse>> getPagedCounselors(
             @PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC)
-            Pageable pageable
+            Pageable pageable,
+            HttpServletRequest request
     ) {
-        PageUtil.PageResponse<CounselorResponse> response = counselorService.findAll(pageable);
+        Long memberId = (Long) request.getAttribute("memberId");
+        PageUtil.PageResponse<CounselorResponse> response = counselorService.findAll(pageable,memberId);
         log.info("상담사 전체 조회 정보 : {}",response);
         return ResponseEntity.ok(response);
     }
 
     // 상담사 상세 조회 (좋아요 여부 포함)
+    @Auth(statuses = {Status.ACTIVE})
     @GetMapping("/{id}")
     public ResponseEntity<CounselorResponse> getCounselorById(
             @PathVariable Long id,

@@ -191,6 +191,7 @@ public class MemberService {
         // B. 추출된 정보
         String email = decodedToken.getEmail();
         String name = decodedToken.getName(); // Firebase에서 제공하는 이름
+        String profileImageUrl = decodedToken.getPicture();
         String uid = decodedToken.getUid();   // Firebase 고유 UID
 
         // 1. 자체 DB에서 사용자 확인 (이메일 기준)
@@ -199,7 +200,7 @@ public class MemberService {
         if (member == null) {
             // 2. 신규 사용자: 자동 회원가입
             log.info("신규 소셜 사용자 자동 가입: {}", email);
-            member = autoRegisterSocialUser(email, name, req.getProvider());
+            member = autoRegisterSocialUser(email, name, profileImageUrl, req.getProvider());
         } else {
             // 3. 기존 사용자: 상태 및 기타 검사
             if (member.getStatus() == Status.PENDING) {
@@ -236,7 +237,7 @@ public class MemberService {
 
     // 자동 소셜 로그인 
     @Transactional
-    private Member autoRegisterSocialUser(String email, String name, String provider) {
+    private Member autoRegisterSocialUser(String email,String name, String profileImageUrl,String provider) {
         // 닉네임, 이름, 전화번호 등은 구글에서 제공하는 정보를 사용하거나 기본값으로 설정할 수 있습니다.
         LoginType loginType;
         try {
@@ -255,6 +256,7 @@ public class MemberService {
                 .emailVerified(true)
                 .name(name != null ? name : "소셜 사용자")
                 .nickName("S-" + provider + "-" + System.currentTimeMillis() % 10000) // 닉네임 기본 설정
+                .profileImage(profileImageUrl)
                 .role(Role.USER) // 기본 역할 설정
                 .status(Status.ACTIVE) // 바로 활성화
                 .loginType(loginType)

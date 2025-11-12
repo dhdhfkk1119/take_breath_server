@@ -27,7 +27,7 @@ public class CounselorResponse {
 
     private List<CounselorLicenseResponse> licenses; // 자격증 목록
 
-    public static CounselorResponse from(Counselor counselor) {
+    public static CounselorResponse from(Counselor counselor,boolean likedByMe) {
         return CounselorResponse.builder()
                 .id(counselor.getId())
                 .name(counselor.getMember().getName())
@@ -45,7 +45,7 @@ public class CounselorResponse {
                                 : null
                 )
                 .likeCount(0)
-                .likedByMe(false)
+                .likedByMe(likedByMe)
                 .build();
     }
 

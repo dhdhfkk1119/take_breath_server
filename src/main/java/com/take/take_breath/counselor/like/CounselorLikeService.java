@@ -67,9 +67,8 @@ public class CounselorLikeService {
         List<CounselorResponse> content = page.getContent().stream()
                 .map(like -> {
                     Counselor c = like.getCounselor();
-                    CounselorResponse dto = CounselorResponse.from(c);
+                    CounselorResponse dto = CounselorResponse.from(c, true);
                     dto.setLikeCount(countLikes(c.getId()));
-                    dto.setLikedByMe(true);
                     return dto;
                 })
                 .toList();

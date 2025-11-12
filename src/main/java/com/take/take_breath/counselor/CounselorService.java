@@ -7,6 +7,7 @@ import com.take.take_breath._core._utils.UploadFile;
 import com.take.take_breath.counselor.dto.CounselorProfileUpdateRequest;
 import com.take.take_breath.counselor.dto.CounselorRequest;
 import com.take.take_breath.counselor.dto.CounselorResponse;
+import com.take.take_breath.counselor.like.CounselorLikeRepository;
 import com.take.take_breath.counselor.like.CounselorLikeService;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
@@ -33,6 +34,7 @@ public class CounselorService {
     private final CounselorApprovalRepository counselorApprovalRepository;
     private final MemberService memberService;
     private final UploadFile uploadFile;
+    private final CounselorLikeRepository counselorLikeRepository;
 
     @Transactional
     public CounselorResponse signup(CounselorRequest req) {
@@ -43,7 +45,7 @@ public class CounselorService {
         CounselorApproval approval = req.toApproval(counselor);
         counselorApprovalRepository.save(approval);
 
-        return CounselorResponse.from(counselor);
+        return CounselorResponse.from(counselor,false);
     }
 
     /**
@@ -54,7 +56,7 @@ public class CounselorService {
 
         return counselorRepository.findAll().stream()
                 .map(c -> {
-                    CounselorResponse dto = CounselorResponse.from(c);
+                    CounselorResponse dto = CounselorResponse.from(c,false);
                     dto.setLikeCount(counselorLikeService.countLikes(c.getId()));
 
                     if (memberEmail != null) {
@@ -70,13 +72,28 @@ public class CounselorService {
     }
 
     /**
-     * 페이지네이션 (좋아요는 포함 안 함 — 필요시 추가 가능)
+     * 페이지네이션
      */
-    public PageUtil.PageResponse<CounselorResponse> findAll(Pageable pageable) {
+    public PageUtil.PageResponse<CounselorResponse> findAll(Pageable pageable, Long memberId) {
+
         Page<Counselor> counselorPage = counselorRepository.findAll(pageable);
 
+
         List<CounselorResponse> content = counselorPage.getContent().stream()
-                .map(CounselorResponse::from)
+                .map(counselor -> {
+
+                    boolean likedByMe = false;
+                    if (memberId != null) {
+
+                        likedByMe = counselorLikeRepository.existsByCounselorIdAndMemberId(
+                                counselor.getId(),
+                                memberId
+                        );
+                    }
+
+                    // 좋아요 상태를 포함하여 DTO를 생성합니다.
+                    return CounselorResponse.from(counselor, likedByMe);
+                })
                 .collect(Collectors.toList());
 
         return PageUtil.PageResponse.of(counselorPage, content);
@@ -89,17 +106,15 @@ public class CounselorService {
         Counselor counselor = counselorRepository.findById(counselorId)
                 .orElseThrow(() -> new Exception400("상담사를 찾을 수 없습니다."));
 
-        CounselorResponse dto = CounselorResponse.from(counselor);
-        dto.setLikeCount(counselorLikeService.countLikes(counselorId));
-
+        boolean likedByMe = false;
         String memberEmail = (String) request.getAttribute("memberEmail");
+
         if (memberEmail != null) {
-            Member member = memberRepository.findByEmail(memberEmail)
-                    .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
-            dto.setLikedByMe(counselorLikeService.isLikedByMember(counselorId, memberEmail));
-        } else {
-            dto.setLikedByMe(false);
+            likedByMe = counselorLikeService.isLikedByMember(counselorId, memberEmail);
         }
+
+        CounselorResponse dto = CounselorResponse.from(counselor, likedByMe);
+        dto.setLikeCount(counselorLikeService.countLikes(counselorId));
 
         return dto;
     }
@@ -109,7 +124,7 @@ public class CounselorService {
      */
     public List<CounselorResponse> searchByHashtags(String keyword) {
         return counselorRepository.findByHashtagsContaining(keyword).stream()
-                .map(CounselorResponse::from)
+                .map(c -> CounselorResponse.from(c, false))
                 .collect(Collectors.toList());
     }
 
