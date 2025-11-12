@@ -48,6 +48,9 @@ public class AudiovisualService {
                 if (!StringUtils.hasText(entity.getDuration())) {
                     entity.setDuration(info.getDuration());
                 }
+                if (!StringUtils.hasText(entity.getThumbnailUrl())) {
+                    entity.setThumbnailUrl(info.getThumbnailUrl());
+                }
             }
         }
 

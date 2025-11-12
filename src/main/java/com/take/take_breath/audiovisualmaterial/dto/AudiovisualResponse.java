@@ -16,6 +16,7 @@ public class AudiovisualResponse {
     private String youtubeUrl;
     private String description;
     private String duration;
+    private String thumbnailUrl;
 
     public static AudiovisualResponse fromEntity(AudiovisualMaterial entity) {
         return AudiovisualResponse.builder()
@@ -24,6 +25,7 @@ public class AudiovisualResponse {
                 .youtubeUrl(entity.getYoutubeUrl())
                 .description(entity.getDescription())
                 .duration(entity.getDuration())
+                .thumbnailUrl(entity.getThumbnailUrl())
                 .build();
     }
 }

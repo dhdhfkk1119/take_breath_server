@@ -33,6 +33,8 @@ public class AudiovisualMaterial {
     @Column(length = 50)
     private String duration;
 
+    private String thumbnailUrl;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

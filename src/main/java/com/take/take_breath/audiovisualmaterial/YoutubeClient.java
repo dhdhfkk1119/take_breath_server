@@ -79,7 +79,19 @@ public class YoutubeClient {
         String description = snippet.optString("description", "");
         String isoDuration = details.optString("duration");
 
-        return new YoutubeVideoInfo(title, description, formatDuration(isoDuration));
+        String thumbnailUrl = "";
+        if (snippet.has("thumbnails")) {
+            JSONObject thumbs = snippet.getJSONObject("thumbnails");
+            if (thumbs.has("maxres")) {
+                thumbnailUrl = thumbs.getJSONObject("maxres").optString("url", "");
+            } else if (thumbs.has("high")) {
+                thumbnailUrl = thumbs.getJSONObject("high").optString("url", "");
+            } else if (thumbs.has("default")) {
+                thumbnailUrl = thumbs.getJSONObject("default").optString("url", "");
+            }
+        }
+
+        return new YoutubeVideoInfo(title, description, formatDuration(isoDuration), thumbnailUrl);
     }
 
     private String formatDuration(String iso) {
