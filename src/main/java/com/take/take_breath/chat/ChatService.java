@@ -4,7 +4,6 @@ import com.take.take_breath._core._exception.Exception400;
 import com.take.take_breath._core._exception.Exception404;
 import com.take.take_breath._core._exception.Exception500;
 import com.take.take_breath._core._utils.ApiUtil;
-import com.take.take_breath._core._utils.PageUtil;
 import com.take.take_breath._core._utils.PageUtil.SliceResponse;
 import com.take.take_breath._core._utils.UploadFile;
 import com.take.take_breath.chat.chat_message.ChatMessage;
@@ -220,7 +219,7 @@ public class ChatService {
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(sender)
-                .content("[이미지]")
+                .content(null)
                 .type(MessageType.IMAGE)
                 .attachmentPath(attachmentPath)
                 .originalFilename(image.getOriginalFilename())
@@ -236,7 +235,7 @@ public class ChatService {
                 .messageId(message.getId())
                 .senderId(senderId)
                 .senderName(sender.getName())
-                .content("[이미지]")
+                .content(message.getContent())
                 .messageType(MessageType.IMAGE)
                 .createdAt(message.getCreatedAt())
                 .isRead(true)
@@ -393,7 +392,12 @@ public class ChatService {
                             .roomId(roomId)
                             .roomName(myRoomMember.getChatRoom().getName())
                             .unreadCount(unreadCount)
-                            .lastMessage(lastMessage != null ? lastMessage.getContent() : null)
+                            // .lastMessage(lastMessage != null ? lastMessage.getContent() : null)
+                            .lastMessage(lastMessage != null
+                                    ? (lastMessage.getType() == MessageType.IMAGE
+                                        ? "이미지"
+                                        : lastMessage.getContent())
+                                    : null)
                             .lastMessageTime(lastMessage != null ? lastMessage.getTime() : null)
                             .otherMemberId(otherMember != null ? otherMember.getMember().getId() : null)
                             .otherMemberName(otherMember != null ? otherMember.getMember().getName() : null)

@@ -30,8 +30,6 @@ public class ChatRoomController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        System.out.println("채팅창 부름");
-        String memberEmail = request.getAttribute("memberEmail").toString();
         Long memberId = (Long) request.getAttribute("memberId");
 
         SliceResponse<ChatRoomListResponse> response
