@@ -16,4 +16,6 @@ public interface CounselorLikeRepository extends JpaRepository<CounselorLike, Lo
     Page<CounselorLike> findAllByMember(Member member, Pageable pageable);
 
     long countByCounselor(Counselor counselor);
+
+    boolean existsByCounselorIdAndMemberId(Long counselorId, Long memberId);
 }
