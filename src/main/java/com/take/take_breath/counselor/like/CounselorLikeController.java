@@ -21,7 +21,7 @@ public class CounselorLikeController {
 
     @Auth(statuses = {Status.ACTIVE}) // 예시: 토큰 검증 및 memberId 추출을 담당하는 어노테이션
     @PostMapping("/{counselorId}")
-    public ResponseEntity<String> toggleLike(
+    public ResponseEntity<?> toggleLike(
             @PathVariable Long counselorId,
             HttpServletRequest request) {
         Long memberId = (Long) request.getAttribute("memberId");
@@ -34,11 +34,10 @@ public class CounselorLikeController {
 
         // 3단계: 서비스 로직 호출
         boolean liked = likeService.toggleLike(counselorId, memberId);
-        String message = liked ? "좋아요가 추가되었습니다." : "좋아요가 취소되었습니다.";
-        return ResponseEntity.ok(message);
+        return ResponseEntity.ok(liked);
     }
 
-    // ✅ 내가 좋아요한 상담사 목록 (페이지네이션)
+    // 내가 좋아요한 상담사 목록 (페이지네이션)
     @GetMapping("/my")
     public ResponseEntity<PageUtil.PageResponse<CounselorResponse>> myLikedCounselors(
             Pageable pageable,
@@ -48,7 +47,7 @@ public class CounselorLikeController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ 특정 상담사 좋아요 개수
+    // 특정 상담사 좋아요 개수
     @GetMapping("/{counselorId}/count")
     public ResponseEntity<Long> countLikes(@PathVariable Long counselorId) {
         return ResponseEntity.ok(likeService.countLikes(counselorId));

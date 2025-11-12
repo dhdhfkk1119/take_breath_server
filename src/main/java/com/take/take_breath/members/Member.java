@@ -46,6 +46,10 @@ public class Member {
         }
     }
 
+    @Enumerated(EnumType.STRING)
+    @Builder.Default // 빌더 사용 시 기본값 설정
+    private LoginType loginType = LoginType.LOCAL;
+
     private String name;
 
     private String phone;
