@@ -1,0 +1,32 @@
+{{> layout/admin-layout-start}}
+
+<div class="page-header">
+    <h2>{{pageTitle}}</h2>
+</div>
+
+<div class="table-container" style="padding:2rem;max-width:700px;margin:auto;">
+    <form action="/api/admin/view/audiovisual/edit/{{video.id}}" method="post" class="admin-form">
+        <label>유튜브 링크 <span style="color:red">*</span></label>
+        <input type="text" name="youtubeUrl" value="{{video.youtubeUrl}}" required>
+
+        <p style="font-size:0.9rem;color:#666;margin-top:-0.3rem;margin-bottom:1.2rem;">
+            → 링크를 변경하면 제목, 설명, 상영시간이 새로 갱신됩니다.
+        </p>
+
+        <label>제목</label>
+        <input type="text" name="title" value="{{video.title}}" placeholder="비워두면 자동 갱신됩니다.">
+
+        <label>상영 시간</label>
+        <input type="text" name="duration" value="{{video.duration}}" placeholder="비워두면 자동 갱신됩니다.">
+
+        <label>설명</label>
+        <textarea name="description" rows="4" placeholder="비워두면 자동 갱신됩니다.">{{video.description}}</textarea>
+
+        <div style="text-align:right;margin-top:1rem;">
+            <button type="submit" class="btn btn-success">수정</button>
+            <a href="/api/admin/view/audiovisual" class="btn">취소</a>
+        </div>
+    </form>
+</div>
+
+{{> layout/admin-layout-end}}

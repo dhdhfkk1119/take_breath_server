@@ -1,12 +1,10 @@
 package com.take.take_breath.audiovisualmaterial.dto;
 
 import com.take.take_breath.audiovisualmaterial.AudiovisualMaterial;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

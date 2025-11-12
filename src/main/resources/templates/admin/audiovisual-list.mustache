@@ -1,0 +1,43 @@
+{{> layout/admin-layout-start}}
+
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+    <h2>{{pageTitle}}</h2>
+    <a href="/api/admin/view/audiovisual/register" class="btn btn-primary">+ 새 자료 등록</a>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>제목</th>
+            <th>유튜브 링크</th>
+            <th>상영 시간</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#videos}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{title}}</td>
+                <td>
+                    <a href="{{youtubeUrl}}" target="_blank" style="color:#3498db;text-decoration:underline;">링크</a>
+                </td>
+                <td>{{duration}}</td>
+                <td>
+                    <a href="/api/admin/view/audiovisual/edit/{{id}}" class="btn btn-success" style="margin-right:4px;">수정</a>
+                    <form action="/api/admin/view/audiovisual/delete/{{id}}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">삭제</button>
+                    </form>
+                </td>
+            </tr>
+        {{/videos}}
+        {{^videos}}
+            <tr><td colspan="5" style="text-align:center;color:#999;">등록된 시청각 자료가 없습니다.</td></tr>
+        {{/videos}}
+        </tbody>
+    </table>
+</div>
+
+{{> layout/admin-layout-end}}
