@@ -10,6 +10,7 @@
         <thead>
         <tr>
             <th>ID</th>
+            <th>썸네일</th>
             <th>제목</th>
             <th>유튜브 링크</th>
             <th>상영 시간</th>
@@ -20,6 +21,14 @@
         {{#videos}}
             <tr>
                 <td>{{id}}</td>
+                <td>
+                    {{#thumbnailUrl}}
+                        <img src="{{thumbnailUrl}}" alt="썸네일" style="width:100px;height:auto;border-radius:6px;">
+                    {{/thumbnailUrl}}
+                    {{^thumbnailUrl}}
+                        <span style="color:#bbb;">(없음)</span>
+                    {{/thumbnailUrl}}
+                </td>
                 <td>{{title}}</td>
                 <td>
                     <a href="{{youtubeUrl}}" target="_blank" style="color:#3498db;text-decoration:underline;">링크</a>
@@ -34,7 +43,7 @@
             </tr>
         {{/videos}}
         {{^videos}}
-            <tr><td colspan="5" style="text-align:center;color:#999;">등록된 시청각 자료가 없습니다.</td></tr>
+            <tr><td colspan="6" style="text-align:center;color:#999;">등록된 시청각 자료가 없습니다.</td></tr>
         {{/videos}}
         </tbody>
     </table>

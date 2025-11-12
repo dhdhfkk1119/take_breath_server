@@ -74,8 +74,8 @@ dependencies {
     implementation 'com.itextpdf:itext7-core:8.0.3'
 
     // 유튜브 관련
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.json:json:20231013'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux' // WebClient용
+    implementation 'org.json:json:20240303'
 
 }
 
