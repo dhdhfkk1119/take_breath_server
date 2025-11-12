@@ -94,3 +94,8 @@ iamport:
   imp-code: ${IAMPORT_IMP_CODE}
   api-key: ${IAMPORT_API_KEY}
   api-secret: ${IAMPORT_API_SECRET}
+
+# 유튜브 API
+youtube:
+  api-key: ${YOUTUBE_API_KEY}
+  base-url: https://www.googleapis.com/youtube/v3

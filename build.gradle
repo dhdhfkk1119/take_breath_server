@@ -72,6 +72,11 @@ dependencies {
 
     // pdf 생성 의존성
     implementation 'com.itextpdf:itext7-core:8.0.3'
+
+    // 유튜브 관련
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.json:json:20231013'
+
 }
 
 tasks.named('test') {
