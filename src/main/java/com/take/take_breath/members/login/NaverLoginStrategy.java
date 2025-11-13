@@ -11,8 +11,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class NaverLoginStrategy implements LoginStrategy {
 
-    private NaverOAuthClient naverOAuthClient;
-    private OAuthProperties oAuthProperties;
+    private final NaverOAuthClient naverOAuthClient;
+    private final OAuthProperties oAuthProperties;
 
     @Override
     public String getProvider() {

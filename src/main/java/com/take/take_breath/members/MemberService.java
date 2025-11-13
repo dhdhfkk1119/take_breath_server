@@ -404,7 +404,7 @@ public class MemberService {
     }
 
 
-    // 소셜 로그인
+    // 네이버 로그인
     @Transactional
     public Member loginOrSignup(UserInfo userInfo) {
 
@@ -417,18 +417,33 @@ public class MemberService {
         // 2. 기존 회원이 없으면 회원가입 진행
         if (member == null) {
 
-            // 소셜 로그인은 이메일 인증/비밀번호/약관 X
             member = Member.builder()
                     .email(userInfo.getEmail())
-                    .name(userInfo.getName())
-                    .provider(userInfo.getProvider())
-                    .socialId(userInfo.getSocialId())
+                    .name(userInfo.getName() != null ? userInfo.getName() : "소셜 사용자")
+                    .nickName(userInfo.getName() != null ? userInfo.getName() : "소셜 사용자")
+                    .provider(userInfo.getProvider())          // "naver"
+                    .socialId(userInfo.getSocialId())          // 네이버 고유 ID
+                    .loginType(LoginType.NAVER)                // ★ 네이버 추가됨
+                    .password(passwordEncoder.encode(""))      // ★ 소셜 로그인은 빈 비번 처리
+                    .profileImage(
+                            (userInfo.getProfileImage() != null && !userInfo.getProfileImage().isEmpty())
+                                    ? userInfo.getProfileImage()
+                                    : "/default/profile.png"   // 기본 이미지
+                    )
                     .role(Role.USER)
                     .status(Status.ACTIVE)
-                    .emailVerified(true) // 소셜 로그인은 기본 인증됨 처리
-                    .nickName(userInfo.getName()) // 기본 닉네임 = 이름
-                    .profileImage("/default/profile.png") // 기본 이미지
+                    .emailVerified(true)
                     .build();
+
+            List<Terms> requiredTerms = termsRepository.findByRequired(true);
+            for (Terms terms : requiredTerms) {
+                MemberTerms agreement = MemberTerms.builder()
+                        .member(member)
+                        .terms(terms)
+                        .agreed(true)
+                        .build();
+                memberTermsRepository.save(agreement);
+            }
 
             memberRepository.save(member);
         }
