@@ -21,6 +21,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     long countByRole(Role role);
 
+    Optional<Member> findByProviderAndSocialId(String provider, String socialId);
+
     // 탈퇴하지않은 활성 회원만 조회
     @Query("SELECT m FROM Member m WHERE m.status IN ('ACTIVE', 'SUSPENDED', 'PENDING')")
     List<Member> findAllActiveMembers();

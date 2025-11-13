@@ -272,3 +272,5 @@ $RECYCLE.BIN/
 /src/main/resources/application.properties
 /src/main/generated/
 /build/
+
+.env

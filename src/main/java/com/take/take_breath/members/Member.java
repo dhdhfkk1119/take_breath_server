@@ -88,6 +88,9 @@ public class Member {
     private LocalDateTime createdAt;
 
 
+    private String provider; // 소셜로그인 제공자
+    private String socialId; //
+
 
     // 상담사 프로필 연결
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
