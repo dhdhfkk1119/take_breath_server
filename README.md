@@ -60,7 +60,6 @@
     - 포인트 히스토리 내역을 만들어서 결제했던 건에 대해서 제일 최신을 기준으로 포인트 사용하지 않은것만 환불 가능 
 
 - **웹 서버 어드민 페이지**
-![admin](https://github.com/user-attachments/assets/ff4659f8-df19-463c-9cc1-752c3a3178f1)
   - 커뮤니티 신고 목록 검사하기 (신고 승인)
   - 상담사 승인
   - 시청각 자료 관리 (Youtube Data API 사용)
@@ -81,4 +80,6 @@
 ## 기능들에 대한 영상 및 이미지는 -> 플러터 프론트 에서 관리하고있습니다
 👀 [눈으로 보고 싶다 -> 프론트 주소](https://github.com/dhdhfkk1119/take_breath_front.git)
 
+**웹 서버 어드민 페이지**
+![admin](https://github.com/user-attachments/assets/ff4659f8-df19-463c-9cc1-752c3a3178f1)
 
