@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -464,6 +465,48 @@ public class ChatService {
         // 7. 응답 생성
         return buildChatRoomResponse(chatRoom, members);
     }
+
+    // 상담사 채팅방 구현
+    public ChatResponse.CreateChatRoomResponse createConsultationChatRoom(Long memberId, Long consultantId) {
+        // 사용자 유무 확인
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+        // 상담사 유무 확인
+        Member consultant = memberRepository.findById(consultantId)
+                .orElseThrow(() -> new Exception404("상담사를 찾을 수 없습니다."));
+
+
+        // 중복 채팅방 확인
+        Optional<ChatRoom> existingRoom = chatRoomRepository
+                .findDirectRoomBetweenMembers(memberId, consultantId);
+        if (existingRoom.isPresent()) {
+            return new ChatResponse.CreateChatRoomResponse(existingRoom.get().getId(), existingRoom.get().getName());
+        }
+
+        // 채팅방 생성
+        ChatRoom chatRoom = ChatRoom.builder()
+                .name(consultant.getName() + "-" + member.getName())
+                .roomType(RoomType.COUNSELING)
+                .build();
+        chatRoomRepository.save(chatRoom);
+
+        // 멤버 추가 (요청자 + 상담사)
+        ChatRoomMember clientMember = ChatRoomMember.builder()
+                .chatRoom(chatRoom)
+                .member(member)
+                .build();
+
+        ChatRoomMember consultantMember = ChatRoomMember.builder()
+                .chatRoom(chatRoom)
+                .member(consultant)
+                .build();
+
+        chatRoomMemberRepository.save(clientMember);
+        chatRoomMemberRepository.save(consultantMember);
+
+        return new ChatResponse.CreateChatRoomResponse(chatRoom.getId(), chatRoom.getName());
+    }
+
 
     /**
      * ChatRoom과 Members를 CreateChatRoomResponse로 변환

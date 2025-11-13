@@ -4,6 +4,8 @@ package com.take.take_breath.chat;
 import com.take.take_breath._core._utils.ApiUtil;
 import com.take.take_breath._core._utils.PageUtil.SliceResponse;
 import com.take.take_breath._core.auth.Auth;
+import com.take.take_breath.chat.dto.ChatRequest.CreateConsultationRequest;
+import com.take.take_breath.chat.dto.ChatResponse;
 import com.take.take_breath.chat.dto.ChatRoomListResponse;
 import com.take.take_breath.chat.dto.CreateChatRoomRequest;
 import com.take.take_breath.chat.dto.CreateChatRoomResponse;
@@ -48,6 +50,24 @@ public class ChatRoomController {
         CreateChatRoomResponse response = chatService.createChatRoom(request);
         return ResponseEntity.ok(ApiUtil.success(response));
     }
+
+
+    /**
+     * 1:1 상담방
+     * @param request
+     * @return
+     */
+    @Auth(statuses = {Status.ACTIVE})
+    @PostMapping("/consultation")
+    public ResponseEntity<?> createConsultationRoom(
+            HttpServletRequest request,
+            @RequestBody CreateConsultationRequest requestDto
+    ) {
+        Long memberId = (Long) request.getAttribute("memberId");
+        ChatResponse.CreateChatRoomResponse response = chatService.createConsultationChatRoom(memberId, requestDto.getConsultantId());
+        return ResponseEntity.ok(ApiUtil.success(response));
+    }
+
 }
 
 /*
