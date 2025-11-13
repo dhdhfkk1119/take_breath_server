@@ -10,4 +10,5 @@ public class UserInfo {
     private String socialId;
     private String email;
     private String name;
+    private String profileImage;
 }

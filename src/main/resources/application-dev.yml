@@ -78,6 +78,6 @@ youtube:
   base-url: https://www.googleapis.com/youtube/v3
 
 naver:
-  request-token-uri: https://nid.naver.com/oauth2.0/token
+  redirect-uri: http://localhost:8080/auth/naver/callback
   client-id: ${NAVER_CLIENT_ID}
   client-secret: ${NAVER_CLIENT_SECRET}

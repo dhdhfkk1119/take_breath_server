@@ -56,9 +56,10 @@ public class NaverOAuthClient {
 
         return new UserInfo(
                 "naver",
-                (String) body.get("id"),
+                (String) body.get("id"),               // socialId
                 (String) body.get("email"),
-                (String) body.get("name")
+                (String) body.get("name"),
+                (String) body.get("profile_image")
         );
     }
 }
