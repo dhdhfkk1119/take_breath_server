@@ -275,3 +275,5 @@ $RECYCLE.BIN/
 
 # Firebase Admin SDK 인증
 src/main/resources/firebase.json
+
+.env

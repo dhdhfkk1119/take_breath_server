@@ -17,6 +17,7 @@ import com.take.take_breath.members.dto.*;
 import com.take.take_breath.members.dto.MemberRequestTo;
 import com.take.take_breath.members.dto.MemberResponseTo;
 import com.take.take_breath.social.google.SocialLoginRequest;
+import com.take.take_breath.members.login.dto.UserInfo;
 import com.take.take_breath.terms.dto.MemberTermsRequest;
 import com.take.take_breath.terms.MemberTerms;
 import com.take.take_breath.terms.Terms;
@@ -235,7 +236,7 @@ public class MemberService {
                 .build();
     }
 
-    // 자동 소셜 로그인 
+    // 자동 소셜 로그인
     @Transactional
     private Member autoRegisterSocialUser(String email,String name, String profileImageUrl,String provider) {
         // 닉네임, 이름, 전화번호 등은 구글에서 제공하는 정보를 사용하거나 기본값으로 설정할 수 있습니다.
@@ -273,11 +274,11 @@ public class MemberService {
                     .build();
             memberTermsRepository.save(memberTerms);
         }
-            
+
         return memberRepository.save(newMember);
     }
 
-    
+
     public MemberResponseTo.isCheckEmailDTO checkEmail(String email) {
         boolean isExist = memberRepository.existsByEmail(email);
 
@@ -400,6 +401,63 @@ public class MemberService {
         }
 
         return jwtTokenProvider.regenerateAccessToken(refreshToken);
+    }
+
+
+    // 소셜 로그인
+    @Transactional
+    public Member loginOrSignup(UserInfo userInfo) {
+
+        // 1. provider + socialId 조합으로 회원 조회
+        Member member = memberRepository.findByProviderAndSocialId(
+                userInfo.getProvider(),
+                userInfo.getSocialId()
+        ).orElse(null);
+
+        // 2. 기존 회원이 없으면 회원가입 진행
+        if (member == null) {
+
+            // 소셜 로그인은 이메일 인증/비밀번호/약관 X
+            member = Member.builder()
+                    .email(userInfo.getEmail())
+                    .name(userInfo.getName())
+                    .provider(userInfo.getProvider())
+                    .socialId(userInfo.getSocialId())
+                    .role(Role.USER)
+                    .status(Status.ACTIVE)
+                    .emailVerified(true) // 소셜 로그인은 기본 인증됨 처리
+                    .nickName(userInfo.getName()) // 기본 닉네임 = 이름
+                    .profileImage("/default/profile.png") // 기본 이미지
+                    .build();
+
+            memberRepository.save(member);
+        }
+
+        // 3. 상태 체크 (기존 로그인과 동일)
+        if (member.getStatus() == Status.PENDING) {
+            throw new Exception403("관리자 승인 대기 중입니다.");
+        }
+
+        if (member.getStatus() == Status.SUSPENDED) {
+            LocalDateTime suspendedUntil = member.getSuspendedUntil();
+            long daysLeft = 0;
+
+            if(suspendedUntil != null) {
+                LocalDate today = LocalDate.now();
+                LocalDate endDate = suspendedUntil.toLocalDate();
+
+                if (today.isBefore(endDate)) {
+                    daysLeft = ChronoUnit.DAYS.between(today, endDate);
+                }
+            }
+
+            throw new Exception403("이용 정지된 계정입니다. 정지 해제까지 " + daysLeft + "일 남았습니다.");
+        }
+
+        // 4. 리프레시 토큰 초기화 (소셜 로그인은 autoLogin 기능 없음)
+        member.setRefreshToken(null);
+
+        return member;
     }
 
 
