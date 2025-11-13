@@ -10,4 +10,5 @@ public class PostLikeEvent {
     private String postTitle;
     private Long likerMemberId;
     private String likerMemberName;
+    private Long relatedPostId;
 }

@@ -22,7 +22,8 @@ public class NotificationEventListener {
                 event.getPostMemberId().toString(),
                 event.getPostTitle(),
                 event.getCommenterMemberId().toString(),
-                event.getCommenterMemberName()
+                event.getCommenterMemberName(),
+                event.getRelatedPostId()
         );
     }
 
@@ -35,7 +36,8 @@ public class NotificationEventListener {
                 event.getPostMemberId().toString(),
                 event.getPostTitle(),
                 event.getLikerMemberId().toString(),
-                event.getLikerMemberName()
+                event.getLikerMemberName(),
+                event.getRelatedPostId()
         );
     }
 }

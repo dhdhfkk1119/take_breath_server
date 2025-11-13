@@ -10,4 +10,6 @@ public class CommentCreatedEvent {
     private String postTitle;
     private Long commenterMemberId;
     private String commenterMemberName;
+    private Long relatedPostId;
+
 }

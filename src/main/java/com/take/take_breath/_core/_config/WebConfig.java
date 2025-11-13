@@ -51,7 +51,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/css/**", "/js/**", "/images/**", "/favicon.ico",
                         "/uploads/**",
                         "/api/terms/**",
-                        "/api/social/**"
+                        "/api/social/**",
+                        "/api/notifications/**"
                 );
 
         registry.addInterceptor(authInterceptor)
