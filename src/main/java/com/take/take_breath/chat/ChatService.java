@@ -15,10 +15,12 @@ import com.take.take_breath.chat.chat_room.RoomType;
 import com.take.take_breath.chat.chat_room_member.ChatRoomMember;
 import com.take.take_breath.chat.chat_room_member.ChatRoomMemberRepository;
 import com.take.take_breath.chat.dto.*;
-import com.take.take_breath.counselor.Counselor;
 import com.take.take_breath.members.Member;
 import com.take.take_breath.members.MemberRepository;
 import com.take.take_breath.members.Role;
+import com.take.take_breath.point.PointHistory;
+import com.take.take_breath.point.PointHistoryRepository;
+import com.take.take_breath.point.PointTransactionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,10 +43,11 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomMemberRepository chatRoomMemberRepository;
     private final MemberRepository memberRepository;
+    private final PointHistoryRepository pointHistoryRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final UploadFile uploadFile;
 
-    private static final int REQUIRED_POINT = 500;
+    private static final Long REQUIRED_POINT = 500L;
 
     /**
      * 채팅방의 메시지 목록 조회 (읽음 여부 포함)
@@ -102,6 +105,7 @@ public class ChatService {
 
         Long currentPoint = null;
         if (sender.getRole() == Role.USER) {
+            // 포인트 부족 체크
             if (sender.getPoint() < REQUIRED_POINT) {
                 throw new Exception400("포인트가 부족합니다. 현재 포인트: " + sender.getPoint());
             }
@@ -109,16 +113,31 @@ public class ChatService {
             // 포인트 차감
             sender.setPoint(sender.getPoint() - REQUIRED_POINT);
             memberRepository.save(sender);
-            currentPoint = sender.getPoint();  // 차감 후 포인트
+            currentPoint = sender.getPoint();
 
-            // 상담사 포인트 적립
+            // 상담사 찾기
             ChatRoomMember otherMember = chatRoomMemberRepository
                     .findOtherMemberInRoom(roomId, senderId);
 
+
+            // 상담사 포인트 적립 + 히스토리 저장
             if (otherMember != null && otherMember.getMember().getRole() == Role.COUNSELOR) {
-                Counselor counselor = otherMember.getMember().getCounselor();
+                //Counselor counselor = otherMember.getMember().getCounselor();
+                Member counselor = otherMember.getMember();
+
                 if (counselor != null) {
                     counselor.setPoint(counselor.getPoint() + REQUIRED_POINT);
+
+                    pointHistoryRepository.save(
+                            PointHistory.builder()
+                                    .member(otherMember.getMember())
+                                    .type(PointTransactionType.EARN)
+                                    .amount(REQUIRED_POINT)
+                                    .balanceAfter(counselor.getPoint())
+                                    .description("채팅 상담 수익")
+                                    .relatedMember(sender)
+                                    .build()
+                    );
                 }
             }
         }
@@ -165,6 +184,8 @@ public class ChatService {
 
         Long currentPoint = null;
         if (sender.getRole() == Role.USER) {
+
+            // 포인트 부족 체크
             if (sender.getPoint() < REQUIRED_POINT) {
                 throw new Exception400("포인트가 부족합니다. 현재 포인트: " + sender.getPoint());
             }
@@ -172,16 +193,29 @@ public class ChatService {
             // 포인트 차감
             sender.setPoint(sender.getPoint() - REQUIRED_POINT);
             memberRepository.save(sender);
-            currentPoint = sender.getPoint();  // 차감 후 포인트
+            currentPoint = sender.getPoint();
 
-            // 상담사 포인트 적립
+            // 상담사 찾기
             ChatRoomMember otherMember = chatRoomMemberRepository
                     .findOtherMemberInRoom(roomId, senderId);
 
+            // 상담사 포인트 적립 + 히스토리 저장
             if (otherMember != null && otherMember.getMember().getRole() == Role.COUNSELOR) {
-                Counselor counselor = otherMember.getMember().getCounselor();
+                Member counselor = otherMember.getMember();
+
                 if (counselor != null) {
                     counselor.setPoint(counselor.getPoint() + REQUIRED_POINT);
+
+                    pointHistoryRepository.save(
+                            PointHistory.builder()
+                                    .member(counselor)
+                                    .type(PointTransactionType.EARN)
+                                    .amount(REQUIRED_POINT)
+                                    .balanceAfter(counselor.getPoint())
+                                    .description("채팅 상담 수익")
+                                    .relatedMember(sender)
+                                    .build()
+                    );
                 }
             }
         }
@@ -396,8 +430,8 @@ public class ChatService {
                             // .lastMessage(lastMessage != null ? lastMessage.getContent() : null)
                             .lastMessage(lastMessage != null
                                     ? (lastMessage.getType() == MessageType.IMAGE
-                                        ? "이미지"
-                                        : lastMessage.getContent())
+                                    ? "이미지"
+                                    : lastMessage.getContent())
                                     : null)
                             .lastMessageTime(lastMessage != null ? lastMessage.getTime() : null)
                             .otherMemberId(otherMember != null ? otherMember.getMember().getId() : null)
@@ -466,7 +500,9 @@ public class ChatService {
         return buildChatRoomResponse(chatRoom, members);
     }
 
-    // 상담사 채팅방 구현
+    /**
+     * 상담 채팅방
+     */
     public ChatResponse.CreateChatRoomResponse createConsultationChatRoom(Long memberId, Long consultantId) {
         // 사용자 유무 확인
         Member member = memberRepository.findById(memberId)
@@ -507,6 +543,12 @@ public class ChatService {
         return new ChatResponse.CreateChatRoomResponse(chatRoom.getId(), chatRoom.getName());
     }
 
+    public List<Long> getChatRoomMemberIds(Long roomId) {
+        return chatRoomMemberRepository.findByChatRoomId(roomId)
+                .stream()
+                .map(chatRoomMember -> chatRoomMember.getMember().getId())
+                .toList();
+    }
 
     /**
      * ChatRoom과 Members를 CreateChatRoomResponse로 변환

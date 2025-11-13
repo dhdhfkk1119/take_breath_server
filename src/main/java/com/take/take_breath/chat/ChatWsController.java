@@ -8,10 +8,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -26,14 +27,18 @@ public class ChatWsController {
      * Server -> Channel /sub/chat/room.{roomId} (구독자들에게 브로드캐스트)
      */
     @MessageMapping("/chat.sendMessage.{roomId}")   // 설정에 prefix로 /pub
-    @SendTo("/sub/chat/room.{roomId}")
-    public ApiResult<ChatMessageResponse> sendMessage(
+    public void sendMessage(
             @DestinationVariable Long roomId,
             ChatMessageRequest request,
             SimpMessageHeaderAccessor headerAccessor) {
         Long memberId = (Long) headerAccessor.getSessionAttributes().get("memberId");
         ChatMessageResponse response = chatService.sendMessage(roomId, memberId, request);
-        return ApiUtil.success(response);
+
+        // 채팅방 참여자들에게 전송
+        messagingTemplate.convertAndSend(
+                "/sub/chat/room." + roomId,
+                ApiUtil.success(response)
+        );
     }
 
     /**
