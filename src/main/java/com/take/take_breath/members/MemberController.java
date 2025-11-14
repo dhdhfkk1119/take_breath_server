@@ -142,5 +142,14 @@ public class MemberController {
         return ResponseEntity.ok("계정이 복구되었습니다.");
     }
 
+    // 토큰 새로 발급
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refreshAccessToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        String newAccessToken = memberService.refreshAccessToken(refreshToken);
+
+        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+    }
+
 
 }

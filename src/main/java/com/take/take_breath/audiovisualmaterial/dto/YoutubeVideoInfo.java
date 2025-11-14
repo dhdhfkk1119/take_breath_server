@@ -9,4 +9,5 @@ public class YoutubeVideoInfo {
     private String title;
     private String description;
     private String duration;
+    private String thumbnailUrl;
 }
