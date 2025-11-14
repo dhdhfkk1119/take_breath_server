@@ -24,7 +24,6 @@ function closeImageModal() {
     document.getElementById('imageModal').style.display = 'none';
 }
 
-// ✅ license-badge 클릭 이벤트 추가
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('license-badge')) {
         const name = e.target.dataset.name;

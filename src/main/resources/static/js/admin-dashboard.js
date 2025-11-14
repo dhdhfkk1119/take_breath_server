@@ -1,20 +1,15 @@
-// ──────────────────────────────────────────────
-// 📊 Admin Dashboard Chart Script (Stable & Optimized)
-// ──────────────────────────────────────────────
 window.addEventListener('error', function (e) {
   console.error('💥 JS 전역 오류 발생:', e.message, e.filename, e.lineno);
 });
-console.log('✅ admin-dashboard.js 파일 진입 확인');
+console.log('admin-dashboard.js 파일 진입 확인');
 
-// ✅ Chart 전역 설정 (성능 최적화)
+// Chart 전역 설정 (성능 최적화)
 Chart.defaults.responsive = true;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.animation = false;
 Chart.defaults.resizeDelay = 200;
 
-// ───────────────────────────────
 // 전역 인스턴스 (중복 생성 방지)
-// ───────────────────────────────
 let feeChartInstance,
     memberGrowthChartInstance,
     statsChartInstance,
@@ -22,13 +17,11 @@ let feeChartInstance,
 
 let isInitialized = false;
 
-// ───────────────────────────────
 // 초기 실행 (한 번만)
-// ───────────────────────────────
 window.addEventListener('load', function () {
-    console.log('✅ admin-dashboard.js fully loaded');
+    console.log('admin-dashboard.js fully loaded');
     if (!window.stats) {
-        console.error('❌ window.stats 없음');
+        console.error('window.stats 없음');
         return;
     }
 
@@ -41,9 +34,7 @@ window.addEventListener('load', function () {
     setupEventListeners();
 });
 
-// ───────────────────────────────
 // 회원 증가 추이 버튼 리스너
-// ───────────────────────────────
 function setupEventListeners() {
     const memberBtns = document.querySelectorAll('.member-chart-btn');
     memberBtns.forEach(btn => {
@@ -56,9 +47,7 @@ function setupEventListeners() {
     });
 }
 
-// ───────────────────────────────
 // Canvas 재생성 (회원 차트만)
-// ───────────────────────────────
 function recreateMemberGrowthChart(period) {
     if (memberGrowthChartInstance) {
         memberGrowthChartInstance.destroy();
@@ -80,9 +69,7 @@ function recreateMemberGrowthChart(period) {
     }
 }
 
-// ───────────────────────────────
-// 💰 월별 결제 수수료 차트
-// ───────────────────────────────
+// 월별 결제 수수료 차트
 function initFeeChart() {
     const canvas = document.getElementById('feeChart');
     if (!canvas) return;
@@ -137,9 +124,8 @@ function initFeeChart() {
     });
 }
 
-// ───────────────────────────────
-// 📈 회원 증가 추이
-// ───────────────────────────────
+
+// 회원 증가 추이
 function initMemberGrowthChart(stats, months = 6) {
     const canvas = document.getElementById('memberGrowthChart');
     if (!canvas) return;
@@ -209,9 +195,7 @@ function initMemberGrowthChart(stats, months = 6) {
     });
 }
 
-// ───────────────────────────────
-// 👥 회원/상담사 현황
-// ───────────────────────────────
+// 회원/상담사 현황
 function initStatsChart(stats) {
     const canvas = document.getElementById('statsChart');
     if (!canvas) return;
@@ -260,9 +244,7 @@ function initStatsChart(stats) {
     });
 }
 
-// ───────────────────────────────
-// 🧩 역할별 비율
-// ───────────────────────────────
+// 역할별 비율
 function initRoleChart(stats) {
     const canvas = document.getElementById('roleChart');
     if (!canvas) return;
@@ -307,9 +289,7 @@ function initRoleChart(stats) {
     });
 }
 
-// ───────────────────────────────
-// 🔄 브라우저 리사이즈 대응
-// ───────────────────────────────
+// 브라우저 리사이즈 대응
 let resizeTimeout;
 
 window.addEventListener('resize', function() {
