@@ -27,6 +27,7 @@ public class NotificationService {
     private final SseUtil sseUtil;
     private final NotificationRepository notificationRepository;
     private final MemberRepository memberRepository;
+    private final FcmService fcmService;
 
     private Member findMemberById(String memberIdStr) {
         Long memberId = Long.parseLong(memberIdStr);
@@ -62,7 +63,11 @@ public class NotificationService {
             notificationRepository.save(notification);
 
             log.info("댓글 알림 전송 to: {}, from: {}", targetMemberId, commenterMemberId);
-            sseUtil.sendToUser(targetMemberId, "Comment", message);
+            sseUtil.sendToUser(targetMemberId, "Comment", message); // 앱이 켜저있을 떄
+            String fcmToken = receiver.getFcmToken();
+            fcmService.sendFcmMessage(fcmToken, "새 댓글", message, relatedPostId, NotificationType.COMMENT.name());
+
+
         } catch (Exception e) {
             sseUtil.sendToUser(targetMemberId, "error", "알림 전송 중 오류가 발생했습니다.");
         }
@@ -103,6 +108,9 @@ public class NotificationService {
             // 3. SSE 전송 (프론트엔드 알림)
             log.info("좋아요 알림 전송 및 저장 to: {}", targetMemberId);
             sseUtil.sendToUser(targetMemberId, "PostLike", messageContent);
+
+            String fcmToken = receiver.getFcmToken();
+            fcmService.sendFcmMessage(fcmToken, "새 좋아요", messageContent, relatedPostId, NotificationType.COMMENT.name());
 
         } catch (Exception e) {
             log.error("좋아요 알림 처리 중 오류 발생: {}", e.getMessage());

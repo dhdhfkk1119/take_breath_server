@@ -475,6 +475,16 @@ public class MemberService {
         return member;
     }
 
+    @Transactional
+    public void updateFcmToken(String accessToken, String fcmToken) {
+        String email = jwtTokenProvider.getSubject(accessToken); // 토큰에서 이메일 추출
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception400("유저를 찾을 수 없습니다."));
+
+        log.info("Service FCM 값 확인 {}",fcmToken);
+        member.setFcmToken(fcmToken);
+        memberRepository.save(member);
+    }
 
 }
 

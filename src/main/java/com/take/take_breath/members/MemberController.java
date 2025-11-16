@@ -151,5 +151,17 @@ public class MemberController {
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
 
+    // flutter 에서 FCM 토큰을 받아옴
+    @PostMapping("/fcm-token")
+    public ResponseEntity<Void> updateFcmToken(
+            @RequestHeader("Authorization") String authorization,
+            @RequestBody Map<String, String> body
+    ) {
+        String token = authorization.replace("Bearer ", "");
+        String fcmToken = body.get("fcmToken");
+        memberService.updateFcmToken(token, fcmToken);
+        return ResponseEntity.ok().build();
+    }
+
 
 }

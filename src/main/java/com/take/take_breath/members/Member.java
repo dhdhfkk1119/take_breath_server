@@ -95,6 +95,9 @@ public class Member {
     private String provider; // 소셜로그인 제공자
     private String socialId; //
 
+    @Column(name = "fcm_token", length = 512)
+    private String fcmToken; // firebase FCM 토큰 -> flutter 에서 받은 토큰을 백엔드로 보냄
+
 
     // 상담사 프로필 연결
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
