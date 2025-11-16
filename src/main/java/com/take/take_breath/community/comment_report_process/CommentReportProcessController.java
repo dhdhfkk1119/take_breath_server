@@ -45,7 +45,7 @@ public class CommentReportProcessController {
         }
 
         String adminEmail = (String) session.getAttribute("adminEmail");
-        Long adminId = processService.findAdminIdByEmail(adminEmail); // ⚙️ 필요 시 구현
+        Long adminId = processService.findAdminIdByEmail(adminEmail); // 필요 시 구현
 
         CommentReportProcessResponse.ProcessDTO response =
                 processService.updateStatus(reportId, adminId, updateStatusDTO);
@@ -73,7 +73,7 @@ public class CommentReportProcessController {
         model.addAttribute("pageTitle", "댓글 신고 관리");
 
         log.info("[SSR 관리자 댓글 신고 목록 조회] count={}", reports.size());
-        return "admin/comment-report-list"; // ⚙️ Mustache 템플릿 파일명 (admin/comment-report-list.mustache)
+        return "admin/comment-report-list"; // Mustache 템플릿 파일명 (admin/comment-report-list.mustache)
     }
 
     /**
@@ -94,6 +94,6 @@ public class CommentReportProcessController {
         model.addAttribute("pageTitle", "댓글 신고 상세");
 
         log.info("[SSR 관리자 댓글 신고 상세 조회] reportId={}", reportId);
-        return "admin/comment-report-detail"; // ⚙️ Mustache 템플릿 파일명
+        return "admin/comment-report-detail"; // Mustache 템플릿 파일명
     }
 }
