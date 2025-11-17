@@ -52,7 +52,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/uploads/**",
                         "/api/terms/**",
                         "/api/social/**",
-                        "/api/notifications/**"
+                        "/api/notifications/**",
+                        "/api/auth/**"
                 );
 
         registry.addInterceptor(authInterceptor)

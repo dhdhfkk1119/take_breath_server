@@ -2,6 +2,7 @@ package com.take.take_breath.social.google;
 
 import com.take.take_breath.members.MemberService;
 import com.take.take_breath.members.dto.MemberResponseTo;
+import com.take.take_breath.social.SocialLoginRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

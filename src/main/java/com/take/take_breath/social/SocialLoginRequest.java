@@ -1,4 +1,4 @@
-package com.take.take_breath.social.google;
+package com.take.take_breath.social;
 
 
 import com.take.take_breath.terms.dto.MemberTermsRequest;
