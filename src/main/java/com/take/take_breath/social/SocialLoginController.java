@@ -19,7 +19,7 @@ public class SocialLoginController {
 
 
     @PostMapping("/naver-login")
-    public ResponseEntity<LoginResponse> socialLogin(
+    public ResponseEntity<?> socialLogin(
             @RequestBody SocialLoginRequest request
     ) {
         log.info("소셜 로그인 API : {} : {} " , request.getIdToken(),request.getProvider());

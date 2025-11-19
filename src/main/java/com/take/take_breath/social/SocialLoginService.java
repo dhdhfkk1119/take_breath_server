@@ -3,6 +3,7 @@ package com.take.take_breath.social;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
 import com.take.take_breath.members.*;
 import com.take.take_breath.members.dto.MemberResponse;
+import com.take.take_breath.members.dto.MemberResponseTo;
 import com.take.take_breath.members.login.dto.LoginResponse;
 import com.take.take_breath.members.login.dto.UserInfo;
 import com.take.take_breath.social.naver.NaverVerifier;
@@ -19,7 +20,7 @@ public class SocialLoginService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public LoginResponse loginOrSignup(SocialLoginRequest request) {
+    public MemberResponseTo.Login loginOrSignup(SocialLoginRequest request) {
 
         UserInfo userInfo = naverVerifier.verify(request.getIdToken());
 
@@ -57,9 +58,20 @@ public class SocialLoginService {
     }
 
 
-    private LoginResponse generateJwtResponse(Member member) {
+    private MemberResponseTo.Login generateJwtResponse(Member member) {
         String jwt = jwtTokenProvider.createToken(member);
-        MemberResponse memberResponse = new MemberResponse(member);
-        return new LoginResponse(jwt, memberResponse);
+        return MemberResponseTo.Login.builder()
+                .accessToken(jwt)
+                .refreshToken("")
+                .id(member.getId())
+                .name(member.getName())
+                .nickName(member.getNickName())
+                .email(member.getEmail())
+                .profileImage(member.getProfileImage())
+                .role(member.getRole().name())
+                .status(member.getStatus().name())
+                .phone(member.getPhone())
+                .daysLeft(null)
+                .build();
     }
 }
