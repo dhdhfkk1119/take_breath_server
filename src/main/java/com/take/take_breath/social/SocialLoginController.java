@@ -18,7 +18,7 @@ public class SocialLoginController {
     private final SocialLoginService socialLoginService;
 
 
-    @PostMapping("/social-login")
+    @PostMapping("/naver-login")
     public ResponseEntity<LoginResponse> socialLogin(
             @RequestBody SocialLoginRequest request
     ) {

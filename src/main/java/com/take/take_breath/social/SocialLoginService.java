@@ -1,12 +1,10 @@
 package com.take.take_breath.social;
 
-import com.google.auth.oauth2.JwtProvider;
 import com.take.take_breath._core._jwt.JwtTokenProvider;
 import com.take.take_breath.members.*;
 import com.take.take_breath.members.dto.MemberResponse;
 import com.take.take_breath.members.login.dto.LoginResponse;
 import com.take.take_breath.members.login.dto.UserInfo;
-import com.take.take_breath.social.google.GoogleVerifier;
 import com.take.take_breath.social.naver.NaverVerifier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,27 +15,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class SocialLoginService {
 
-    private final GoogleVerifier googleVerifier;
     private final NaverVerifier naverVerifier;
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     public LoginResponse loginOrSignup(SocialLoginRequest request) {
 
-        UserInfo userInfo;
-
-        switch (request.getProvider()) {
-            case "google":
-                userInfo = googleVerifier.verify(request.getIdToken());
-                break;
-
-            case "naver":
-                userInfo = naverVerifier.verify(request.getIdToken());
-                break;
-
-            default:
-                throw new IllegalArgumentException("Unknown provider");
-        }
+        UserInfo userInfo = naverVerifier.verify(request.getIdToken());
 
         log.info("서비스 소셜 로그인 API : {} : {} " , request.getIdToken(),request.getProvider());
 

@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 public class SocialLoginRequest {
-    @NotEmpty private String idToken;
-    private String provider; // "google" 또는 "apple" 등
+    private String idToken;
+    private String provider;
     private List<MemberTermsRequest> agreements;
 }
