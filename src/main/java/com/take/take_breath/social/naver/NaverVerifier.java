@@ -34,11 +34,11 @@ public class NaverVerifier {
         Map responseBody = (Map) response.getBody().get("response");
 
         return new UserInfo(
-                (String) responseBody.get("id"),               // uid
-                (String) responseBody.get("email"),            // email
-                (String) responseBody.get("name"),             // name
-                (String) responseBody.get("profile_image"),    // profileImage
-                "naver"                                        // provider
+        "naver",
+                (String) responseBody.get("id"),
+                (String) responseBody.get("email"),
+                (String) responseBody.get("name"),
+                (String) responseBody.get("profile_image")
         );
 
     }
